@@ -1,20 +1,19 @@
 /* ============================================================
    Service Worker - המעקב שלי
-   גרסה: 1.2.0
+   גרסה: 1.3.0
    תפקיד: caching בסיסי + הצגת התראות יומיות
    
-   שינויים בגרסה 1.2.0:
-   - שדרוג splash screen: inline CSS + preload + early init
-   - background_color ב-manifest שונה ללבן צרוף (#ffffff)
-   - bumped cache name לאלץ עדכון אצל המשתמשים
+   שינויים בגרסה 1.3.0:
+   - הסרת splash.mp4 מה-cache (הפיצ'ר הוסר לטובת פתיחה מהירה)
+   - אייקונים חדשים (לוגו Health Mate החדש)
+   - bumped cache name לאלץ עדכון מלא אצל המשתמשים
    ============================================================ */
 
-const CACHE_NAME = 'nutrition-tracker-v1-2';
+const CACHE_NAME = 'nutrition-tracker-v1-3';
 const CORE_FILES = [
     './',
     './index.html',
     './manifest.json',
-    './splash.mp4',
     './icon-192.png',
     './icon-512.png',
     './icon-maskable-512.png',
@@ -23,7 +22,7 @@ const CORE_FILES = [
 
 // ===== Install =====
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing v1.2.0...');
+    console.log('[SW] Installing v1.3.0...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(CORE_FILES))
@@ -34,7 +33,7 @@ self.addEventListener('install', (event) => {
 
 // ===== Activate =====
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating v1.2.0... clearing old caches');
+    console.log('[SW] Activating v1.3.0... clearing old caches');
     event.waitUntil(
         caches.keys().then(keys => 
             Promise.all(
@@ -48,8 +47,6 @@ self.addEventListener('activate', (event) => {
 });
 
 // ===== Fetch - network first, fallback to cache =====
-// Network-first means users always get latest files when online,
-// and fallback to cache when offline (essential for PWA reliability).
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     if (!event.request.url.startsWith(self.location.origin)) return;
@@ -57,7 +54,6 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         fetch(event.request)
             .then(response => {
-                // Cache successful responses
                 if (response && response.status === 200) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then(cache => {
@@ -76,11 +72,9 @@ self.addEventListener('notificationclick', (event) => {
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then(clientList => {
-                // If app already open, focus it
                 for (const client of clientList) {
                     if ('focus' in client) return client.focus();
                 }
-                // Otherwise open it
                 if (clients.openWindow) return clients.openWindow('./');
             })
     );
