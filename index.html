@@ -18,27 +18,6 @@
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
     
-    <!-- Preload the splash video so it's ready as soon as DOM parses.
-         This makes the in-app splash appear nearly instantly after the
-         OS-level PWA splash transitions away. -->
-    <link rel="preload" as="video" href="splash.mp4" type="video/mp4">
-    
-    <!-- Inline critical CSS for splash so it shows BEFORE the main stylesheet loads.
-         This is the key trick: the white background appears immediately, then
-         the video starts. No gap, no flicker. -->
-    <style>
-        html, body { background: #ffffff !important; margin: 0; padding: 0; }
-        #splashScreen {
-            position: fixed; inset: 0; background: #ffffff; z-index: 99999;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
-        }
-        #splashScreen video {
-            width: 100%; height: 100%; object-fit: contain;
-            max-width: 100vw; max-height: 100vh; background: #ffffff;
-        }
-    </style>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet">
@@ -6656,47 +6635,7 @@
             font-weight: 700;
         }
         
-        /* ===== Splash Screen - shown on app launch =====
-           Covers the entire viewport while the app initializes.
-           The video plays once and the overlay fades out gracefully. */
-        .splash-screen {
-            position: fixed;
-            inset: 0;
-            background: #ffffff;
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: opacity 0.5s ease-out;
-            opacity: 1;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .splash-screen.fade-out {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .splash-screen.hidden {
-            display: none;
-        }
-        .splash-video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            max-width: 100vw;
-            max-height: 100vh;
-            background: #ffffff;
-            pointer-events: none;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        /* Hide native video controls and fullscreen button on iOS */
-        .splash-video::-webkit-media-controls {
-            display: none !important;
-        }
-        .splash-video::-webkit-media-controls-enclosure {
-            display: none !important;
-        }
+        /* (Splash screen CSS removed - feature was removed for faster app launch) */
         
         /* ===== History Modal (Workouts & Meals) - Full-screen overlay ===== */
         .history-overlay {
@@ -8355,75 +8294,6 @@
     </style>
 </head>
 <body>
-
-<!-- ============ SPLASH SCREEN - shown on app launch ============ -->
-<div id="splashScreen" class="splash-screen" aria-hidden="true">
-    <video id="splashVideo" 
-           autoplay 
-           muted 
-           playsinline
-           preload="auto"
-           disablePictureInPicture
-           disableRemotePlayback
-           class="splash-video">
-        <source src="splash.mp4" type="video/mp4">
-    </video>
-</div>
-<script>
-/* Splash screen init - runs INLINE as soon as the splash DOM is parsed.
-   This is much earlier than DOMContentLoaded - the video starts playing
-   while the rest of the page is still loading. */
-(function initSplashEarly() {
-    var splash = document.getElementById('splashScreen');
-    var video = document.getElementById('splashVideo');
-    if (!splash || !video) return;
-    
-    // Skip if already shown this session
-    try {
-        if (sessionStorage.getItem('splash_shown_v1') === '1') {
-            splash.style.display = 'none';
-            return;
-        }
-    } catch (e) {}
-    
-    var hidden = false;
-    function hideSplash() {
-        if (hidden) return;
-        hidden = true;
-        try { sessionStorage.setItem('splash_shown_v1', '1'); } catch (e) {}
-        splash.style.transition = 'opacity 0.5s ease-out';
-        splash.style.opacity = '0';
-        splash.style.pointerEvents = 'none';
-        setTimeout(function () {
-            splash.style.display = 'none';
-            if (video) {
-                try { video.pause(); video.src = ''; video.load(); } catch (e) {}
-            }
-        }, 600);
-    }
-    
-    video.addEventListener('ended', hideSplash);
-    video.addEventListener('error', function () {
-        console.log('[splash] video error, skipping');
-        hideSplash();
-    });
-    
-    var playPromise = video.play();
-    if (playPromise !== undefined) {
-        playPromise.catch(function (err) {
-            console.log('[splash] autoplay blocked:', err && err.message);
-            hideSplash();
-        });
-    }
-    
-    // Safety: hide after max 5.5 seconds (slightly more than video length)
-    setTimeout(hideSplash, 5500);
-    
-    // Tap to skip
-    splash.addEventListener('click', hideSplash);
-    splash.addEventListener('touchend', hideSplash);
-})();
-</script>
 
 <div class="toast" id="toast"></div>
 
@@ -10812,7 +10682,8 @@ function renderTodayScreen() {
     // The Mirror is now available on-demand via the "המראה השבועית" button.
     // This respects the user's flow and avoids unwanted interruptions.
     renderDailyInsight();
-    renderCausalCard();  // PRD #3 - Causal Mirror summary card
+    // Note: renderCausalCard() removed from auto-render.
+    // Was duplicating the "המראה השבועית" feature - now only available via the button.
     renderForecast();
     renderWhyCard();
     renderComebackBanner();
