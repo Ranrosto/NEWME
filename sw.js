@@ -1,15 +1,29 @@
 /* ============================================================
    Service Worker - המעקב שלי
-   גרסה: 1.0.0
+   גרסה: 1.2.0
    תפקיד: caching בסיסי + הצגת התראות יומיות
+   
+   שינויים בגרסה 1.2.0:
+   - שדרוג splash screen: inline CSS + preload + early init
+   - background_color ב-manifest שונה ללבן צרוף (#ffffff)
+   - bumped cache name לאלץ עדכון אצל המשתמשים
    ============================================================ */
 
-const CACHE_NAME = 'nutrition-tracker-v1';
-const CORE_FILES = ['./', './index.html', './manifest.json'];
+const CACHE_NAME = 'nutrition-tracker-v1-2';
+const CORE_FILES = [
+    './',
+    './index.html',
+    './manifest.json',
+    './splash.mp4',
+    './icon-192.png',
+    './icon-512.png',
+    './icon-maskable-512.png',
+    './sw.js'
+];
 
 // ===== Install =====
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing...');
+    console.log('[SW] Installing v1.2.0...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(CORE_FILES))
@@ -20,17 +34,22 @@ self.addEventListener('install', (event) => {
 
 // ===== Activate =====
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating...');
+    console.log('[SW] Activating v1.2.0... clearing old caches');
     event.waitUntil(
         caches.keys().then(keys => 
             Promise.all(
-                keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+                keys.filter(k => k !== CACHE_NAME).map(k => {
+                    console.log('[SW] Deleting old cache:', k);
+                    return caches.delete(k);
+                })
             )
         ).then(() => self.clients.claim())
     );
 });
 
 // ===== Fetch - network first, fallback to cache =====
+// Network-first means users always get latest files when online,
+// and fallback to cache when offline (essential for PWA reliability).
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
     if (!event.request.url.startsWith(self.location.origin)) return;
@@ -74,8 +93,8 @@ self.addEventListener('message', (event) => {
         self.registration.showNotification(title || 'המעקב שלי', {
             body: body || '',
             tag: tag || 'daily-goals',
-            icon: 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 192 192\'><rect width=\'192\' height=\'192\' rx=\'42\' fill=\'%23A9D39E\'/><text x=\'96\' y=\'138\' font-family=\'serif\' font-size=\'118\' font-weight=\'900\' fill=\'%23CEA2FD\' text-anchor=\'middle\'>ר</text></svg>',
-            badge: 'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 96 96\'><rect width=\'96\' height=\'96\' rx=\'24\' fill=\'%236b9c5e\'/></svg>',
+            icon: 'icon-192.png',
+            badge: 'icon-192.png',
             lang: 'he',
             dir: 'rtl',
             requireInteraction: false,

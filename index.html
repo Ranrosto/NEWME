@@ -18,6 +18,27 @@
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
     
+    <!-- Preload the splash video so it's ready as soon as DOM parses.
+         This makes the in-app splash appear nearly instantly after the
+         OS-level PWA splash transitions away. -->
+    <link rel="preload" as="video" href="splash.mp4" type="video/mp4">
+    
+    <!-- Inline critical CSS for splash so it shows BEFORE the main stylesheet loads.
+         This is the key trick: the white background appears immediately, then
+         the video starts. No gap, no flicker. -->
+    <style>
+        html, body { background: #ffffff !important; margin: 0; padding: 0; }
+        #splashScreen {
+            position: fixed; inset: 0; background: #ffffff; z-index: 99999;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        #splashScreen video {
+            width: 100%; height: 100%; object-fit: contain;
+            max-width: 100vw; max-height: 100vh; background: #ffffff;
+        }
+    </style>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet">
@@ -680,11 +701,13 @@
         .day-col:active { background: var(--bg); }
 
         .day-num {
-            font-family: var(--serif);
-            font-size: 14px;
-            font-weight: 600;
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 700;
             color: var(--ink-secondary);
+            letter-spacing: 0.04em;
             margin-bottom: 2px;
+            text-transform: uppercase;
         }
 
         .day-col.current .day-num {
@@ -1822,6 +1845,82 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
+        }
+        
+        /* ===== Viewing past-day banner =====
+           Shown when user clicks on a past day in the week strip.
+           Makes it clear they're editing that day, with easy "back to today". */
+        .viewing-day-banner {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px 14px;
+            background: linear-gradient(90deg, var(--lilac-wash), var(--pistachio-wash));
+            border: 1px solid var(--lilac-light);
+            border-radius: 12px;
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--ink-primary);
+            animation: anchorIn 0.3s ease-out;
+        }
+        .viewing-day-banner[style*="display: none"] {
+            display: none !important;
+        }
+        .vd-icon { font-size: 16px; flex-shrink: 0; }
+        .vd-text { flex: 1; min-width: 0; font-weight: 500; }
+        .vd-text strong { color: var(--lilac-deep); font-weight: 700; }
+        .vd-back {
+            background: var(--ink-primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: var(--sans);
+            flex-shrink: 0;
+        }
+        .vd-back:active { transform: scale(0.95); }
+        
+        /* ===== Sticky Footer Modal Pattern =====
+           Used by modals with lots of content (e.g., workout logging).
+           Solves the problem of "Save" button being hidden below the fold:
+           keeps the action buttons always visible at the bottom of the modal,
+           with a subtle gradient fade hint so users know there's more above. */
+        .modal.modal-with-sticky-footer {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            overflow: hidden;
+        }
+        .modal-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--s-6) var(--s-5) var(--s-4);
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+        .modal-sticky-footer {
+            background: var(--bg-elevated);
+            padding: var(--s-4) var(--s-5);
+            border-top: 1px solid var(--border-soft);
+            box-shadow: 0 -8px 16px -8px rgba(45, 40, 30, 0.08);
+            position: relative;
+            flex-shrink: 0;
+        }
+        /* Subtle "more content above" gradient fade visible at top of sticky footer */
+        .modal-sticky-footer::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(to top, var(--bg-elevated), rgba(255,255,255,0));
+            pointer-events: none;
         }
         
         .btn-modal-secondary {
@@ -6492,6 +6591,113 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===== Mirror Button - on-demand weekly review =====
+           Beautiful, prominent button that invites the user to view their
+           weekly summary on their own terms (not forced as a popup). */
+        #mirrorBtnContainer {
+            margin-bottom: var(--s-5);
+        }
+        .mirror-open-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            background: linear-gradient(135deg, var(--lilac-wash) 0%, var(--pistachio-wash) 100%);
+            border: 1px solid var(--lilac-light);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            font-family: var(--sans);
+            transition: transform 0.15s, box-shadow 0.15s;
+            text-align: start;
+            position: relative;
+            overflow: hidden;
+        }
+        .mirror-open-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right, var(--pistachio-deep) 0%, var(--lilac-deep) 100%);
+        }
+        .mirror-open-btn:active {
+            transform: scale(0.98);
+            box-shadow: var(--shadow-xs);
+        }
+        .mirror-open-btn-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .mirror-open-btn-text {
+            flex: 1;
+            min-width: 0;
+        }
+        .mirror-open-btn-title {
+            font-family: var(--serif);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ink-primary);
+            letter-spacing: -0.01em;
+            margin-bottom: 3px;
+        }
+        .mirror-open-btn-sub {
+            font-size: 12px;
+            color: var(--ink-tertiary);
+            line-height: 1.4;
+        }
+        .mirror-open-btn-arrow {
+            color: var(--lilac-deep);
+            font-size: 22px;
+            flex-shrink: 0;
+            font-weight: 700;
+        }
+        
+        /* ===== Splash Screen - shown on app launch =====
+           Covers the entire viewport while the app initializes.
+           The video plays once and the overlay fades out gracefully. */
+        .splash-screen {
+            position: fixed;
+            inset: 0;
+            background: #ffffff;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: opacity 0.5s ease-out;
+            opacity: 1;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .splash-screen.hidden {
+            display: none;
+        }
+        .splash-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            max-width: 100vw;
+            max-height: 100vh;
+            background: #ffffff;
+            pointer-events: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        /* Hide native video controls and fullscreen button on iOS */
+        .splash-video::-webkit-media-controls {
+            display: none !important;
+        }
+        .splash-video::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+        
         /* ===== History Modal (Workouts & Meals) - Full-screen overlay ===== */
         .history-overlay {
             position: fixed;
@@ -8150,6 +8356,75 @@
 </head>
 <body>
 
+<!-- ============ SPLASH SCREEN - shown on app launch ============ -->
+<div id="splashScreen" class="splash-screen" aria-hidden="true">
+    <video id="splashVideo" 
+           autoplay 
+           muted 
+           playsinline
+           preload="auto"
+           disablePictureInPicture
+           disableRemotePlayback
+           class="splash-video">
+        <source src="splash.mp4" type="video/mp4">
+    </video>
+</div>
+<script>
+/* Splash screen init - runs INLINE as soon as the splash DOM is parsed.
+   This is much earlier than DOMContentLoaded - the video starts playing
+   while the rest of the page is still loading. */
+(function initSplashEarly() {
+    var splash = document.getElementById('splashScreen');
+    var video = document.getElementById('splashVideo');
+    if (!splash || !video) return;
+    
+    // Skip if already shown this session
+    try {
+        if (sessionStorage.getItem('splash_shown_v1') === '1') {
+            splash.style.display = 'none';
+            return;
+        }
+    } catch (e) {}
+    
+    var hidden = false;
+    function hideSplash() {
+        if (hidden) return;
+        hidden = true;
+        try { sessionStorage.setItem('splash_shown_v1', '1'); } catch (e) {}
+        splash.style.transition = 'opacity 0.5s ease-out';
+        splash.style.opacity = '0';
+        splash.style.pointerEvents = 'none';
+        setTimeout(function () {
+            splash.style.display = 'none';
+            if (video) {
+                try { video.pause(); video.src = ''; video.load(); } catch (e) {}
+            }
+        }, 600);
+    }
+    
+    video.addEventListener('ended', hideSplash);
+    video.addEventListener('error', function () {
+        console.log('[splash] video error, skipping');
+        hideSplash();
+    });
+    
+    var playPromise = video.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(function (err) {
+            console.log('[splash] autoplay blocked:', err && err.message);
+            hideSplash();
+        });
+    }
+    
+    // Safety: hide after max 5.5 seconds (slightly more than video length)
+    setTimeout(hideSplash, 5500);
+    
+    // Tap to skip
+    splash.addEventListener('click', hideSplash);
+    splash.addEventListener('touchend', hideSplash);
+})();
+</script>
+
 <div class="toast" id="toast"></div>
 
 <!-- ============ ONBOARDING MODAL ============ -->
@@ -8305,6 +8580,17 @@
     </div>
 </div>
 
+<!-- ============ MIRROR OVERLAY: Weekly summary on demand ============ -->
+<div class="history-overlay" id="mirrorOverlay">
+    <div class="history-topbar">
+        <button class="history-back-btn" onclick="closeMirror()" aria-label="חזרה">✕</button>
+        <h2 class="history-title">המראה השבועית</h2>
+    </div>
+    <div class="history-content" id="mirrorOverlayContent">
+        <!-- Populated by renderMirrorOverlay() -->
+    </div>
+</div>
+
 <!-- ============ SCREEN: TODAY ============ -->
 <div class="screen active" id="screen-today">
     <!-- ====== EDITORIAL MASTHEAD ====== -->
@@ -8432,7 +8718,25 @@
         <div class="week-strip-wrap">
             <div class="week-strip" id="weekStrip"></div>
         </div>
+        <!-- Viewing-day banner: shown when user clicks a past day in the strip -->
+        <div id="viewingDayBanner" class="viewing-day-banner" style="display: none;">
+            <span class="vd-icon">📝</span>
+            <span class="vd-text" id="viewingDayBannerText"></span>
+            <button class="vd-back" onclick="returnToToday()">חזרה להיום</button>
+        </div>
     </section>
+
+    <!-- ====== MIRROR BUTTON - Weekly review on demand ====== -->
+    <div id="mirrorBtnContainer" style="display: none;">
+        <button class="mirror-open-btn" onclick="openMirror()">
+            <div class="mirror-open-btn-icon">🪞</div>
+            <div class="mirror-open-btn-text">
+                <div class="mirror-open-btn-title">המראה השבועית</div>
+                <div class="mirror-open-btn-sub" id="mirrorBtnSubtitle">סיכום וניתוח של השבוע האחרון</div>
+            </div>
+            <div class="mirror-open-btn-arrow">‹</div>
+        </button>
+    </div>
 
     <!-- ====== MOVEMENT SECTION - קפיצת חבל ====== -->
     <section class="editorial-section section-tight">
@@ -8762,15 +9066,28 @@
     </div>
 
     <!-- Daily Notifications Toggle -->
-    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
-        <div onclick="toggleDailyNotifications()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
-            <div style="font-size: 24px;">🔔</div>
+    <div class="settings-card" style="padding: var(--s-4) var(--s-5); margin-top: var(--s-3);">
+        <div style="display: flex; align-items: flex-start; gap: var(--s-3);">
+            <div style="font-size: 24px; padding-top: 2px;">🔔</div>
             <div style="flex: 1;">
-                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית בשעה 15:30</div>
+                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית</div>
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">תזכורת אוטומטית של 3 המטרות · הכי מומלץ להתקין כאפליקציה קודם</div>
-                <button id="notifToggleBtn" style="margin-top: 8px; background: var(--ink-primary); color: white; 
-                        border: none; padding: 8px 16px; border-radius: 18px; font-size: 14px; cursor: pointer;
-                        font-family: var(--sans); font-weight: 600;">🔕 הפעל התראות יומיות (15:30)</button>
+                
+                <!-- Time picker row -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px; background: var(--paper-cool); border-radius: 10px;">
+                    <label for="notifTimeInput" style="font-size: 13px; color: var(--ink-secondary); font-family: var(--sans);">שעה:</label>
+                    <input type="time" id="notifTimeInput" 
+                           onchange="onNotifTimeChange()"
+                           style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: white; color: var(--ink-primary);">
+                    <span style="font-size: 11px; color: var(--ink-tertiary); margin-inline-start: auto;" id="notifTimeHint"></span>
+                </div>
+                
+                <!-- Enable/disable button -->
+                <button id="notifToggleBtn" 
+                        onclick="toggleDailyNotifications()"
+                        style="margin-top: 10px; background: var(--ink-primary); color: white; 
+                               border: none; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer;
+                               font-family: var(--sans); font-weight: 600; width: 100%;">🔕 הפעל התראות יומיות</button>
             </div>
         </div>
     </div>
@@ -8784,6 +9101,18 @@
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">סקור 14 ימים אחורה · בחר יום והשלם נתונים</div>
             </div>
             <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
+        </div>
+    </div>
+
+    <!-- Mirror - Weekly Review -->
+    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
+        <div onclick="openMirror()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
+            <div style="font-size: 24px;">🪞</div>
+            <div style="flex: 1;">
+                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">המראה השבועית</div>
+                <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">סיכום וניתוח של השבוע האחרון · על פי דרישה</div>
+            </div>
+            <div style="color: var(--lilac-deep); font-size: 20px;">‹</div>
         </div>
     </div>
 
@@ -8983,9 +9312,10 @@
 
 <!-- ============ WORKOUT LOG MODAL ============ -->
 <div class="modal-overlay" id="workoutModal" style="display: none;">
-    <div class="modal">
+    <div class="modal modal-with-sticky-footer">
+        <div class="modal-scroll-area">
         <div class="modal-title">אימון קפיצת חבל</div>
-        <div class="modal-text">רישום מהיר של אימון שסיימת</div>
+        <div class="modal-text" id="workoutModalSubtitle">רישום מהיר של אימון שסיימת</div>
         
         <div class="workout-section">
             <div class="workout-section-label">משך · דקות</div>
@@ -9058,10 +9388,13 @@
                 <div id="workoutCustomDateHint" style="font-size: 13px; color: var(--ink-tertiary); margin-top:6px;"></div>
             </div>
         </div>
+        </div><!-- /.modal-scroll-area -->
         
-        <div class="modal-actions">
-            <button class="btn-modal-secondary" onclick="closeWorkoutModal()">סגור</button>
-            <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" disabled style="padding: 12px;">שמור</button>
+        <div class="modal-sticky-footer">
+            <div class="modal-actions">
+                <button class="btn-modal-secondary" onclick="closeWorkoutModal()">סגור</button>
+                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" disabled style="padding: 12px;">שמור</button>
+            </div>
         </div>
     </div>
 </div>
@@ -10352,14 +10685,25 @@ function renderWeekStrip() {
     
     document.getElementById('weekStripLabel').textContent = `שבוע ${viewingWeek}`;
 
+    // English day-of-week labels (Sun=0, Mon=1, etc.)
+    const ENG_DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
     container.innerHTML = weekDays.map(dayNum => {
         const dayData = state.days[dayNum] || {};
         const isCurrent = dayNum === currentDay;
         const isViewing = dayNum === viewingDayNum;
         const isFuture = dayNum > currentDay;
-        const dow = dayOfWeek(dayNum);
         const type = getDayType(dayNum);
         const typeClass = type !== 'regular' ? `type-${type}` : '';
+        
+        // Calculate the actual day-of-week (Sun..Sat) from the real calendar date
+        let engDayLabel = '·';
+        if (state.startTimestamp) {
+            const startDate = new Date(state.startTimestamp);
+            const targetDate = new Date(startDate);
+            targetDate.setDate(startDate.getDate() + (dayNum - 1));
+            engDayLabel = ENG_DAY_LABELS[targetDate.getDay()];
+        }
 
         // Special day: show special marker instead of habit dots
         let dotsHtml;
@@ -10381,7 +10725,7 @@ function renderWeekStrip() {
             <div class="day-col ${isCurrent ? 'current' : ''} ${isViewing ? 'viewing' : ''} ${typeClass}" 
                  data-day="${dayNum}"
                  style="opacity: ${isFuture ? 0.3 : 1}; pointer-events: ${isFuture ? 'none' : 'auto'}">
-                <div class="day-num">${dow}</div>
+                <div class="day-num">${engDayLabel}</div>
                 ${dotsHtml}
             </div>
         `;
@@ -10389,8 +10733,17 @@ function renderWeekStrip() {
     
     container.querySelectorAll('.day-col').forEach(col => {
         col.addEventListener('click', () => {
-            viewingDayNum = parseInt(col.dataset.day);
+            const newDay = parseInt(col.dataset.day);
+            viewingDayNum = newDay;
             renderTodayScreen();
+            // After re-render, scroll to habits section for clarity
+            setTimeout(() => {
+                const habitsEl = document.getElementById('habitsContainer');
+                if (habitsEl && newDay !== currentDay) {
+                    // Smooth scroll to habits area so user sees what they're editing
+                    habitsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
         });
     });
 }
@@ -10455,7 +10808,9 @@ function renderReflection() {
 function renderTodayScreen() {
     renderTopBar();
     renderIdentity();
-    renderMirrorMoment();
+    // Note: renderMirrorMoment() removed from auto-render.
+    // The Mirror is now available on-demand via the "המראה השבועית" button.
+    // This respects the user's flow and avoids unwanted interruptions.
     renderDailyInsight();
     renderCausalCard();  // PRD #3 - Causal Mirror summary card
     renderForecast();
@@ -10468,12 +10823,56 @@ function renderTodayScreen() {
     renderSpecialDayBanner();
     renderHabits();
     renderWeekStrip();
+    renderViewingDayBanner();  // Show "you're editing day X" banner if needed
+    updateMirrorButtonVisibility();  // Show/hide Mirror button based on data
     renderMovementSection();
     renderSnacks();
     renderReflection();
     renderHero();
     renderMomentumCard();
 }
+
+// ==================== VIEWING DAY BANNER ====================
+function renderViewingDayBanner() {
+    const banner = document.getElementById('viewingDayBanner');
+    const text = document.getElementById('viewingDayBannerText');
+    if (!banner || !text) return;
+    
+    const currentDay = getCurrentDayNum();
+    if (viewingDayNum === currentDay || !state.startTimestamp) {
+        banner.style.display = 'none';
+        return;
+    }
+    
+    // Calculate the date label for the viewing day
+    const startDate = new Date(state.startTimestamp);
+    const viewingDate = new Date(startDate);
+    viewingDate.setDate(startDate.getDate() + (viewingDayNum - 1));
+    
+    const heDayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    const heMonths = ['ינו׳', 'פבר׳', 'מרץ', 'אפר׳', 'מאי', 'יוני', 'יולי', 'אוג׳', 'ספט׳', 'אוק׳', 'נוב׳', 'דצמ׳'];
+    const dayName = heDayNames[viewingDate.getDay()];
+    const dom = viewingDate.getDate();
+    const month = heMonths[viewingDate.getMonth()];
+    
+    const daysBack = currentDay - viewingDayNum;
+    let backLabel;
+    if (daysBack === 1) backLabel = 'אתמול';
+    else if (daysBack === 2) backLabel = 'שלשום';
+    else backLabel = `לפני ${daysBack} ימים`;
+    
+    text.innerHTML = `עורך את <strong>יום ${dayName}, ${dom} ${month}</strong> · ${backLabel}`;
+    banner.style.display = 'flex';
+}
+
+// Make returnToToday globally available (called from banner button)
+window.returnToToday = function() {
+    if (typeof haptic === 'function') haptic();
+    const currentDay = getCurrentDayNum();
+    viewingDayNum = currentDay;
+    renderTodayScreen();
+    if (typeof showToast === 'function') showToast('חזרה להיום ✓');
+};
 
 // ==================== MEALS SCREEN ====================
 // Old template-based renderMealsScreen has been replaced by the dynamic
@@ -11470,6 +11869,22 @@ function openWorkoutModal() {
     haptic();
     workoutDraft = { duration: null, type: null, mood: null, note: '', customDate: null };
     
+    // Show target day in subtitle if viewing past day
+    const subtitle = document.getElementById('workoutModalSubtitle');
+    if (subtitle) {
+        const currentDay = getCurrentDayNum();
+        if (typeof viewingDayNum === 'number' && viewingDayNum !== currentDay && viewingDayNum >= 1) {
+            const daysBack = currentDay - viewingDayNum;
+            let backLabel;
+            if (daysBack === 1) backLabel = 'אתמול';
+            else if (daysBack === 2) backLabel = 'שלשום';
+            else backLabel = `לפני ${daysBack} ימים`;
+            subtitle.innerHTML = `📝 האימון יישמר ל-<strong style="color: var(--lilac-deep);">${backLabel}</strong> (היום שבחרת)`;
+        } else {
+            subtitle.textContent = 'רישום מהיר של אימון שסיימת';
+        }
+    }
+    
     // Reset retroactive date picker
     const dateBox = document.getElementById('workoutCustomDateBox');
     const dateInput = document.getElementById('workoutCustomDate');
@@ -12083,6 +12498,177 @@ function _escapeHtml(s) {
 window.openHistory = openHistory;
 window.closeHistory = closeHistory;
 
+// ============== MIRROR - On-demand weekly review ==============
+// UX rationale: Instead of an automatic popup that interrupts the user's flow,
+// the Mirror is now accessible via a prominent button. Users decide when they
+// want to reflect on their week - respecting their attention and autonomy.
+// This is the "pull, not push" principle for self-improvement features.
+
+function openMirror() {
+    if (typeof haptic === 'function') haptic();
+    const overlay = document.getElementById('mirrorOverlay');
+    if (!overlay) return;
+    
+    // Close other history overlays defensively
+    ['workoutsHistoryOverlay', 'mealsHistoryOverlay'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('show');
+    });
+    
+    renderMirrorOverlay();
+    overlay.classList.add('show');
+    overlay.scrollTop = 0;
+    document.body.style.overflow = 'hidden';
+}
+
+function closeMirror() {
+    if (typeof haptic === 'function') haptic();
+    const overlay = document.getElementById('mirrorOverlay');
+    if (overlay) overlay.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+function renderMirrorOverlay() {
+    const container = document.getElementById('mirrorOverlayContent');
+    if (!container) return;
+    
+    const moment = generateMirrorMomentOnDemand();
+    
+    // Empty state - not enough data yet
+    if (!moment) {
+        const currentDay = (typeof getCurrentDayNum === 'function') ? getCurrentDayNum() : 0;
+        const daysToWait = Math.max(0, 7 - currentDay);
+        container.innerHTML = `
+            <div class="history-empty">
+                <div class="history-empty-icon">🪞</div>
+                <div class="history-empty-text">
+                    ${currentDay < 7 
+                        ? `המראה השבועית תהיה זמינה אחרי שבוע מלא של מעקב.<br>נשאר${daysToWait === 1 ? ' עוד יום אחד' : ` עוד ${daysToWait} ימים`}.`
+                        : 'אין מספיק נתונים מהשבוע האחרון להציג מראה.<br>המשך לרשום הרגלים ותחזור.'}
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Build the mirror content - same structure as old auto-Mirror, but presented on demand
+    let comparisonHtml = '';
+    if (moment.prevAdherence !== null) {
+        const arrow = moment.adherencePct > moment.prevAdherence ? '↗' : moment.adherencePct < moment.prevAdherence ? '↘' : '→';
+        const arrowColor = moment.adherencePct > moment.prevAdherence ? 'var(--pistachio-deep)' : moment.adherencePct < moment.prevAdherence ? 'var(--lilac-deep)' : 'var(--ink-tertiary)';
+        comparisonHtml = `
+            <div class="mirror-section">
+                <div class="mirror-section-label">מול שבוע קודם</div>
+                <div class="mirror-stats">
+                    <div class="mirror-stat">
+                        <div class="mirror-stat-then">שבוע קודם</div>
+                        <div class="mirror-stat-value">${moment.prevAdherence}%</div>
+                    </div>
+                    <div class="mirror-arrow" style="color: ${arrowColor};">${arrow}</div>
+                    <div class="mirror-stat">
+                        <div class="mirror-stat-then">השבוע</div>
+                        <div class="mirror-stat-value" style="color: var(--ink-primary);">${moment.adherencePct}%</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    let bestHabitHtml = '';
+    if (moment.bestHabit && moment.bestHabitPct > 0) {
+        bestHabitHtml = `
+            <div class="mirror-section">
+                <div class="mirror-section-label">ההרגל החזק ביותר</div>
+                <div class="mirror-section-text">
+                    <strong>${moment.bestHabit.emoji} ${moment.bestHabit.label}</strong> · 
+                    <em>${moment.bestHabitPct}% מהשבוע</em>
+                </div>
+            </div>
+        `;
+    }
+    
+    let weightHtml = '';
+    if (moment.weightDelta !== null) {
+        const sign = moment.weightDelta < 0 ? '↓' : moment.weightDelta > 0 ? '↑' : '=';
+        const color = moment.weightDelta < 0 ? 'var(--pistachio-deep)' : moment.weightDelta > 0 ? 'var(--lilac-deep)' : 'var(--ink-secondary)';
+        const absDelta = Math.abs(moment.weightDelta).toFixed(1);
+        weightHtml = `
+            <div class="mirror-section">
+                <div class="mirror-section-label">משקל</div>
+                <div class="mirror-section-text">
+                    שבועיים אחרונים: <strong style="color: ${color};">${sign} ${absDelta} ק״ג</strong>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Headline narrative
+    let headline;
+    if (moment.adherencePct >= 80) {
+        headline = 'שבוע מעולה. ההרגלים שלך מתבססים.';
+    } else if (moment.adherencePct >= 60) {
+        headline = 'שבוע טוב. יש מקום לדיוק קל.';
+    } else if (moment.adherencePct >= 40) {
+        headline = 'שבוע ביניים. כדאי לחשוב מה הפריע.';
+    } else {
+        headline = 'שבוע מאתגר. כל יום חדש הוא הזדמנות.';
+    }
+    
+    container.innerHTML = `
+        <div class="mirror-moment" style="margin-bottom: var(--s-4);">
+            <div class="mirror-issue">שבוע ${moment.weekNum} · ${moment.regularDays} ימים רגילים</div>
+            <h2 class="mirror-title" style="font-size: 28px;">${headline}</h2>
+            
+            <div class="mirror-section">
+                <div class="mirror-section-label">דבקות בהרגלים</div>
+                <div class="mirror-section-text">
+                    סך הכל: <strong>${moment.adherencePct}%</strong> מהיעדים השבוע
+                </div>
+            </div>
+            
+            ${comparisonHtml}
+            ${bestHabitHtml}
+            ${weightHtml}
+        </div>
+        
+        <div style="text-align: center; font-size: 13px; color: var(--ink-tertiary); margin-top: 24px; padding: 16px;">
+            💭 המראה היא הזדמנות לראות את עצמך בכנות.<br>
+            כל מספר הוא נתון, לא שיפוט.
+        </div>
+    `;
+}
+
+// Show/hide the Mirror button on Today screen based on data availability
+function updateMirrorButtonVisibility() {
+    const container = document.getElementById('mirrorBtnContainer');
+    const subtitle = document.getElementById('mirrorBtnSubtitle');
+    if (!container) return;
+    
+    const currentDay = (typeof getCurrentDayNum === 'function') ? getCurrentDayNum() : 0;
+    
+    if (currentDay < 7) {
+        // Hide button if less than a week of data
+        container.style.display = 'none';
+        return;
+    }
+    
+    // Available - show button
+    container.style.display = 'block';
+    
+    // Personalize subtitle if we have a quick preview stat
+    if (subtitle) {
+        const moment = generateMirrorMomentOnDemand();
+        if (moment && moment.adherencePct !== undefined) {
+            subtitle.textContent = `דבקות השבוע: ${moment.adherencePct}% · הקש לפירוט`;
+        } else {
+            subtitle.textContent = 'סיכום וניתוח של השבוע האחרון';
+        }
+    }
+}
+
+window.openMirror = openMirror;
+window.closeMirror = closeMirror;
+
 // ===== Retroactive workout date picker =====
 function toggleWorkoutDatePicker() {
     if (typeof haptic === 'function') haptic();
@@ -12168,12 +12754,23 @@ function saveWorkout() {
     if (!state.workouts) state.workouts = {};
     
     // ===== Determine target day =====
-    // If user opened the retroactive date picker AND chose a date, log to that day.
-    // Otherwise, log to today (default behavior).
+    // Priority:
+    // 1. If user opened the retroactive date picker AND chose a date → that day
+    // 2. If user is viewing a past day in the week strip → that day
+    // 3. Default: today
     const currentDay = getCurrentDayNum();
     let targetDay = currentDay;
     let isRetroactive = false;
     
+    // Priority 2: viewing a past day
+    if (typeof viewingDayNum === 'number' && viewingDayNum >= 1 && viewingDayNum < currentDay) {
+        targetDay = viewingDayNum;
+        isRetroactive = true;
+        workoutDraft.retroactive = true;
+        workoutDraft.actualDayNum = targetDay;
+    }
+    
+    // Priority 1: explicit date picker overrides everything
     const dateBox = document.getElementById('workoutCustomDateBox');
     const dateInput = document.getElementById('workoutCustomDate');
     if (dateBox && dateBox.style.display !== 'none' && dateInput && dateInput.value) {
@@ -12629,6 +13226,109 @@ function renderForecast() {
 }
 
 // ==================== MIRROR MOMENT (Sunday weekly) ====================
+// On-demand version: works any day, used by the "המראה השבועית" button.
+// Skips the Sunday-only and dismissed checks that the auto version has.
+function generateMirrorMomentOnDemand() {
+    const currentDay = getCurrentDayNum();
+    if (currentDay < 7) return null; // Need at least one full week
+    
+    // Calculate this past week (last 7 days)
+    const lastWeekDays = [];
+    for (let d = currentDay - 7; d < currentDay; d++) {
+        if (d >= 1) lastWeekDays.push(d);
+    }
+    
+    // Stats
+    let totalV = 0, totalMarks = 0, regularDays = 0;
+    let bestHabit = null, bestHabitPct = 0;
+    const habitStats = {};
+    
+    HABITS.forEach(h => habitStats[h.id] = { done: 0, total: 0 });
+    
+    lastWeekDays.forEach(d => {
+        const type = getDayType(d);
+        if (type !== 'regular') return;
+        regularDays++;
+        
+        const dayData = state.days[d] || {};
+        HABITS.forEach(h => {
+            habitStats[h.id].total++;
+            if (dayData[h.id] === true) {
+                habitStats[h.id].done++;
+                totalV++;
+            }
+            totalMarks++;
+        });
+    });
+    
+    if (regularDays === 0) return null;
+    
+    const adherencePct = totalMarks > 0 ? Math.round((totalV / totalMarks) * 100) : 0;
+    
+    HABITS.forEach(h => {
+        const stats = habitStats[h.id];
+        if (stats.total === 0) return;
+        const pct = Math.round((stats.done / stats.total) * 100);
+        if (pct > bestHabitPct) {
+            bestHabitPct = pct;
+            bestHabit = h;
+        }
+    });
+    
+    // Previous week comparison
+    let prevAdherence = null;
+    if (currentDay >= 14) {
+        let prevV = 0, prevTotal = 0;
+        for (let d = currentDay - 14; d < currentDay - 7; d++) {
+            if (d < 1) continue;
+            const type = getDayType(d);
+            if (type !== 'regular') continue;
+            const dayData = state.days[d] || {};
+            HABITS.forEach(h => {
+                prevTotal++;
+                if (dayData[h.id] === true) prevV++;
+            });
+        }
+        if (prevTotal > 0) prevAdherence = Math.round((prevV / prevTotal) * 100);
+    }
+    
+    // Weight comparison - state.weights is keyed by week number, not day number
+    let weightDelta = null;
+    const sortedWeightWeeks = Object.keys(state.weights || {}).map(Number).sort((a, b) => a - b);
+    if (sortedWeightWeeks.length >= 2) {
+        // Compare the latest weight to the one ~2 weeks earlier (or the second-latest if not enough history)
+        const newestWeek = sortedWeightWeeks[sortedWeightWeeks.length - 1];
+        // Find a comparison point - prefer ~2 weeks back, fall back to earliest
+        let comparisonWeek = sortedWeightWeeks[0];
+        for (const w of sortedWeightWeeks) {
+            if (w >= newestWeek - 2 && w < newestWeek) {
+                comparisonWeek = w;
+                break;
+            }
+        }
+        if (comparisonWeek !== newestWeek) {
+            const oldest = state.weights[comparisonWeek];
+            const newest = state.weights[newestWeek];
+            if (oldest != null && newest != null) {
+                weightDelta = newest - oldest;
+            }
+        }
+    }
+    
+    return {
+        adherencePct,
+        regularDays,
+        bestHabit,
+        bestHabitPct,
+        prevAdherence,
+        weightDelta,
+        weekNum: dayToWeek(currentDay - 1)
+    };
+}
+
+// ==================== MIRROR MOMENT (Sunday weekly - LEGACY auto-popup version) ====================
+// Note: This function is no longer auto-called. It's kept for reference and
+// for the legacy renderMirrorMoment() function that may still be called by old code paths.
 function generateMirrorMoment() {
     const currentDay = getCurrentDayNum();
     if (currentDay < 7) return null; // Need at least one full week
@@ -13829,6 +14529,8 @@ renderMoreScreen = function() {
     _originalRenderMore();
     updateApiKeyStatus();
     updateSettingsToggles();
+    // Sync notif button + time input with current settings
+    if (typeof updateNotifButtonUI === 'function') updateNotifButtonUI();
     // Re-check IDB - if key exists there but not in state, restore it
     idbGetApiKey().then((idbKey) => {
         if (idbKey && (!state.settings.claudeApiKey || state.settings.claudeApiKey !== idbKey)) {
@@ -14556,6 +15258,12 @@ document.addEventListener('click', (e) => {
 // ESC key closes Reality modal and Anchor (common UX expectation on desktop)
 document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    // Check Mirror overlay (most contextually important review)
+    const mirror = document.getElementById('mirrorOverlay');
+    if (mirror && mirror.classList.contains('show')) {
+        closeMirror();
+        return;
+    }
     // Check history overlays first (most recently opened)
     const workoutsHistory = document.getElementById('workoutsHistoryOverlay');
     if (workoutsHistory && workoutsHistory.classList.contains('show')) {
@@ -14586,6 +15294,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ==================== PRD ADDITIONS - INIT ====================
+
+// (Splash screen init moved inline near the splash DOM for earlier execution)
 
 // Run once on initial load (after state is loaded and DOM ready)
 document.addEventListener('DOMContentLoaded', () => {
@@ -14815,9 +15525,26 @@ window.addEventListener('load', () => {
    ===== DAILY NOTIFICATIONS at 15:30 =========================
    ============================================================ */
 
-const NOTIF_HOUR = 15;
-const NOTIF_MINUTE = 30;
+// Default notification time - can be overridden by user setting (stored in localStorage)
+const NOTIF_HOUR_DEFAULT = 15;
+const NOTIF_MINUTE_DEFAULT = 30;
 const NOTIF_STORAGE_KEY = 'nutrition_notif_settings_v1';
+
+// Get currently configured hour/minute (with fallback to defaults)
+function getNotifHour() {
+    const settings = getNotifSettings();
+    return (settings.hour !== undefined && settings.hour !== null) ? settings.hour : NOTIF_HOUR_DEFAULT;
+}
+function getNotifMinute() {
+    const settings = getNotifSettings();
+    return (settings.minute !== undefined && settings.minute !== null) ? settings.minute : NOTIF_MINUTE_DEFAULT;
+}
+// Format current notif time as "HH:MM" for display
+function getNotifTimeStr() {
+    const h = String(getNotifHour()).padStart(2, '0');
+    const m = String(getNotifMinute()).padStart(2, '0');
+    return `${h}:${m}`;
+}
 
 function getNotifSettings() {
     try {
@@ -14846,7 +15573,7 @@ async function enableDailyNotifications() {
         const settings = getNotifSettings();
         settings.enabled = true;
         saveNotifSettings(settings);
-        showNotifConfirmation('✓ התראות יומיות הופעלו לשעה 15:30');
+        showNotifConfirmation(`✓ התראות יומיות הופעלו לשעה ${getNotifTimeStr()}`);
         return true;
     }
     
@@ -14860,7 +15587,7 @@ async function enableDailyNotifications() {
         const settings = getNotifSettings();
         settings.enabled = true;
         saveNotifSettings(settings);
-        showNotifConfirmation('✓ התראות יומיות הופעלו לשעה 15:30');
+        showNotifConfirmation(`✓ התראות יומיות הופעלו לשעה ${getNotifTimeStr()}`);
         // Test notification
         setTimeout(() => sendDailyNotification(true), 1000);
         return true;
@@ -14958,8 +15685,11 @@ function checkNotificationTime() {
     const h = now.getHours();
     const m = now.getMinutes();
     
-    // Window: 15:30 to 15:35 (5-minute window for safety)
-    if (h === NOTIF_HOUR && m >= NOTIF_MINUTE && m < NOTIF_MINUTE + 5) {
+    const targetHour = getNotifHour();
+    const targetMinute = getNotifMinute();
+    
+    // Window: targetHour:targetMinute to +5 min (5-minute window for safety)
+    if (h === targetHour && m >= targetMinute && m < targetMinute + 5) {
         sendDailyNotification(false);
     }
 }
@@ -15000,11 +15730,49 @@ window.toggleDailyNotifications = async function() {
 
 window.updateNotifButtonUI = function() {
     const btn = document.getElementById('notifToggleBtn');
-    if (!btn) return;
+    const timeInput = document.getElementById('notifTimeInput');
+    const timeHint = document.getElementById('notifTimeHint');
     const settings = getNotifSettings();
     const isOn = settings.enabled && Notification.permission === 'granted';
-    btn.textContent = isOn ? '🔔 התראות יומיות: פעיל' : '🔕 הפעל התראות יומיות (15:30)';
-    btn.style.background = isOn ? 'var(--pistachio-deep)' : 'var(--ink-primary)';
+    
+    if (btn) {
+        const timeStr = getNotifTimeStr();
+        btn.textContent = isOn ? `🔔 התראות פעילות · ${timeStr}` : '🔕 הפעל התראות יומיות';
+        btn.style.background = isOn ? 'var(--pistachio-deep)' : 'var(--ink-primary)';
+    }
+    
+    // Sync time input with current setting
+    if (timeInput && !timeInput.dataset.userTyping) {
+        timeInput.value = getNotifTimeStr();
+    }
+    
+    if (timeHint) {
+        timeHint.textContent = isOn ? '✓ פעיל' : '';
+    }
+};
+
+// Called when user changes the time picker
+window.onNotifTimeChange = function() {
+    const timeInput = document.getElementById('notifTimeInput');
+    if (!timeInput || !timeInput.value) return;
+    
+    // Parse "HH:MM"
+    const [hStr, mStr] = timeInput.value.split(':');
+    const h = parseInt(hStr, 10);
+    const m = parseInt(mStr, 10);
+    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
+    
+    // Save to settings
+    const settings = getNotifSettings();
+    settings.hour = h;
+    settings.minute = m;
+    // Reset the "lastShownDate" so the user can test today if they want
+    settings.lastShownDate = null;
+    saveNotifSettings(settings);
+    
+    if (typeof haptic === 'function') haptic();
+    showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`);
+    updateNotifButtonUI();
 };
 
 // Update button on load
