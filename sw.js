@@ -12,7 +12,7 @@
 // Cache name is auto-unique PER CLONE (based on this app's folder path), so
 // several participant apps hosted on the same domain never overwrite or
 // delete each other's cached files. Bump CACHE_VERSION to force an update.
-const CACHE_VERSION = 'v1-8';
+const CACHE_VERSION = 'v1-9';
 const CACHE_PREFIX = 'nutrition-tracker-' + self.location.pathname.replace(/sw\.js$/, '');
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 const CORE_FILES = [

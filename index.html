@@ -9018,17 +9018,18 @@
 
     <!-- Daily Notifications Toggle -->
     <div class="settings-card" id="notifCard" style="padding: var(--s-4) var(--s-5); margin-top: var(--s-3);">
-        <!-- Header row: icon + title + status + real switch -->
-        <div style="display: flex; align-items: center; gap: var(--s-3);">
-            <div style="font-size: 24px;">🔔</div>
-            <div style="flex: 1; min-width: 0;">
+        <!-- Header row: the WHOLE row toggles, so the tap target is large and reliable -->
+        <div onclick="toggleDailyNotifications()" role="switch" aria-checked="false" id="notifSwitchRow"
+             style="display: flex; align-items: center; gap: var(--s-3); cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none;">
+            <div style="font-size: 24px; pointer-events: none;">🔔</div>
+            <div style="flex: 1; min-width: 0; pointer-events: none;">
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית</div>
                 <div id="notifStatusLine" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">כבוי</div>
             </div>
-            <button id="notifSwitch" onclick="toggleDailyNotifications()" role="switch" aria-checked="false" aria-label="הפעלת התראה יומית"
-                    style="position: relative; width: 52px; height: 32px; flex-shrink: 0; border: none; border-radius: 16px; background: #d6d3cd; cursor: pointer; padding: 0; transition: background .25s ease; -webkit-tap-highlight-color: transparent;">
+            <div id="notifSwitch" aria-hidden="true"
+                 style="position: relative; width: 52px; height: 32px; flex-shrink: 0; border-radius: 16px; background: #d6d3cd; transition: background .25s ease; pointer-events: none;">
                 <span id="notifSwitchKnob" style="position: absolute; top: 3px; inset-inline-start: 3px; width: 26px; height: 26px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.25); transition: inset-inline-start .25s ease;"></span>
-            </button>
+            </div>
         </div>
 
         <!-- Time picker: auto-saves on change, no separate save button -->
@@ -15713,13 +15714,20 @@ function sendTestNotification() {
 
 /* ---- Public API for the UI ---- */
 window.toggleDailyNotifications = async function() {
-    const s = getNotifSettings();
-    if (s.enabled && window.Notification && Notification.permission === 'granted') {
-        await disableDailyNotifications();
-    } else {
-        await enableDailyNotifications();
+    try {
+        if (typeof haptic === 'function') haptic();
+        const s = getNotifSettings();
+        if (s.enabled && window.Notification && Notification.permission === 'granted') {
+            await disableDailyNotifications();
+        } else {
+            await enableDailyNotifications();
+        }
+        updateNotifButtonUI();
+    } catch (err) {
+        // Never fail silently: show what went wrong so we can fix it
+        try { alert('שגיאה בהפעלת ההתראות:\n' + (err && err.message ? err.message : err)); } catch {}
+        console.error('[Notif] toggle failed:', err);
     }
-    updateNotifButtonUI();
 };
 
 window.updateNotifButtonUI = function() {
@@ -15734,9 +15742,10 @@ window.updateNotifButtonUI = function() {
 
     if (sw && knob) {
         sw.style.background = isOn ? 'var(--pistachio-deep)' : '#d6d3cd';
-        sw.setAttribute('aria-checked', isOn ? 'true' : 'false');
         knob.style.insetInlineStart = isOn ? '23px' : '3px';
     }
+    const swRow = document.getElementById('notifSwitchRow');
+    if (swRow) swRow.setAttribute('aria-checked', isOn ? 'true' : 'false');
     if (statusLine) {
         statusLine.textContent = isOn
             ? '✓ פעיל · תזכורת כל יום בשעה ' + getNotifTimeStr()
