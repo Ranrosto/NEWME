@@ -8312,8 +8312,8 @@
             border-radius: 6px;
         }
 
-        /* Kill rubber-band overscroll + accidental pull-to-refresh in browser mode */
-        html, body { overscroll-behavior-y: none; }
+        /* Prevent accidental horizontal pull only; vertical scroll must stay free */
+        html { overscroll-behavior-x: none; }
 
         /* Snappier taps everywhere: no double-tap zoom delay, no gray flash */
         button, [onclick], .nav-btn, .habit-btn, .settings-card {
