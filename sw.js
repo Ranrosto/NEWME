@@ -9,7 +9,12 @@
    - bumped cache name לאלץ עדכון מלא אצל המשתמשים
    ============================================================ */
 
-const CACHE_NAME = 'nutrition-tracker-v1-3';
+// Cache name is auto-unique PER CLONE (based on this app's folder path), so
+// several participant apps hosted on the same domain never overwrite or
+// delete each other's cached files. Bump CACHE_VERSION to force an update.
+const CACHE_VERSION = 'v1-6';
+const CACHE_PREFIX = 'nutrition-tracker-' + self.location.pathname.replace(/sw\.js$/, '');
+const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 const CORE_FILES = [
     './',
     './index.html',
@@ -37,7 +42,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then(keys => 
             Promise.all(
-                keys.filter(k => k !== CACHE_NAME).map(k => {
+                keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE_NAME).map(k => {
                     console.log('[SW] Deleting old cache:', k);
                     return caches.delete(k);
                 })
@@ -80,7 +85,33 @@ self.addEventListener('notificationclick', (event) => {
     );
 });
 
-// ===== Message from app - show notification =====
+// ===== Push from server - show the daily notification =====
+// Fired by the OS when the GitHub Action sends a web push, even when the
+// app is fully closed. This is what makes closed-app delivery work on
+// both iOS (16.4+, installed to Home Screen) and Android.
+self.addEventListener('push', (event) => {
+    let data = {};
+    try {
+        data = event.data ? event.data.json() : {};
+    } catch (e) {
+        data = { body: event.data ? event.data.text() : '' };
+    }
+    const title = data.title || '🎯 3 המטרות שלך להיום';
+    const options = {
+        body: data.body || 'פתח את האפליקציה ובדוק את 3 המטרות של היום',
+        tag: data.tag || 'daily-goals',
+        icon: 'icon-192.png',
+        badge: 'icon-192.png',
+        lang: 'he',
+        dir: 'rtl',
+        requireInteraction: false,
+        vibrate: [200, 100, 200],
+        data: { url: './' }
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// ===== Message from app - show notification (used for the local test) =====
 self.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
         const { title, body, tag } = event.data;

@@ -8291,6 +8291,87 @@
             font-style: italic;
         }
 
+        /* ============================================================
+           POLISH PASS v1.5 — feel & quality floor (no color changes)
+           ============================================================ */
+
+        /* Quality floor: respect users who prefer less motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* Visible keyboard focus without affecting touch */
+        :focus-visible {
+            outline: 2px solid var(--lilac-deep);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        /* Kill rubber-band overscroll + accidental pull-to-refresh in browser mode */
+        html, body { overscroll-behavior-y: none; }
+
+        /* Snappier taps everywhere: no double-tap zoom delay, no gray flash */
+        button, [onclick], .nav-btn, .habit-btn, .settings-card {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Tactile press feedback on tappable settings rows */
+        .settings-card div[onclick] {
+            transition: transform 0.12s ease, opacity 0.12s ease;
+        }
+        .settings-card div[onclick]:active {
+            transform: scale(0.985);
+            opacity: 0.8;
+        }
+
+        /* Deeper, more physical press on the three daily habit buttons */
+        .habit-btn:active { transform: scale(0.97); }
+        .habit-btn { transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease; }
+
+        /* Toast clears the home indicator on modern iPhones */
+        .toast { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+
+        /* Tab switch: a small spring on the icon that just became active */
+        @keyframes navPop {
+            0%   { transform: scale(1); }
+            40%  { transform: scale(1.16) translateY(-1px); }
+            100% { transform: scale(1) translateY(-1px); }
+        }
+        .nav-btn.active .nav-icon { animation: navPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* "Unfinished day" dot on the Today tab — disappears once all 3 goals are marked */
+        .nav-btn .nav-dot {
+            position: absolute;
+            top: 5px;
+            inset-inline-start: calc(50% + 11px);
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--lilac-deep);
+            box-shadow: 0 0 0 2px rgba(253, 251, 246, 0.9);
+            opacity: 0;
+            transform: scale(0);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: none;
+        }
+        .nav-btn.has-dot .nav-dot {
+            opacity: 1;
+            transform: scale(1);
+            animation: navDotBreathe 2.6s ease-in-out infinite;
+        }
+        @keyframes navDotBreathe {
+            0%, 100% { transform: scale(1); }
+            50%      { transform: scale(1.3); }
+        }
+
+        /* iOS zoom guard: any focused input below 16px makes Safari zoom the page */
+        .api-key-input { font-size: 16px; }
+        .workout-note-input { font-size: 16px; }
     </style>
 </head>
 <body>
@@ -8936,30 +9017,33 @@
     </div>
 
     <!-- Daily Notifications Toggle -->
-    <div class="settings-card" style="padding: var(--s-4) var(--s-5); margin-top: var(--s-3);">
-        <div style="display: flex; align-items: flex-start; gap: var(--s-3);">
-            <div style="font-size: 24px; padding-top: 2px;">🔔</div>
-            <div style="flex: 1;">
+    <div class="settings-card" id="notifCard" style="padding: var(--s-4) var(--s-5); margin-top: var(--s-3);">
+        <!-- Header row: icon + title + status + real switch -->
+        <div style="display: flex; align-items: center; gap: var(--s-3);">
+            <div style="font-size: 24px;">🔔</div>
+            <div style="flex: 1; min-width: 0;">
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית</div>
-                <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">תזכורת אוטומטית של 3 המטרות · הכי מומלץ להתקין כאפליקציה קודם</div>
-                
-                <!-- Time picker row -->
-                <div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px; background: var(--paper-cool); border-radius: 10px;">
-                    <label for="notifTimeInput" style="font-size: 13px; color: var(--ink-secondary); font-family: var(--sans);">שעה:</label>
-                    <input type="time" id="notifTimeInput" 
-                           onchange="onNotifTimeChange()"
-                           style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: white; color: var(--ink-primary);">
-                    <span style="font-size: 11px; color: var(--ink-tertiary); margin-inline-start: auto;" id="notifTimeHint"></span>
-                </div>
-                
-                <!-- Enable/disable button -->
-                <button id="notifToggleBtn" 
-                        onclick="toggleDailyNotifications()"
-                        style="margin-top: 10px; background: var(--ink-primary); color: white; 
-                               border: none; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer;
-                               font-family: var(--sans); font-weight: 600; width: 100%;">🔕 הפעל התראות יומיות</button>
+                <div id="notifStatusLine" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">כבוי</div>
             </div>
+            <button id="notifSwitch" onclick="toggleDailyNotifications()" role="switch" aria-checked="false" aria-label="הפעלת התראה יומית"
+                    style="position: relative; width: 52px; height: 32px; flex-shrink: 0; border: none; border-radius: 16px; background: #d6d3cd; cursor: pointer; padding: 0; transition: background .25s ease; -webkit-tap-highlight-color: transparent;">
+                <span id="notifSwitchKnob" style="position: absolute; top: 3px; inset-inline-start: 3px; width: 26px; height: 26px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.25); transition: inset-inline-start .25s ease;"></span>
+            </button>
         </div>
+
+        <!-- Time picker: vertical layout, never clipped on narrow screens -->
+        <div style="margin-top: 12px; padding: 12px; background: var(--paper-cool); border-radius: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <label for="notifTimeInput" style="font-size: 14px; color: var(--ink-secondary); font-family: var(--sans); flex-shrink: 0;">שעת ההתראה</label>
+                <input type="time" id="notifTimeInput"
+                       style="width: 120px; max-width: 45%; box-sizing: border-box; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; font-family: inherit; background: white; color: var(--ink-primary); text-align: center;">
+            </div>
+            <button id="notifSaveTimeBtn" onclick="onNotifTimeChange()"
+                    style="margin-top: 10px; width: 100%; box-sizing: border-box; padding: 11px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-family: var(--sans); font-weight: 600; background: var(--pistachio-deep); color: white;">שמור שעה</button>
+        </div>
+
+        <!-- Scheduling support status / help -->
+        <div id="notifSupportHint" style="font-size: 12px; color: var(--ink-tertiary); margin-top: 10px; line-height: 1.55;"></div>
     </div>
 
     <!-- Catch-Up: Fill missed days -->
@@ -9106,7 +9190,7 @@
         <div class="reality-cal-row">
             <div class="reality-cal-label">אומדן קלוריות (גס):</div>
             <input type="number" class="reality-cal-input" id="realityCalInput" 
-                   placeholder="0" min="0" max="3000">
+                   inputmode="numeric" placeholder="0" min="0" max="3000">
         </div>
 
         <div class="reality-quick-pills">
@@ -9272,6 +9356,7 @@
 <!-- ============ BOTTOM NAV ============ -->
 <nav class="bottom-nav">
     <button class="nav-btn active" data-screen="screen-today">
+        <span class="nav-dot"></span>
         <span class="nav-icon"><svg viewBox="0 0 32 32" fill="none">
     <circle cx="16" cy="16" r="13.5" fill="#f0f7ed" stroke="#A9D39E" stroke-width="1"/>
     <path d="M 9.5 16.2 Q 11 17.2 13.5 19.5 Q 15.5 21.5 22.5 11.5" 
@@ -10102,8 +10187,11 @@ function showToast(msg, variant = '') {
     toastTimeout = setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
-function haptic() {
-    if ('vibrate' in navigator) navigator.vibrate(10);
+function haptic(kind) {
+    if (!('vibrate' in navigator)) return;
+    if (kind === 'success')      navigator.vibrate([12, 50, 18]);          // one goal done
+    else if (kind === 'big')     navigator.vibrate([15, 60, 25, 60, 35]);  // all 3 goals done
+    else                         navigator.vibrate(10);                     // regular tap
 }
 
 // ==================== MASTHEAD (time-based greeting) ====================
@@ -10533,17 +10621,34 @@ function toggleHabit(habitId, btnEl) {
             // Variable celebration message
             const celebration = getCelebration(newStreak);
             showToast(celebration);
+            haptic('big');
             
             // Big burst animation at center
             burstParticles(window.innerWidth / 2, window.innerHeight / 2);
         }
     } else if (state.days[viewingDayNum]?.[habitId] === true) {
+        haptic('success');
         // Small burst on single V mark
         if (btnEl) {
             const rect = btnEl.getBoundingClientRect();
             burstParticles(rect.left + rect.width - 30, rect.top + rect.height / 2);
         }
     }
+    updateTodayNavDot();
+}
+
+// "Unfinished day" dot on the Today tab: visible until all 3 goals are marked
+function updateTodayNavDot() {
+    const btn = document.querySelector('.nav-btn[data-screen="screen-today"]');
+    if (!btn) return;
+    const today = getCurrentDayNum();
+    if (typeof getDayType === 'function' && getDayType(today) === 'off') {
+        btn.classList.remove('has-dot');
+        return;
+    }
+    const d = state.days[today] || {};
+    const addressed = HABITS.every(h => d[h.id] === true || d[h.id] === false);
+    btn.classList.toggle('has-dot', !addressed);
 }
 
 // ==================== WEEK STRIP ====================
@@ -11532,6 +11637,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         }
         if (btn.dataset.screen === 'screen-more') renderMoreScreen();
         window.scrollTo(0, 0);
+        updateTodayNavDot();
     });
 });
 
@@ -15391,92 +15497,190 @@ window.addEventListener('load', () => {
         }
     }, 1500);
 });
-
 /* ============================================================
-   ===== DAILY NOTIFICATIONS at 15:30 =========================
+   ===== DAILY NOTIFICATIONS via SERVER WEB PUSH ==============
+   Works on Android AND iOS (iOS 16.4+, app must be installed to
+   Home Screen). The browser subscribes to push and sends the
+   subscription + chosen time + timezone to Supabase. A scheduled
+   GitHub Action reads subscriptions and sends the daily push.
    ============================================================ */
 
-// Default notification time - can be overridden by user setting (stored in localStorage)
+// ---- CONFIG: fill these in after you set up Supabase + VAPID (see SETUP.md) ----
+const PUSH_CONFIG = {
+    vapidPublicKey: 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY',
+    supabaseUrl:    'https://REPLACE.supabase.co',
+    supabaseAnonKey:'REPLACE_WITH_YOUR_SUPABASE_ANON_KEY'
+};
+function pushConfigReady() {
+    return PUSH_CONFIG.vapidPublicKey.indexOf('REPLACE') === -1
+        && PUSH_CONFIG.supabaseUrl.indexOf('REPLACE') === -1
+        && PUSH_CONFIG.supabaseAnonKey.indexOf('REPLACE') === -1;
+}
+
 const NOTIF_HOUR_DEFAULT = 15;
 const NOTIF_MINUTE_DEFAULT = 30;
 const NOTIF_STORAGE_KEY = 'nutrition_notif_settings_v1';
 
-// Get currently configured hour/minute (with fallback to defaults)
-function getNotifHour() {
-    const settings = getNotifSettings();
-    return (settings.hour !== undefined && settings.hour !== null) ? settings.hour : NOTIF_HOUR_DEFAULT;
-}
-function getNotifMinute() {
-    const settings = getNotifSettings();
-    return (settings.minute !== undefined && settings.minute !== null) ? settings.minute : NOTIF_MINUTE_DEFAULT;
-}
-// Format current notif time as "HH:MM" for display
-function getNotifTimeStr() {
-    const h = String(getNotifHour()).padStart(2, '0');
-    const m = String(getNotifMinute()).padStart(2, '0');
-    return `${h}:${m}`;
-}
-
 function getNotifSettings() {
     try {
         const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-        if (!raw) return { enabled: false, lastShownDate: null };
+        if (!raw) return { enabled: false };
         return JSON.parse(raw);
     } catch {
-        return { enabled: false, lastShownDate: null };
+        return { enabled: false };
     }
 }
-
 function saveNotifSettings(settings) {
+    try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(settings)); } catch {}
+}
+function getNotifHour() {
+    const s = getNotifSettings();
+    return (s.hour !== undefined && s.hour !== null) ? s.hour : NOTIF_HOUR_DEFAULT;
+}
+function getNotifMinute() {
+    const s = getNotifSettings();
+    return (s.minute !== undefined && s.minute !== null) ? s.minute : NOTIF_MINUTE_DEFAULT;
+}
+function getNotifTimeStr() {
+    return `${String(getNotifHour()).padStart(2,'0')}:${String(getNotifMinute()).padStart(2,'0')}`;
+}
+function getUserTimezone() {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jerusalem'; }
+    catch { return 'Asia/Jerusalem'; }
+}
+
+/* ---- Platform detection (iOS needs special handling) ---- */
+function isIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+}
+
+/* ---- VAPID key helper ---- */
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const out = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+    return out;
+}
+
+/* ---- Talk to Supabase via security-definer RPCs (anon key is safe to expose) ---- */
+async function supabaseRpc(fn, body) {
+    const res = await fetch(`${PUSH_CONFIG.supabaseUrl}/rest/v1/rpc/${fn}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': PUSH_CONFIG.supabaseAnonKey,
+            'Authorization': 'Bearer ' + PUSH_CONFIG.supabaseAnonKey
+        },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error('Supabase RPC ' + fn + ' failed: ' + res.status);
+    return res;
+}
+
+// Subscribe to push (if needed) and store the subscription + time + tz on the server
+async function registerPush() {
+    if (!pushConfigReady()) throw new Error('Push not configured yet');
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+        sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey)
+        });
+    }
+    const json = sub.toJSON();
+    await supabaseRpc('register_subscription', {
+        p_endpoint: json.endpoint,
+        p_p256dh: json.keys.p256dh,
+        p_auth: json.keys.auth,
+        p_hour: getNotifHour(),
+        p_minute: getNotifMinute(),
+        p_tz: getUserTimezone()
+    });
+    const s = getNotifSettings();
+    s.endpoint = json.endpoint;
+    saveNotifSettings(s);
+    return true;
+}
+
+// Remove the subscription from the server and unsubscribe locally
+async function unregisterPush() {
     try {
-        localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(settings));
-    } catch {}
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+            if (pushConfigReady()) {
+                try { await supabaseRpc('unregister_subscription', { p_endpoint: sub.endpoint }); } catch {}
+            }
+            await sub.unsubscribe();
+        }
+    } catch (e) { console.warn('[Push] unregister failed:', e); }
 }
 
-// Request permission - call when user clicks "enable notifications" button
+// Enable: permission -> subscribe -> store on server
 async function enableDailyNotifications() {
-    if (!('Notification' in window)) {
-        alert('הדפדפן הזה לא תומך בהתראות 😕\nנסה Chrome, Edge, או Safari עדכני.');
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+        // On iOS this is the usual cause: opened in Safari tab, not the installed app
+        if (isIOS() && !isStandalone()) {
+            alert('כדי לקבל התראות באייפון:\n\n1. פתח את הדף בספארי\n2. לחץ על כפתור השיתוף (ריבוע עם חץ למעלה)\n3. בחר "הוסף למסך הבית"\n4. פתח את האפליקציה מהאייקון החדש, ואז הפעל התראות מכאן');
+            return false;
+        }
+        alert('הדפדפן הזה לא תומך בהתראות 😕\nנסה Chrome / Edge עדכני, או התקן את האפליקציה למסך הבית.');
         return false;
     }
-    
-    if (Notification.permission === 'granted') {
-        const settings = getNotifSettings();
-        settings.enabled = true;
-        saveNotifSettings(settings);
-        showNotifConfirmation(`✓ התראות יומיות הופעלו לשעה ${getNotifTimeStr()}`);
-        return true;
+    if (isIOS() && !isStandalone()) {
+        alert('באייפון חובה קודם להתקין את האפליקציה למסך הבית:\n\nכפתור שיתוף ⬆️ ‹ "הוסף למסך הבית", ואז לפתוח מהאייקון ולהפעיל מכאן.');
+        return false;
     }
-    
+    if (!pushConfigReady()) {
+        alert('האפליקציה עדיין לא חוברה לשרת ההתראות.\nהשלם את שלבי ההקמה (ראה SETUP.md).');
+        return false;
+    }
     if (Notification.permission === 'denied') {
-        alert('ההתראות חסומות בדפדפן 🔕\n\nאיך לאפשר:\n1. לחץ על סמל המנעול ליד הכתובת\n2. אפשר התראות\n3. רענן את הדף');
+        alert('ההתראות חסומות 🔕\n\nהגדרות ‹ האתר/האפליקציה ‹ התראות ‹ אפשר. ואז נסה שוב.');
         return false;
     }
-    
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-        const settings = getNotifSettings();
-        settings.enabled = true;
-        saveNotifSettings(settings);
+    let permission = Notification.permission;
+    if (permission !== 'granted') permission = await Notification.requestPermission();
+    if (permission !== 'granted') return false;
+
+    try {
+        const s = getNotifSettings();
+        s.enabled = true;
+        saveNotifSettings(s);
+        await registerPush();
         showNotifConfirmation(`✓ התראות יומיות הופעלו לשעה ${getNotifTimeStr()}`);
-        // Test notification
-        setTimeout(() => sendDailyNotification(true), 1000);
+        // immediate local test so the user sees it works now
+        setTimeout(() => sendTestNotification(), 1000);
         return true;
+    } catch (e) {
+        console.warn('[Push] enable failed:', e);
+        alert('משהו השתבש בהרשמה להתראות. בדוק חיבור אינטרנט ואת הגדרות ההקמה.');
+        const s = getNotifSettings(); s.enabled = false; saveNotifSettings(s);
+        return false;
     }
-    return false;
 }
 
-function disableDailyNotifications() {
-    const settings = getNotifSettings();
-    settings.enabled = false;
-    saveNotifSettings(settings);
+async function disableDailyNotifications() {
+    const s = getNotifSettings();
+    s.enabled = false;
+    saveNotifSettings(s);
+    await unregisterPush();
     showNotifConfirmation('התראות יומיות בוטלו');
 }
 
 function showNotifConfirmation(text) {
     const toast = document.createElement('div');
     toast.style.cssText = `
-        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+        position: fixed; left: 50%; transform: translateX(-50%);
+        bottom: calc(120px + env(safe-area-inset-bottom, 0px));
         background: var(--ink-primary); color: white; padding: 14px 22px;
         border-radius: 24px; font-size: 16px; z-index: 99999;
         box-shadow: 0 4px 20px rgba(0,0,0,0.25); font-family: var(--sans);
@@ -15488,168 +15692,101 @@ function showNotifConfirmation(text) {
     setTimeout(() => toast.remove(), 3500);
 }
 
-// Build notification body from current goals
+// Local test notification (proves permission + service worker work right now)
 function buildGoalsNotificationBody() {
     try {
-        if (typeof generateFocusPoints !== 'function') {
-            return 'בדוק את 3 המטרות של היום באפליקציה';
-        }
-        const focuses = generateFocusPoints();
-        if (!focuses || focuses.length === 0) {
-            return 'בדוק את 3 המטרות של היום באפליקציה';
-        }
-        // Strip emoji prefixes for cleaner notification text
-        return focuses.slice(0, 3).join('\n');
-    } catch {
-        return 'בדוק את 3 המטרות של היום באפליקציה';
-    }
+        if (typeof generateFocusPoints !== 'function') return 'בדוק את 3 המטרות של היום באפליקציה';
+        const f = generateFocusPoints();
+        if (!f || f.length === 0) return 'בדוק את 3 המטרות של היום באפליקציה';
+        return f.slice(0, 3).join('\n');
+    } catch { return 'בדוק את 3 המטרות של היום באפליקציה'; }
 }
-
-// Send the actual notification
-function sendDailyNotification(isTest = false) {
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
-    
-    const title = isTest ? '🧪 בדיקה - 3 המטרות שלך' : '🎯 3 המטרות שלך להיום';
+function sendTestNotification() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const title = '🧪 בדיקה - 3 המטרות שלך';
     const body = buildGoalsNotificationBody();
-    const tag = 'daily-goals-' + new Date().toDateString();
-    
-    // Prefer SW notification (works better when app is in background)
+    const tag = 'daily-goals-test';
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            type: 'SHOW_NOTIFICATION',
-            title, body, tag
-        });
+        navigator.serviceWorker.controller.postMessage({ type: 'SHOW_NOTIFICATION', title, body, tag });
     } else {
-        // Fallback: direct notification
-        try {
-            new Notification(title, {
-                body,
-                tag,
-                lang: 'he',
-                dir: 'rtl'
-            });
-        } catch (err) {
-            console.warn('[Notif] Direct notification failed:', err);
-        }
-    }
-    
-    if (!isTest) {
-        const settings = getNotifSettings();
-        settings.lastShownDate = new Date().toDateString();
-        saveNotifSettings(settings);
+        try { new Notification(title, { body, tag, lang: 'he', dir: 'rtl' }); } catch {}
     }
 }
 
-// Check every minute if it's time
-function checkNotificationTime() {
-    const settings = getNotifSettings();
-    if (!settings.enabled) return;
-    if (Notification.permission !== 'granted') return;
-    
-    const now = new Date();
-    const today = now.toDateString();
-    
-    // Already sent today?
-    if (settings.lastShownDate === today) return;
-    
-    const h = now.getHours();
-    const m = now.getMinutes();
-    
-    const targetHour = getNotifHour();
-    const targetMinute = getNotifMinute();
-    
-    // Window: targetHour:targetMinute to +5 min (5-minute window for safety)
-    if (h === targetHour && m >= targetMinute && m < targetMinute + 5) {
-        sendDailyNotification(false);
-    }
-}
-
-// Start checking every 60 seconds while app is open
-let notifCheckInterval = null;
-function startNotificationChecker() {
-    if (notifCheckInterval) return;
-    // Check immediately on load
-    checkNotificationTime();
-    // Then every minute
-    notifCheckInterval = setInterval(checkNotificationTime, 60 * 1000);
-}
-
-// Also check when app comes back to foreground
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') {
-        checkNotificationTime();
-    }
-});
-
-// Start checker on load
-window.addEventListener('load', () => {
-    setTimeout(startNotificationChecker, 2000);
-});
-
-// Public API for the button in UI
+/* ---- Public API for the UI ---- */
 window.toggleDailyNotifications = async function() {
-    const settings = getNotifSettings();
-    if (settings.enabled && Notification.permission === 'granted') {
-        disableDailyNotifications();
-        updateNotifButtonUI();
+    const s = getNotifSettings();
+    if (s.enabled && window.Notification && Notification.permission === 'granted') {
+        await disableDailyNotifications();
     } else {
-        const ok = await enableDailyNotifications();
-        if (ok) updateNotifButtonUI();
+        await enableDailyNotifications();
     }
+    updateNotifButtonUI();
 };
 
 window.updateNotifButtonUI = function() {
-    const btn = document.getElementById('notifToggleBtn');
+    const sw = document.getElementById('notifSwitch');
+    const knob = document.getElementById('notifSwitchKnob');
+    const statusLine = document.getElementById('notifStatusLine');
     const timeInput = document.getElementById('notifTimeInput');
-    const timeHint = document.getElementById('notifTimeHint');
-    const settings = getNotifSettings();
-    const isOn = settings.enabled && Notification.permission === 'granted';
-    
-    if (btn) {
-        const timeStr = getNotifTimeStr();
-        btn.textContent = isOn ? `🔔 התראות פעילות · ${timeStr}` : '🔕 הפעל התראות יומיות';
-        btn.style.background = isOn ? 'var(--pistachio-deep)' : 'var(--ink-primary)';
+    const supportHint = document.getElementById('notifSupportHint');
+    const s = getNotifSettings();
+    const granted = window.Notification && Notification.permission === 'granted';
+    const isOn = s.enabled && granted;
+
+    if (sw && knob) {
+        sw.style.background = isOn ? 'var(--pistachio-deep)' : '#d6d3cd';
+        sw.setAttribute('aria-checked', isOn ? 'true' : 'false');
+        knob.style.insetInlineStart = isOn ? '23px' : '3px';
     }
-    
-    // Sync time input with current setting
-    if (timeInput && !timeInput.dataset.userTyping) {
-        timeInput.value = getNotifTimeStr();
+    if (statusLine) {
+        statusLine.textContent = isOn
+            ? '✓ פעיל · תזכורת כל יום בשעה ' + getNotifTimeStr()
+            : 'כבוי · לא נשלחת תזכורת';
+        statusLine.style.color = isOn ? 'var(--pistachio-deep)' : 'var(--ink-tertiary)';
+        statusLine.style.fontWeight = isOn ? '600' : '400';
     }
-    
-    if (timeHint) {
-        timeHint.textContent = isOn ? '✓ פעיל' : '';
+    if (timeInput && !timeInput.dataset.userTyping) timeInput.value = getNotifTimeStr();
+
+    if (supportHint) {
+        if (isIOS() && !isStandalone()) {
+            supportHint.innerHTML = '📲 <b>אייפון:</b> כדי לקבל התראות, התקן קודם למסך הבית (כפתור שיתוף ‹ "הוסף למסך הבית"), ואז פתח מהאייקון.';
+        } else if (!pushConfigReady()) {
+            supportHint.innerHTML = '⚙️ האפליקציה עדיין לא חוברה לשרת ההתראות (ראה מדריך ההקמה).';
+        } else if (window.Notification && Notification.permission === 'denied') {
+            supportHint.innerHTML = '🔕 ההתראות חסומות. אפשר אותן בהגדרות ההתראות של האפליקציה ונסה שוב.';
+        } else if (isOn) {
+            supportHint.innerHTML = '✓ ההתראה תישלח כל יום בשעה שבחרת, גם כשהאפליקציה <b>סגורה</b> (iPhone ו-Android).';
+        } else {
+            supportHint.innerHTML = 'בחר שעה והפעל. ההתראה תגיע כל יום גם כשהאפליקציה סגורה.';
+        }
     }
 };
 
-// Called when user changes the time picker
-window.onNotifTimeChange = function() {
+window.onNotifTimeChange = async function() {
     const timeInput = document.getElementById('notifTimeInput');
     if (!timeInput || !timeInput.value) return;
-    
-    // Parse "HH:MM"
     const [hStr, mStr] = timeInput.value.split(':');
-    const h = parseInt(hStr, 10);
-    const m = parseInt(mStr, 10);
+    const h = parseInt(hStr, 10), m = parseInt(mStr, 10);
     if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
-    
-    // Save to settings
-    const settings = getNotifSettings();
-    settings.hour = h;
-    settings.minute = m;
-    // Reset the "lastShownDate" so the user can test today if they want
-    settings.lastShownDate = null;
-    saveNotifSettings(settings);
-    
+    const s = getNotifSettings();
+    s.hour = h; s.minute = m;
+    saveNotifSettings(s);
     if (typeof haptic === 'function') haptic();
+    // If already enabled, update the stored time on the server
+    if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
+        try { await registerPush(); } catch (e) { console.warn('[Push] time update failed:', e); }
+    }
     showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`);
     updateNotifButtonUI();
 };
+
 
 // Update button on load
 window.addEventListener('load', () => {
     setTimeout(() => {
         if (typeof updateNotifButtonUI === 'function') updateNotifButtonUI();
+        if (typeof updateTodayNavDot === 'function') updateTodayNavDot();
     }, 500);
 });
 
