@@ -9031,15 +9031,13 @@
             </button>
         </div>
 
-        <!-- Time picker: vertical layout, never clipped on narrow screens -->
-        <div style="margin-top: 12px; padding: 12px; background: var(--paper-cool); border-radius: 12px;">
+        <!-- Time picker: auto-saves on change, no separate save button -->
+        <div style="margin-top: 12px; padding: 12px 14px; background: var(--paper-cool); border-radius: 12px;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <label for="notifTimeInput" style="font-size: 14px; color: var(--ink-secondary); font-family: var(--sans); flex-shrink: 0;">שעת ההתראה</label>
-                <input type="time" id="notifTimeInput"
-                       style="width: 120px; max-width: 45%; box-sizing: border-box; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; font-family: inherit; background: white; color: var(--ink-primary); text-align: center;">
+                <label for="notifTimeInput" style="font-size: 15px; color: var(--ink-secondary); font-family: var(--sans); flex-shrink: 0;">שעת התזכורת</label>
+                <input type="time" id="notifTimeInput" dir="ltr" onchange="onNotifTimeChange()"
+                       style="width: 130px; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 17px; font-family: inherit; background: white; color: var(--ink-primary); text-align: center;">
             </div>
-            <button id="notifSaveTimeBtn" onclick="onNotifTimeChange()"
-                    style="margin-top: 10px; width: 100%; box-sizing: border-box; padding: 11px; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-family: var(--sans); font-weight: 600; background: var(--pistachio-deep); color: white;">שמור שעה</button>
         </div>
 
         <!-- Scheduling support status / help -->
@@ -15505,7 +15503,7 @@ window.addEventListener('load', () => {
    GitHub Action reads subscriptions and sends the daily push.
    ============================================================ */
 
-// ---- CONFIG: fill these in after you set up Supabase + VAPID (see SETUP.md) ----
+// ---- CONFIG: fill these in after setting up Supabase + VAPID (see the setup guide) ----
 const PUSH_CONFIG = {
     vapidPublicKey: 'REPLACE_WITH_YOUR_VAPID_PUBLIC_KEY',
     supabaseUrl:    'https://REPLACE.supabase.co',
@@ -15640,7 +15638,7 @@ async function enableDailyNotifications() {
         return false;
     }
     if (!pushConfigReady()) {
-        alert('האפליקציה עדיין לא חוברה לשרת ההתראות.\nהשלם את שלבי ההקמה (ראה SETUP.md).');
+        alert('כמעט שם! 🔔\n\nההתראות בצד הטלפון מוכנות, אבל עדיין צריך לחבר אותן לשרת השליחה (שלב חד-פעמי).\n\nעד שנשלים את זה, השעה שתבחר נשמרת, וברגע שנחבר את השרת ההתראות יתחילו להגיע אוטומטית.');
         return false;
     }
     if (Notification.permission === 'denied') {
