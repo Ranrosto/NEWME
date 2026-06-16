@@ -9035,10 +9035,23 @@
         <!-- Time picker: auto-saves on change, no separate save button -->
         <div style="margin-top: 12px; padding: 12px 14px; background: var(--paper-cool); border-radius: 12px;">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <label for="notifTimeInput" style="font-size: 15px; color: var(--ink-secondary); font-family: var(--sans); flex-shrink: 0;">שעת התזכורת</label>
-                <input type="time" id="notifTimeInput" dir="ltr" onchange="onNotifTimeChange()"
-                       style="width: 130px; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 17px; font-family: inherit; background: white; color: var(--ink-primary); text-align: center;">
-            </div>
+                <label style="font-size: 15px; color: var(--ink-secondary); font-family: var(--sans); flex-shrink: 0;">שעת התזכורת</label>
+                <!-- Custom stepper: never clipped, large tap targets, no native dialog -->
+                <div dir="ltr" style="display: flex; align-items: center; gap: 6px;">
+                    <!-- Hours -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <button onclick="bumpNotifTime('h', 1)" aria-label="שעה למעלה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▲</button>
+                        <div id="notifHourDisplay" style="width: 48px; text-align: center; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-primary); font-family: var(--sans);">00</div>
+                        <button onclick="bumpNotifTime('h', -1)" aria-label="שעה למטה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▼</button>
+                    </div>
+                    <div style="font-size: 24px; font-weight: 700; color: var(--ink-tertiary); padding-bottom: 2px;">:</div>
+                    <!-- Minutes -->
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <button onclick="bumpNotifTime('m', 5)" aria-label="דקות למעלה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▲</button>
+                        <div id="notifMinuteDisplay" style="width: 48px; text-align: center; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-primary); font-family: var(--sans);">00</div>
+                        <button onclick="bumpNotifTime('m', -5)" aria-label="דקות למטה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▼</button>
+                    </div>
+                </div>
         </div>
 
         <!-- Scheduling support status / help -->
@@ -9052,6 +9065,18 @@
             <div style="flex: 1;">
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">השלם ימים שדולגו</div>
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">סקור 14 ימים אחורה · בחר יום והשלם נתונים</div>
+            </div>
+            <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
+        </div>
+    </div>
+
+    <!-- Edit "why" anytime -->
+    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
+        <div onclick="openWhyEditor()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
+            <div style="font-size: 24px;">💭</div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">ה\u201cלמה\u201d שלי</div>
+                <div id="whyMorePreview" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">הוסף משפט שיזכיר לך למה התחלת</div>
             </div>
             <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
         </div>
@@ -10985,6 +11010,12 @@ function renderMoreScreen() {
     renderWeightChart();
     renderHabitStats();
     renderTips();
+
+    // Why preview
+    const whyPrev = document.getElementById('whyMorePreview');
+    if (whyPrev) {
+        whyPrev.textContent = state.why ? state.why : 'הוסף משפט שיזכיר לך למה התחלת';
+    }
 }
 
 function renderWeightChart() {
@@ -11188,23 +11219,41 @@ function fillWhyExample(el) {
 
 function saveWhy() {
     const input = document.getElementById('whySetupInput');
-    const val = input.value.trim();
+    const val = input ? input.value.trim() : '';
     if (!val) {
         showToast('תכתוב משפט קצר');
         return;
     }
-    state.why = val;
-    saveState();
-    document.getElementById('whySetupModal').style.display = 'none';
-    haptic();
+    try {
+        state.why = val;
+        state.whySkipped = false;
+        saveState();
+    } catch (e) { console.warn('[Why] save failed:', e); }
+    const modal = document.getElementById('whySetupModal');
+    if (modal) modal.style.display = 'none';
+    if (typeof haptic === 'function') haptic();
     showToast('נשמר. זה יופיע כשתצטרך אותו 💫');
-    renderWhyCard();
+    if (typeof renderWhyCard === 'function') renderWhyCard();
+    const whyPrev = document.getElementById('whyMorePreview');
+    if (whyPrev) whyPrev.textContent = val;
 }
 
 function skipWhySetup() {
-    state.whySkipped = true;
-    saveState();
-    document.getElementById('whySetupModal').style.display = 'none';
+    try {
+        state.whySkipped = true;
+        saveState();
+    } catch (e) { console.warn('[Why] skip save failed:', e); }
+    const modal = document.getElementById('whySetupModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Open the "why" editor from the More screen, prefilled if one exists
+function openWhyEditor() {
+    const input = document.getElementById('whySetupInput');
+    if (input) input.value = state.why || '';
+    const modal = document.getElementById('whySetupModal');
+    if (modal) modal.style.display = 'flex';
+    if (typeof haptic === 'function') haptic();
 }
 
 function renderWhyCard() {
@@ -15734,7 +15783,6 @@ window.updateNotifButtonUI = function() {
     const sw = document.getElementById('notifSwitch');
     const knob = document.getElementById('notifSwitchKnob');
     const statusLine = document.getElementById('notifStatusLine');
-    const timeInput = document.getElementById('notifTimeInput');
     const supportHint = document.getElementById('notifSupportHint');
     const s = getNotifSettings();
     const granted = window.Notification && Notification.permission === 'granted';
@@ -15746,6 +15794,10 @@ window.updateNotifButtonUI = function() {
     }
     const swRow = document.getElementById('notifSwitchRow');
     if (swRow) swRow.setAttribute('aria-checked', isOn ? 'true' : 'false');
+    const hourEl = document.getElementById('notifHourDisplay');
+    const minEl = document.getElementById('notifMinuteDisplay');
+    if (hourEl) hourEl.textContent = String(getNotifHour()).padStart(2, '0');
+    if (minEl) minEl.textContent = String(getNotifMinute()).padStart(2, '0');
     if (statusLine) {
         statusLine.textContent = isOn
             ? '✓ פעיל · תזכורת כל יום בשעה ' + getNotifTimeStr()
@@ -15770,22 +15822,34 @@ window.updateNotifButtonUI = function() {
     }
 };
 
-window.onNotifTimeChange = async function() {
-    const timeInput = document.getElementById('notifTimeInput');
-    if (!timeInput || !timeInput.value) return;
-    const [hStr, mStr] = timeInput.value.split(':');
-    const h = parseInt(hStr, 10), m = parseInt(mStr, 10);
-    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
+let _notifSyncTimer = null;
+window.bumpNotifTime = function(unit, delta) {
     const s = getNotifSettings();
+    let h = (s.hour !== undefined && s.hour !== null) ? s.hour : NOTIF_HOUR_DEFAULT;
+    let m = (s.minute !== undefined && s.minute !== null) ? s.minute : NOTIF_MINUTE_DEFAULT;
+
+    if (unit === 'h') {
+        h = (h + delta + 24) % 24;
+    } else {
+        // 5-minute steps that roll the hour over cleanly
+        let total = h * 60 + m + delta;
+        total = (total + 24 * 60) % (24 * 60);
+        h = Math.floor(total / 60);
+        m = total % 60;
+    }
     s.hour = h; s.minute = m;
     saveNotifSettings(s);
     if (typeof haptic === 'function') haptic();
-    // If already enabled, update the stored time on the server
-    if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
-        try { await registerPush(); } catch (e) { console.warn('[Push] time update failed:', e); }
-    }
-    showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`);
     updateNotifButtonUI();
+
+    // Debounce the server update so rapid taps result in ONE network call
+    if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
+        clearTimeout(_notifSyncTimer);
+        _notifSyncTimer = setTimeout(async () => {
+            try { await registerPush(); showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`); }
+            catch (e) { console.warn('[Push] time update failed:', e); }
+        }, 900);
+    }
 };
 
 
