@@ -21,7 +21,7 @@ const {
 
 // How many minutes after the target time we are still allowed to send.
 // Covers the gap between 15-minute cron runs plus any GitHub delay.
-const SEND_WINDOW_MINUTES = 60;
+const SEND_WINDOW_MINUTES = 120;
 
 function fail(msg) { console.error('FATAL: ' + msg); process.exit(1); }
 
