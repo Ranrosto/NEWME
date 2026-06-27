@@ -8291,87 +8291,6 @@
             font-style: italic;
         }
 
-        /* ============================================================
-           POLISH PASS v1.5 — feel & quality floor (no color changes)
-           ============================================================ */
-
-        /* Quality floor: respect users who prefer less motion */
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-        }
-
-        /* Visible keyboard focus without affecting touch */
-        :focus-visible {
-            outline: 2px solid var(--lilac-deep);
-            outline-offset: 2px;
-            border-radius: 6px;
-        }
-
-        /* Prevent accidental horizontal pull only; vertical scroll must stay free */
-        html { overscroll-behavior-x: none; }
-
-        /* Snappier taps everywhere: no double-tap zoom delay, no gray flash */
-        button, [onclick], .nav-btn, .habit-btn, .settings-card {
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Tactile press feedback on tappable settings rows */
-        .settings-card div[onclick] {
-            transition: transform 0.12s ease, opacity 0.12s ease;
-        }
-        .settings-card div[onclick]:active {
-            transform: scale(0.985);
-            opacity: 0.8;
-        }
-
-        /* Deeper, more physical press on the three daily habit buttons */
-        .habit-btn:active { transform: scale(0.97); }
-        .habit-btn { transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease; }
-
-        /* Toast clears the home indicator on modern iPhones */
-        .toast { bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
-
-        /* Tab switch: a small spring on the icon that just became active */
-        @keyframes navPop {
-            0%   { transform: scale(1); }
-            40%  { transform: scale(1.16) translateY(-1px); }
-            100% { transform: scale(1) translateY(-1px); }
-        }
-        .nav-btn.active .nav-icon { animation: navPop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        /* "Unfinished day" dot on the Today tab — disappears once all 3 goals are marked */
-        .nav-btn .nav-dot {
-            position: absolute;
-            top: 5px;
-            inset-inline-start: calc(50% + 11px);
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: var(--lilac-deep);
-            box-shadow: 0 0 0 2px rgba(253, 251, 246, 0.9);
-            opacity: 0;
-            transform: scale(0);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            pointer-events: none;
-        }
-        .nav-btn.has-dot .nav-dot {
-            opacity: 1;
-            transform: scale(1);
-            animation: navDotBreathe 2.6s ease-in-out infinite;
-        }
-        @keyframes navDotBreathe {
-            0%, 100% { transform: scale(1); }
-            50%      { transform: scale(1.3); }
-        }
-
-        /* iOS zoom guard: any focused input below 16px makes Safari zoom the page */
-        .api-key-input { font-size: 16px; }
-        .workout-note-input { font-size: 16px; }
     </style>
 </head>
 <body>
@@ -9017,45 +8936,31 @@
     </div>
 
     <!-- Daily Notifications Toggle -->
-    <div class="settings-card" id="notifCard" style="padding: var(--s-4) var(--s-5); margin-top: var(--s-3);">
-        <!-- Header row: the WHOLE row toggles, so the tap target is large and reliable -->
-        <div onclick="toggleDailyNotifications()" role="switch" aria-checked="false" id="notifSwitchRow"
-             style="display: flex; align-items: center; gap: var(--s-3); cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none;">
-            <div style="font-size: 24px; pointer-events: none;">🔔</div>
-            <div style="flex: 1; min-width: 0; pointer-events: none;">
+    <div class="settings-card" style="padding: var(--s-4) var(--s-5); margin-top: var(--s-3);">
+        <div style="display: flex; align-items: flex-start; gap: var(--s-3);">
+            <div style="font-size: 24px; padding-top: 2px;">🔔</div>
+            <div style="flex: 1;">
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית</div>
-                <div id="notifStatusLine" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">כבוי</div>
-            </div>
-            <div id="notifSwitch" aria-hidden="true"
-                 style="position: relative; width: 52px; height: 32px; flex-shrink: 0; border-radius: 16px; background: #d6d3cd; transition: background .25s ease; pointer-events: none;">
-                <span id="notifSwitchKnob" style="position: absolute; top: 3px; inset-inline-start: 3px; width: 26px; height: 26px; border-radius: 50%; background: white; box-shadow: 0 1px 4px rgba(0,0,0,0.25); transition: inset-inline-start .25s ease;"></span>
-            </div>
-        </div>
-
-        <!-- Time picker: auto-saves on change, no separate save button -->
-        <div style="margin-top: 12px; padding: 12px 14px; background: var(--paper-cool); border-radius: 12px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                <label style="font-size: 15px; color: var(--ink-secondary); font-family: var(--sans); flex-shrink: 0;">שעת התזכורת</label>
-                <!-- Custom stepper: never clipped, large tap targets, no native dialog -->
-                <div dir="ltr" style="display: flex; align-items: center; gap: 6px;">
-                    <!-- Hours -->
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                        <button onclick="bumpNotifTime('h', 1)" aria-label="שעה למעלה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▲</button>
-                        <div id="notifHourDisplay" style="width: 48px; text-align: center; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-primary); font-family: var(--sans);">00</div>
-                        <button onclick="bumpNotifTime('h', -1)" aria-label="שעה למטה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▼</button>
-                    </div>
-                    <div style="font-size: 24px; font-weight: 700; color: var(--ink-tertiary); padding-bottom: 2px;">:</div>
-                    <!-- Minutes -->
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                        <button onclick="bumpNotifTime('m', 5)" aria-label="דקות למעלה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▲</button>
-                        <div id="notifMinuteDisplay" style="width: 48px; text-align: center; font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-primary); font-family: var(--sans);">00</div>
-                        <button onclick="bumpNotifTime('m', -5)" aria-label="דקות למטה" style="width: 40px; height: 28px; border: 1px solid var(--border); border-radius: 8px; background: white; font-size: 16px; line-height: 1; cursor: pointer; color: var(--ink-secondary); padding: 0;">▼</button>
-                    </div>
+                <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">תזכורת אוטומטית של 3 המטרות · הכי מומלץ להתקין כאפליקציה קודם</div>
+                
+                <!-- Time picker row -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px; background: var(--paper-cool); border-radius: 10px; flex-wrap: wrap;">
+                    <label for="notifTimeInput" style="font-size: 13px; color: var(--ink-secondary); font-family: var(--sans);">שעה:</label>
+                    <input type="time" id="notifTimeInput" onchange="onNotifTimeChange()"
+                           style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: white; color: var(--ink-primary);">
+                    <button id="notifSaveTimeBtn" onclick="onNotifTimeChange()"
+                            style="padding: 7px 16px; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: var(--sans); font-weight: 600; background: var(--pistachio-deep); color: white; white-space: nowrap;">שמור שעה</button>
+                    <span style="font-size: 11px; color: var(--ink-tertiary); margin-inline-start: auto;" id="notifTimeHint"></span>
                 </div>
-        </div>
 
-        <!-- Scheduling support status / help -->
-        <div id="notifSupportHint" style="font-size: 12px; color: var(--ink-tertiary); margin-top: 10px; line-height: 1.55;"></div>
+                <!-- Enable/disable button -->
+                <button id="notifToggleBtn" onclick="toggleDailyNotifications()"
+                        style="margin-top: 10px; background: var(--ink-primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; font-family: var(--sans); font-weight: 600; width: 100%;">🔕 הפעל התראות יומיות</button>
+
+                <!-- Scheduling support status / help -->
+                <div id="notifSupportHint" style="font-size: 12px; color: var(--ink-tertiary); margin-top: 8px; line-height: 1.55;"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Catch-Up: Fill missed days -->
@@ -9065,18 +8970,6 @@
             <div style="flex: 1;">
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">השלם ימים שדולגו</div>
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">סקור 14 ימים אחורה · בחר יום והשלם נתונים</div>
-            </div>
-            <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
-        </div>
-    </div>
-
-    <!-- Edit "why" anytime -->
-    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
-        <div onclick="openWhyEditor()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
-            <div style="font-size: 24px;">💭</div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">ה\u201cלמה\u201d שלי</div>
-                <div id="whyMorePreview" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">הוסף משפט שיזכיר לך למה התחלת</div>
             </div>
             <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
         </div>
@@ -9214,7 +9107,7 @@
         <div class="reality-cal-row">
             <div class="reality-cal-label">אומדן קלוריות (גס):</div>
             <input type="number" class="reality-cal-input" id="realityCalInput" 
-                   inputmode="numeric" placeholder="0" min="0" max="3000">
+                   placeholder="0" min="0" max="3000">
         </div>
 
         <div class="reality-quick-pills">
@@ -9380,7 +9273,6 @@
 <!-- ============ BOTTOM NAV ============ -->
 <nav class="bottom-nav">
     <button class="nav-btn active" data-screen="screen-today">
-        <span class="nav-dot"></span>
         <span class="nav-icon"><svg viewBox="0 0 32 32" fill="none">
     <circle cx="16" cy="16" r="13.5" fill="#f0f7ed" stroke="#A9D39E" stroke-width="1"/>
     <path d="M 9.5 16.2 Q 11 17.2 13.5 19.5 Q 15.5 21.5 22.5 11.5" 
@@ -10211,11 +10103,8 @@ function showToast(msg, variant = '') {
     toastTimeout = setTimeout(() => toast.classList.remove('show'), 2400);
 }
 
-function haptic(kind) {
-    if (!('vibrate' in navigator)) return;
-    if (kind === 'success')      navigator.vibrate([12, 50, 18]);          // one goal done
-    else if (kind === 'big')     navigator.vibrate([15, 60, 25, 60, 35]);  // all 3 goals done
-    else                         navigator.vibrate(10);                     // regular tap
+function haptic() {
+    if ('vibrate' in navigator) navigator.vibrate(10);
 }
 
 // ==================== MASTHEAD (time-based greeting) ====================
@@ -10645,34 +10534,17 @@ function toggleHabit(habitId, btnEl) {
             // Variable celebration message
             const celebration = getCelebration(newStreak);
             showToast(celebration);
-            haptic('big');
             
             // Big burst animation at center
             burstParticles(window.innerWidth / 2, window.innerHeight / 2);
         }
     } else if (state.days[viewingDayNum]?.[habitId] === true) {
-        haptic('success');
         // Small burst on single V mark
         if (btnEl) {
             const rect = btnEl.getBoundingClientRect();
             burstParticles(rect.left + rect.width - 30, rect.top + rect.height / 2);
         }
     }
-    updateTodayNavDot();
-}
-
-// "Unfinished day" dot on the Today tab: visible until all 3 goals are marked
-function updateTodayNavDot() {
-    const btn = document.querySelector('.nav-btn[data-screen="screen-today"]');
-    if (!btn) return;
-    const today = getCurrentDayNum();
-    if (typeof getDayType === 'function' && getDayType(today) === 'off') {
-        btn.classList.remove('has-dot');
-        return;
-    }
-    const d = state.days[today] || {};
-    const addressed = HABITS.every(h => d[h.id] === true || d[h.id] === false);
-    btn.classList.toggle('has-dot', !addressed);
 }
 
 // ==================== WEEK STRIP ====================
@@ -11010,12 +10882,6 @@ function renderMoreScreen() {
     renderWeightChart();
     renderHabitStats();
     renderTips();
-
-    // Why preview
-    const whyPrev = document.getElementById('whyMorePreview');
-    if (whyPrev) {
-        whyPrev.textContent = state.why ? state.why : 'הוסף משפט שיזכיר לך למה התחלת';
-    }
 }
 
 function renderWeightChart() {
@@ -11219,41 +11085,23 @@ function fillWhyExample(el) {
 
 function saveWhy() {
     const input = document.getElementById('whySetupInput');
-    const val = input ? input.value.trim() : '';
+    const val = input.value.trim();
     if (!val) {
         showToast('תכתוב משפט קצר');
         return;
     }
-    try {
-        state.why = val;
-        state.whySkipped = false;
-        saveState();
-    } catch (e) { console.warn('[Why] save failed:', e); }
-    const modal = document.getElementById('whySetupModal');
-    if (modal) modal.style.display = 'none';
-    if (typeof haptic === 'function') haptic();
+    state.why = val;
+    saveState();
+    document.getElementById('whySetupModal').style.display = 'none';
+    haptic();
     showToast('נשמר. זה יופיע כשתצטרך אותו 💫');
-    if (typeof renderWhyCard === 'function') renderWhyCard();
-    const whyPrev = document.getElementById('whyMorePreview');
-    if (whyPrev) whyPrev.textContent = val;
+    renderWhyCard();
 }
 
 function skipWhySetup() {
-    try {
-        state.whySkipped = true;
-        saveState();
-    } catch (e) { console.warn('[Why] skip save failed:', e); }
-    const modal = document.getElementById('whySetupModal');
-    if (modal) modal.style.display = 'none';
-}
-
-// Open the "why" editor from the More screen, prefilled if one exists
-function openWhyEditor() {
-    const input = document.getElementById('whySetupInput');
-    if (input) input.value = state.why || '';
-    const modal = document.getElementById('whySetupModal');
-    if (modal) modal.style.display = 'flex';
-    if (typeof haptic === 'function') haptic();
+    state.whySkipped = true;
+    saveState();
+    document.getElementById('whySetupModal').style.display = 'none';
 }
 
 function renderWhyCard() {
@@ -11685,7 +11533,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
         }
         if (btn.dataset.screen === 'screen-more') renderMoreScreen();
         window.scrollTo(0, 0);
-        updateTodayNavDot();
     });
 });
 
@@ -15553,7 +15400,7 @@ window.addEventListener('load', () => {
    GitHub Action reads subscriptions and sends the daily push.
    ============================================================ */
 
-// ---- CONFIG: fill these in after setting up Supabase + VAPID (see the setup guide) ----
+// ---- CONFIG: fill these in after you set up Supabase + VAPID (see SETUP.md) ----
 const PUSH_CONFIG = {
     vapidPublicKey: 'BBQcWsgw2XqpOah3NJnoeA51lcGNrzHEaK4tB_jxNODzp70iPyyOFWPtsebsxoDFu8h5viN6IMFs6-W0kvFPyTU',
     supabaseUrl:    'https://sigsjmjhhcplwyebfphq.supabase.co',
@@ -15688,7 +15535,7 @@ async function enableDailyNotifications() {
         return false;
     }
     if (!pushConfigReady()) {
-        alert('כמעט שם! 🔔\n\nההתראות בצד הטלפון מוכנות, אבל עדיין צריך לחבר אותן לשרת השליחה (שלב חד-פעמי).\n\nעד שנשלים את זה, השעה שתבחר נשמרת, וברגע שנחבר את השרת ההתראות יתחילו להגיע אוטומטית.');
+        alert('האפליקציה עדיין לא חוברה לשרת ההתראות.\nהשלם את שלבי ההקמה (ראה SETUP.md).');
         return false;
     }
     if (Notification.permission === 'denied') {
@@ -15763,49 +15610,31 @@ function sendTestNotification() {
 
 /* ---- Public API for the UI ---- */
 window.toggleDailyNotifications = async function() {
-    try {
-        if (typeof haptic === 'function') haptic();
-        const s = getNotifSettings();
-        if (s.enabled && window.Notification && Notification.permission === 'granted') {
-            await disableDailyNotifications();
-        } else {
-            await enableDailyNotifications();
-        }
+    const s = getNotifSettings();
+    if (s.enabled && window.Notification && Notification.permission === 'granted') {
+        await disableDailyNotifications();
         updateNotifButtonUI();
-    } catch (err) {
-        // Never fail silently: show what went wrong so we can fix it
-        try { alert('שגיאה בהפעלת ההתראות:\n' + (err && err.message ? err.message : err)); } catch {}
-        console.error('[Notif] toggle failed:', err);
+    } else {
+        const ok = await enableDailyNotifications();
+        if (ok) updateNotifButtonUI();
     }
 };
 
 window.updateNotifButtonUI = function() {
-    const sw = document.getElementById('notifSwitch');
-    const knob = document.getElementById('notifSwitchKnob');
-    const statusLine = document.getElementById('notifStatusLine');
+    const btn = document.getElementById('notifToggleBtn');
+    const timeInput = document.getElementById('notifTimeInput');
+    const timeHint = document.getElementById('notifTimeHint');
     const supportHint = document.getElementById('notifSupportHint');
     const s = getNotifSettings();
     const granted = window.Notification && Notification.permission === 'granted';
     const isOn = s.enabled && granted;
 
-    if (sw && knob) {
-        sw.style.background = isOn ? 'var(--pistachio-deep)' : '#d6d3cd';
-        knob.style.insetInlineStart = isOn ? '23px' : '3px';
-    }
-    const swRow = document.getElementById('notifSwitchRow');
-    if (swRow) swRow.setAttribute('aria-checked', isOn ? 'true' : 'false');
-    const hourEl = document.getElementById('notifHourDisplay');
-    const minEl = document.getElementById('notifMinuteDisplay');
-    if (hourEl) hourEl.textContent = String(getNotifHour()).padStart(2, '0');
-    if (minEl) minEl.textContent = String(getNotifMinute()).padStart(2, '0');
-    if (statusLine) {
-        statusLine.textContent = isOn
-            ? '✓ פעיל · תזכורת כל יום בשעה ' + getNotifTimeStr()
-            : 'כבוי · לא נשלחת תזכורת';
-        statusLine.style.color = isOn ? 'var(--pistachio-deep)' : 'var(--ink-tertiary)';
-        statusLine.style.fontWeight = isOn ? '600' : '400';
+    if (btn) {
+        btn.textContent = isOn ? `🔔 התראות פעילות · ${getNotifTimeStr()}` : '🔕 הפעל התראות יומיות';
+        btn.style.background = isOn ? 'var(--pistachio-deep)' : 'var(--ink-primary)';
     }
     if (timeInput && !timeInput.dataset.userTyping) timeInput.value = getNotifTimeStr();
+    if (timeHint) timeHint.textContent = isOn ? '✓ פעיל' : '';
 
     if (supportHint) {
         if (isIOS() && !isStandalone()) {
@@ -15822,34 +15651,22 @@ window.updateNotifButtonUI = function() {
     }
 };
 
-let _notifSyncTimer = null;
-window.bumpNotifTime = function(unit, delta) {
+window.onNotifTimeChange = async function() {
+    const timeInput = document.getElementById('notifTimeInput');
+    if (!timeInput || !timeInput.value) return;
+    const [hStr, mStr] = timeInput.value.split(':');
+    const h = parseInt(hStr, 10), m = parseInt(mStr, 10);
+    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
     const s = getNotifSettings();
-    let h = (s.hour !== undefined && s.hour !== null) ? s.hour : NOTIF_HOUR_DEFAULT;
-    let m = (s.minute !== undefined && s.minute !== null) ? s.minute : NOTIF_MINUTE_DEFAULT;
-
-    if (unit === 'h') {
-        h = (h + delta + 24) % 24;
-    } else {
-        // 5-minute steps that roll the hour over cleanly
-        let total = h * 60 + m + delta;
-        total = (total + 24 * 60) % (24 * 60);
-        h = Math.floor(total / 60);
-        m = total % 60;
-    }
     s.hour = h; s.minute = m;
     saveNotifSettings(s);
     if (typeof haptic === 'function') haptic();
-    updateNotifButtonUI();
-
-    // Debounce the server update so rapid taps result in ONE network call
+    // If already enabled, update the stored time on the server
     if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
-        clearTimeout(_notifSyncTimer);
-        _notifSyncTimer = setTimeout(async () => {
-            try { await registerPush(); showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`); }
-            catch (e) { console.warn('[Push] time update failed:', e); }
-        }, 900);
+        try { await registerPush(); } catch (e) { console.warn('[Push] time update failed:', e); }
     }
+    showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`);
+    updateNotifButtonUI();
 };
 
 
@@ -15857,7 +15674,6 @@ window.bumpNotifTime = function(unit, delta) {
 window.addEventListener('load', () => {
     setTimeout(() => {
         if (typeof updateNotifButtonUI === 'function') updateNotifButtonUI();
-        if (typeof updateTodayNavDot === 'function') updateTodayNavDot();
     }, 500);
 });
 
