@@ -8943,14 +8943,23 @@
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית</div>
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">תזכורת אוטומטית של 3 המטרות · הכי מומלץ להתקין כאפליקציה קודם</div>
                 
-                <!-- Time picker row -->
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 10px; background: var(--paper-cool); border-radius: 10px; flex-wrap: wrap;">
-                    <label for="notifTimeInput" style="font-size: 13px; color: var(--ink-secondary); font-family: var(--sans);">שעה:</label>
-                    <input type="time" id="notifTimeInput" onchange="onNotifTimeChange()"
-                           style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: white; color: var(--ink-primary);">
-                    <button id="notifSaveTimeBtn" onclick="onNotifTimeChange()"
-                            style="padding: 7px 16px; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: var(--sans); font-weight: 600; background: var(--pistachio-deep); color: white; white-space: nowrap;">שמור שעה</button>
-                    <span style="font-size: 11px; color: var(--ink-tertiary); margin-inline-start: auto;" id="notifTimeHint"></span>
+                <!-- Time picker: custom stepper (no native dialog, never clipped) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; padding: 12px; background: var(--paper-cool); border-radius: 10px;">
+                    <span style="font-size: 14px; color: var(--ink-secondary); font-family: var(--sans);">שעת התזכורת</span>
+                    <div dir="ltr" style="display: flex; align-items: center; gap: 6px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                            <button onclick="bumpNotifTime('h',1)" aria-label="שעה +" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▲</button>
+                            <div id="notifHourDisplay" style="width:46px;text-align:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-primary);">15</div>
+                            <button onclick="bumpNotifTime('h',-1)" aria-label="שעה -" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▼</button>
+                        </div>
+                        <div style="font-size:22px;font-weight:700;color:var(--ink-tertiary);">:</div>
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                            <button onclick="bumpNotifTime('m',5)" aria-label="דקות +" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▲</button>
+                            <div id="notifMinuteDisplay" style="width:46px;text-align:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-primary);">30</div>
+                            <button onclick="bumpNotifTime('m',-5)" aria-label="דקות -" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▼</button>
+                        </div>
+                    </div>
+                    <span style="font-size: 11px; color: var(--ink-tertiary);" id="notifTimeHint"></span>
                 </div>
 
                 <!-- Enable/disable button -->
@@ -15622,7 +15631,6 @@ window.toggleDailyNotifications = async function() {
 
 window.updateNotifButtonUI = function() {
     const btn = document.getElementById('notifToggleBtn');
-    const timeInput = document.getElementById('notifTimeInput');
     const timeHint = document.getElementById('notifTimeHint');
     const supportHint = document.getElementById('notifSupportHint');
     const s = getNotifSettings();
@@ -15633,7 +15641,10 @@ window.updateNotifButtonUI = function() {
         btn.textContent = isOn ? `🔔 התראות פעילות · ${getNotifTimeStr()}` : '🔕 הפעל התראות יומיות';
         btn.style.background = isOn ? 'var(--pistachio-deep)' : 'var(--ink-primary)';
     }
-    if (timeInput && !timeInput.dataset.userTyping) timeInput.value = getNotifTimeStr();
+    const hourEl = document.getElementById('notifHourDisplay');
+    const minEl = document.getElementById('notifMinuteDisplay');
+    if (hourEl) hourEl.textContent = String(getNotifHour()).padStart(2, '0');
+    if (minEl) minEl.textContent = String(getNotifMinute()).padStart(2, '0');
     if (timeHint) timeHint.textContent = isOn ? '✓ פעיל' : '';
 
     if (supportHint) {
@@ -15651,22 +15662,29 @@ window.updateNotifButtonUI = function() {
     }
 };
 
-window.onNotifTimeChange = async function() {
-    const timeInput = document.getElementById('notifTimeInput');
-    if (!timeInput || !timeInput.value) return;
-    const [hStr, mStr] = timeInput.value.split(':');
-    const h = parseInt(hStr, 10), m = parseInt(mStr, 10);
-    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
+let _notifSyncTimer = null;
+window.bumpNotifTime = function(unit, delta) {
     const s = getNotifSettings();
+    let h = (s.hour !== undefined && s.hour !== null) ? s.hour : NOTIF_HOUR_DEFAULT;
+    let m = (s.minute !== undefined && s.minute !== null) ? s.minute : NOTIF_MINUTE_DEFAULT;
+    if (unit === 'h') {
+        h = (h + delta + 24) % 24;
+    } else {
+        let total = h * 60 + m + delta;
+        total = (total + 24 * 60) % (24 * 60);
+        h = Math.floor(total / 60); m = total % 60;
+    }
     s.hour = h; s.minute = m;
     saveNotifSettings(s);
     if (typeof haptic === 'function') haptic();
-    // If already enabled, update the stored time on the server
-    if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
-        try { await registerPush(); } catch (e) { console.warn('[Push] time update failed:', e); }
-    }
-    showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`);
     updateNotifButtonUI();
+    if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
+        clearTimeout(_notifSyncTimer);
+        _notifSyncTimer = setTimeout(async () => {
+            try { await registerPush(); showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`); }
+            catch (e) { console.warn('[Push] time update failed:', e); }
+        }, 900);
+    }
 };
 
 
