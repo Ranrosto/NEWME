@@ -3273,6 +3273,7 @@
         }
         
         .type-btn:active { transform: scale(0.97); }
+        .type-btn * { pointer-events: none; }
         
         .type-btn.selected {
             background: var(--lilac-wash);
@@ -9235,7 +9236,7 @@
         <div class="workout-section">
             <div class="workout-section-label">סוג אימון</div>
             <div class="type-options" id="typeOptions">
-                <button class="type-btn" data-type="jumprope" style="background: var(--pistachio-wash); border: 2px solid var(--pistachio-deep);">
+                <button class="type-btn" data-type="jumprope">
                     <span style="font-size: 24px;">🪢</span>
                     <span>קפיצת חבל</span>
                 </button>
@@ -9294,7 +9295,7 @@
         <div class="modal-sticky-footer">
             <div class="modal-actions">
                 <button class="btn-modal-secondary" onclick="closeWorkoutModal()">סגור</button>
-                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" disabled style="padding: 12px;">שמור</button>
+                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" style="padding: 12px;">שמור</button>
             </div>
         </div>
     </div>
@@ -11907,8 +11908,10 @@ function openWorkoutModal() {
 function updateSaveBtn() {
     const btn = document.getElementById('saveWorkoutBtn');
     if (!btn) return;
-    // Require duration + type (mood optional)
-    btn.disabled = !(workoutDraft.duration && workoutDraft.type);
+    // Button stays clickable; saveWorkout() validates and guides the user.
+    // Dim slightly until duration+type chosen, but never block the tap.
+    const ready = !!(workoutDraft.duration && workoutDraft.type);
+    btn.style.opacity = ready ? '1' : '0.6';
 }
 
 /* ============================================================
