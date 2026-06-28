@@ -1798,6 +1798,7 @@
         }
         
         .commitment-option:active { transform: scale(0.98); }
+        .commitment-option * { pointer-events: none; }
         
         .commitment-option.selected {
             background: var(--pistachio-wash);
@@ -1874,6 +1875,9 @@
             flex-direction: column;
             max-height: 90vh;
             overflow: hidden;
+        }
+        .modal.modal-with-sticky-footer .modal-scroll-area {
+            padding-bottom: var(--s-6);
         }
         .modal-scroll-area {
             flex: 1;
@@ -8311,7 +8315,12 @@
                    inputmode="decimal" step="0.1" value="82" min="40" max="200">
             <span class="modal-input-unit">ק״ג</span>
         </div>
-        <div class="modal-note">היעד קבוע: 76 ק״ג</div>
+        <div class="modal-input-label" style="margin-top: 12px;">משקל יעד</div>
+        <div class="modal-input-row">
+            <input type="number" class="modal-input" id="targetWeightInput" 
+                   inputmode="decimal" step="0.1" value="76" min="30" max="200">
+            <span class="modal-input-unit">ק״ג</span>
+        </div>
         <button class="btn-primary" onclick="startJourney()">התחלתי</button>
     </div>
 </div>
@@ -8381,7 +8390,7 @@
         </div>
         <div class="modal-actions">
             <button class="btn-modal-secondary" onclick="skipCommitment()">דלג</button>
-            <button class="btn-primary" onclick="saveCommitment()" id="saveCommitBtn" disabled style="padding: 12px;">שמור</button>
+            <button class="btn-primary" onclick="saveCommitment()" id="saveCommitBtn" style="padding: 12px;">שמור</button>
         </div>
     </div>
 </div>
@@ -8984,6 +8993,18 @@
         </div>
     </div>
 
+    <!-- Edit "why" anytime -->
+    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
+        <div onclick="openWhyEditor()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
+            <div style="font-size: 24px;">💭</div>
+            <div style="flex: 1; min-width: 0;">
+                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">ה"למה" שלי</div>
+                <div id="whyMorePreview" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">הוסף משפט שיזכיר לך למה התחלת</div>
+            </div>
+            <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
+        </div>
+    </div>
+
     <!-- Mirror - Weekly Review -->
     <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
         <div onclick="openMirror()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
@@ -9335,6 +9356,10 @@
 <script>
 // ==================== CONFIG ====================
 const GOAL_WEIGHT = 76;
+function goalWeight() {
+    return (state && state.goal && typeof state.goal.targetWeight === 'number')
+        ? state.goal.targetWeight : GOAL_WEIGHT;
+}
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const HABITS = [
@@ -10016,9 +10041,16 @@ function startJourney() {
         showToast('הכנס משקל תקין');
         return;
     }
+    const targetWeight = parseFloat(document.getElementById('targetWeightInput').value);
+    if (isNaN(targetWeight) || targetWeight < 30 || targetWeight > 200) {
+        showToast('הכנס משקל יעד תקין');
+        return;
+    }
     state.started = true;
     state.startTimestamp = Date.now();
     state.startWeight = startWeight;
+    if (!state.goal) state.goal = {};
+    state.goal.targetWeight = targetWeight;
     saveState();
     document.getElementById('startModal').style.display = 'none';
     viewingDayNum = 1;
@@ -10065,7 +10097,10 @@ function selectCommitment(value) {
 }
 
 function saveCommitment() {
-    if (!selectedCommitment) return;
+    if (!selectedCommitment) {
+        showToast('בחר מחויבות אחת');
+        return;
+    }
     if (!state.days[viewingDayNum]) state.days[viewingDayNum] = {};
     state.days[viewingDayNum].commitment = selectedCommitment;
     saveState();
@@ -10258,7 +10293,7 @@ function renderHero() {
     const startWeight = state.startWeight || 82;
     const current = getCurrentWeight();
     const totalDelta = startWeight - current;
-    const toGoal = Math.max(0, current - GOAL_WEIGHT);
+    const toGoal = Math.max(0, current - goalWeight());
 
     const currEl = document.getElementById('currentWeight');
     const lossEl = document.getElementById('totalLoss');
@@ -10867,6 +10902,8 @@ document.getElementById('saveWeightBtn').addEventListener('click', () => {
 function renderMoreScreen() {
     renderWeeklyWins();
     renderMovementBadges();
+    const whyPrev = document.getElementById('whyMorePreview');
+    if (whyPrev) whyPrev.textContent = state.why ? state.why : 'הוסף משפט שיזכיר לך למה התחלת';
     const startWeight = state.startWeight || 82;
     const weeks = Object.keys(state.weights).map(Number).sort((a, b) => a - b);
     let avg = 0;
@@ -10905,7 +10942,7 @@ function renderWeightChart() {
 
     const points = [{ x: 0, y: startWeight }, ...weeks.map(w => ({ x: w, y: state.weights[w] }))];
     const maxX = Math.max(15, ...points.map(p => p.x));
-    const allY = [...points.map(p => p.y), GOAL_WEIGHT, startWeight];
+    const allY = [...points.map(p => p.y), goalWeight(), startWeight];
     const minY = Math.min(...allY) - 0.5;
     const maxY = Math.max(...allY) + 0.5;
 
@@ -10915,7 +10952,7 @@ function renderWeightChart() {
 
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(p.x)} ${scaleY(p.y)}`).join(' ');
     const areaData = pathData + ` L ${scaleX(points[points.length - 1].x)} ${H - P} L ${scaleX(0)} ${H - P} Z`;
-    const goalY = scaleY(GOAL_WEIGHT);
+    const goalY = scaleY(goalWeight());
 
     container.innerHTML = `
         <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
@@ -11094,23 +11131,37 @@ function fillWhyExample(el) {
 
 function saveWhy() {
     const input = document.getElementById('whySetupInput');
-    const val = input.value.trim();
+    const val = input ? input.value.trim() : '';
     if (!val) {
         showToast('תכתוב משפט קצר');
         return;
     }
     state.why = val;
+    state.whySkipped = false;
     saveState();
     document.getElementById('whySetupModal').style.display = 'none';
-    haptic();
+    if (typeof haptic === 'function') haptic();
     showToast('נשמר. זה יופיע כשתצטרך אותו 💫');
-    renderWhyCard();
+    if (typeof renderWhyCard === 'function') renderWhyCard();
+    const whyPrev = document.getElementById('whyMorePreview');
+    if (whyPrev) whyPrev.textContent = val;
 }
 
 function skipWhySetup() {
-    state.whySkipped = true;
-    saveState();
-    document.getElementById('whySetupModal').style.display = 'none';
+    try {
+        state.whySkipped = true;
+        saveState();
+    } catch (e) { console.warn('[Why] skip failed:', e); }
+    const modal = document.getElementById('whySetupModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function openWhyEditor() {
+    const input = document.getElementById('whySetupInput');
+    if (input) input.value = state.why || '';
+    const modal = document.getElementById('whySetupModal');
+    if (modal) modal.style.display = 'flex';
+    if (typeof haptic === 'function') haptic();
 }
 
 function renderWhyCard() {
@@ -11224,7 +11275,7 @@ function renderMomentumCard() {
     const startWeight = state.startWeight || 82;
     const currentWeight = state.weights[weeks[weeks.length - 1]];
     const totalLoss = startWeight - currentWeight;
-    const totalNeeded = startWeight - GOAL_WEIGHT;
+    const totalNeeded = startWeight - goalWeight();
     const progressPct = Math.max(0, Math.min(100, (totalLoss / totalNeeded) * 100));
     
     // Calculate rate
@@ -11232,7 +11283,7 @@ function renderMomentumCard() {
     const avgPerWeek = weekSpan > 0 ? totalLoss / weekSpan : 0;
     
     // Project
-    const remaining = currentWeight - GOAL_WEIGHT;
+    const remaining = currentWeight - goalWeight();
     let forecast = '';
     if (remaining <= 0) {
         forecast = 'הגעת ליעד! 🎉';
@@ -12997,7 +13048,7 @@ function analyzeTrend() {
     const startWeight = state.startWeight || 82;
     const lastWeight = state.weights[weeks[weeks.length - 1]];
     const totalLost = startWeight - lastWeight;
-    const goalLost = startWeight - GOAL_WEIGHT;
+    const goalLost = startWeight - goalWeight();
     const pct = Math.round((totalLost / goalLost) * 100);
     
     if (totalLost > 0 && pct >= 10) {
@@ -13063,7 +13114,7 @@ function renderForecast() {
     
     const startWeight = state.startWeight || 82;
     const lastWeight = state.weights[weeks[weeks.length - 1]];
-    const remaining = lastWeight - GOAL_WEIGHT;
+    const remaining = lastWeight - goalWeight();
     
     if (remaining <= 0.2) {
         container.innerHTML = `
@@ -13101,7 +13152,7 @@ function renderForecast() {
     container.innerHTML = `
         <div class="forecast-banner">
             <div class="forecast-label">חיזוי</div>
-            <div class="forecast-text">בקצב הזה תגיע ל-${GOAL_WEIGHT} ק״ג ב<span class="date">${dateStr}</span>. <strong>${weeksToGoal}</strong> שבועות מהיום.</div>
+            <div class="forecast-text">בקצב הזה תגיע ל-${goalWeight()} ק״ג ב<span class="date">${dateStr}</span>. <strong>${weeksToGoal}</strong> שבועות מהיום.</div>
         </div>
     `;
 }
