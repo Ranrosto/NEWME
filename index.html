@@ -1680,7 +1680,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 500;
+            z-index: 9500;
             padding: 20px;
             animation: fadeIn 0.3s ease-out;
         }
@@ -1877,7 +1877,7 @@
             overflow: hidden;
         }
         .modal.modal-with-sticky-footer .modal-scroll-area {
-            padding-bottom: var(--s-6);
+            padding-bottom: 48px;
         }
         .modal-scroll-area {
             flex: 1;
@@ -15010,7 +15010,10 @@ function renderCatchUp() {
 }
 
 function showCatchUp() {
-    // (Daily Anchor was removed - no conflict check needed)
+    // Never open on top of another modal — it would cover it and block all taps.
+    const anyModalOpen = Array.from(document.querySelectorAll('.modal-overlay'))
+        .some(m => m.style.display && m.style.display !== 'none');
+    if (anyModalOpen) return;
     renderCatchUp();
     document.getElementById('catchupOverlay').classList.add('show');
     document.body.style.overflow = 'hidden';
