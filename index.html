@@ -11146,6 +11146,7 @@ function saveWhy() {
     if (typeof renderWhyCard === 'function') renderWhyCard();
     const whyPrev = document.getElementById('whyMorePreview');
     if (whyPrev) whyPrev.textContent = val;
+    if (typeof goToTodayTop === 'function') goToTodayTop();
 }
 
 function skipWhySetup() {
@@ -11155,6 +11156,17 @@ function skipWhySetup() {
     } catch (e) { console.warn('[Why] skip failed:', e); }
     const modal = document.getElementById('whySetupModal');
     if (modal) modal.style.display = 'none';
+    if (typeof haptic === 'function') haptic();
+    // Return to the top of the main screen, not wherever the page was scrolled
+    if (typeof goToTodayTop === 'function') goToTodayTop();
+}
+
+// Switch to the Today tab and scroll to the very top
+function goToTodayTop() {
+    const todayBtn = document.querySelector('.nav-btn[data-screen="screen-today"]');
+    if (todayBtn) todayBtn.click();
+    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
+    setTimeout(() => window.scrollTo({ top: 0 }), 60);
 }
 
 function openWhyEditor() {
