@@ -1,18 +1,17 @@
 /* ============================================================
    Service Worker - המעקב שלי
-   גרסה: 1.3.0
+   גרסה: 1.4.0
    תפקיד: caching בסיסי + הצגת התראות יומיות
    
-   שינויים בגרסה 1.3.0:
-   - הסרת splash.mp4 מה-cache (הפיצ'ר הוסר לטובת פתיחה מהירה)
-   - אייקונים חדשים (לוגו Health Mate החדש)
-   - bumped cache name לאלץ עדכון מלא אצל המשתמשים
+   שינויים בגרסה 1.4.0:
+   - bump ל-v3-1: פיצ'רים חדשים - חזרה חמה אחרי היעדרות,
+     כפתור "רגע קשה" (SOS), ושליחת יומן אכילה במייל
    ============================================================ */
 
 // Cache name is auto-unique PER CLONE (based on this app's folder path), so
 // several participant apps hosted on the same domain never overwrite or
 // delete each other's cached files. Bump CACHE_VERSION to force an update.
-const CACHE_VERSION = 'v3-0';
+const CACHE_VERSION = 'v3-2';
 const CACHE_PREFIX = 'nutrition-tracker-' + self.location.pathname.replace(/sw\.js$/, '');
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 const CORE_FILES = [
