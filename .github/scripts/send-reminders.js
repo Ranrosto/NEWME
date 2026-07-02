@@ -20,8 +20,13 @@ const {
 } = process.env;
 
 // How many minutes after the target time we are still allowed to send.
-// Covers the gap between 15-minute cron runs plus any GitHub delay.
-const SEND_WINDOW_MINUTES = 120;
+// THIS is the knob that controls punctuality:
+//   - Too big (e.g. 120) => a delayed run can fire up to 2h late.
+//   - Too small (e.g. 20) => if GitHub skips runs for a while, that
+//     day's reminder is lost entirely.
+// 60 is the sweet spot with a 15-min cron: normally arrives within
+// ~5-20 min of the chosen time, and survives one badly delayed run.
+const SEND_WINDOW_MINUTES = 60;
 
 function fail(msg) { console.error('FATAL: ' + msg); process.exit(1); }
 
@@ -72,11 +77,20 @@ async function main() {
     const due = now.minutesOfDay >= target && now.minutesOfDay < target + SEND_WINDOW_MINUTES;
     const alreadySent = sub.last_sent_date === now.dateStr;
 
+    // Clear per-subscription log line - makes "is it working?" answerable
+    // straight from the Actions tab, no guessing.
+    const fmtMin = (m) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+    const who = sub.endpoint.slice(-12);
+    const status = alreadySent ? 'already sent today' : (due ? 'DUE -> sending' : 'not due');
+    console.log(`[...${who}] tz=${tz} local=${fmtMin(now.minutesOfDay)} target=${fmtMin(target)} => ${status}`);
+
     if (!due || alreadySent) { skipped++; continue; }
 
+    // Custom message per user: if the app saved notif_title / notif_body
+    // columns in Supabase, use them; otherwise fall back to the default.
     const payload = JSON.stringify({
-      title: '🎯 3 המטרות שלך להיום',
-      body: 'פתח את האפליקציה ובדוק את המטרות של היום 💪',
+      title: sub.notif_title || '🎯 3 המטרות שלך להיום',
+      body: sub.notif_body || 'פתח את האפליקציה ובדוק את המטרות של היום 💪',
       tag: 'daily-goals-' + now.dateStr,
     });
 
