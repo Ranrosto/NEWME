@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>שאלון התאמה אישית · המעקב שלי</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pistachio:#A9D39E; --pistachio-deep:#6b9c5e; --pistachio-light:#d9ebd2; --pistachio-wash:#f0f7ed;
+  --lilac:#CEA2FD; --lilac-deep:#9169c8; --lilac-light:#ebdcfb; --lilac-wash:#f7f0ff;
+  --paper:#f8f6f1; --bg-elevated:#fdfbf6; --card:#ffffff;
+  --ink:#1f1d1a; --ink-2:#5a5752; --ink-3:#8a8780; --ink-4:#b0ada6;
+  --border:#e8e5df; --border-soft:#f0ede5;
+  --danger:#c0564f; --danger-wash:#faeceb;
+  --shadow-sm:0 2px 6px rgba(45,40,30,.04); --shadow-md:0 6px 20px rgba(45,40,30,.06);
+  --sans:'Assistant',-apple-system,sans-serif; --serif:'Fraunces',Georgia,serif;
+  --r-sm:10px; --r-md:16px; --r-lg:24px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.6;text-align:right;font-size:16.5px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px 90px}
+a{color:var(--lilac-deep)}
+
+/* ===== header ===== */
+header{padding:34px 0 10px;text-align:center}
+.mark{font-family:var(--serif);font-weight:800;font-size:44px;line-height:1;color:var(--pistachio-deep);letter-spacing:-.02em}
+.mark span{color:var(--lilac-deep)}
+h1{font-size:25px;font-weight:800;margin-top:10px;letter-spacing:-.01em}
+.sub{color:var(--ink-2);font-size:15.5px;margin-top:4px}
+.intro{background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:18px 20px;margin:20px 0 6px;font-size:15.5px;color:var(--ink-2)}
+.intro b{color:var(--ink)}
+
+/* ===== progress ===== */
+.progress-wrap{position:sticky;top:0;z-index:50;background:linear-gradient(var(--paper) 75%,rgba(248,246,241,0));padding:12px 0 14px}
+.progress-bar{height:8px;background:var(--border-soft);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(270deg,var(--pistachio-deep),var(--lilac-deep));transition:width .35s ease}
+.progress-label{font-size:13px;color:var(--ink-3);margin-top:5px;text-align:left}
+
+/* ===== sections ===== */
+.section{background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:22px 22px 12px;margin:18px 0}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.sec-letter{font-family:var(--serif);font-weight:800;font-size:34px;color:var(--pistachio-deep);line-height:1}
+.sec-title{font-size:19px;font-weight:700}
+.sec-note{font-size:14px;color:var(--ink-3);margin-bottom:14px}
+
+.q{padding:14px 0 16px;border-top:1px dashed var(--border)}
+.q:first-of-type{border-top:none}
+.q-label{font-weight:600;font-size:16.5px;margin-bottom:4px;display:block}
+.q-label .req{color:var(--lilac-deep);font-weight:800}
+.q-hint{font-size:14px;color:var(--ink-3);margin-bottom:9px}
+input[type=text],input[type=number],input[type=time],textarea,select{
+  width:100%;font-family:var(--sans);font-size:16.5px;color:var(--ink);
+  background:var(--bg-elevated);border:1.5px solid var(--border);border-radius:var(--r-sm);
+  padding:11px 13px;outline:none;transition:border-color .15s;text-align:right
+}
+input:focus,textarea:focus,select:focus{border-color:var(--lilac)}
+textarea{min-height:76px;resize:vertical}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--border);background:var(--bg-elevated);border-radius:99px;padding:8px 16px;font-size:15.5px;cursor:pointer;user-select:none;transition:all .12s;color:var(--ink-2)}
+.chip.on{background:var(--pistachio-wash);border-color:var(--pistachio-deep);color:var(--pistachio-deep);font-weight:700}
+.chip.lil.on{background:var(--lilac-wash);border-color:var(--lilac-deep);color:var(--lilac-deep)}
+.privacy{display:flex;gap:8px;align-items:flex-start;background:var(--lilac-wash);border-radius:var(--r-sm);padding:10px 12px;font-size:13.5px;color:var(--lilac-deep);margin-top:8px}
+
+/* ===== finish ===== */
+.finish{background:linear-gradient(160deg,var(--pistachio-wash),var(--lilac-wash));border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:26px 22px;text-align:center;margin:22px 0}
+.finish h2{font-size:21px;margin-bottom:6px}
+.finish p{color:var(--ink-2);font-size:15.5px;margin-bottom:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:17px;border-radius:14px;padding:14px 26px;transition:transform .1s, box-shadow .15s;text-decoration:none}
+.btn:active{transform:scale(.98)}
+.btn-main{background:var(--pistachio-deep);color:#fff;box-shadow:0 6px 18px rgba(107,156,94,.28)}
+.btn-wa{background:#25D366;color:#fff;box-shadow:0 6px 18px rgba(37,211,102,.25)}
+.btn-ghost{background:var(--card);color:var(--ink-2);border:1.5px solid var(--border)}
+.btn-lilac{background:var(--lilac-deep);color:#fff;box-shadow:0 6px 18px rgba(145,105,200,.25)}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.missing{background:var(--danger-wash);color:var(--danger);border-radius:var(--r-sm);padding:10px 14px;font-size:14.5px;margin-top:14px;display:none;text-align:right}
+.toast{position:fixed;bottom:24px;right:50%;transform:translateX(50%);background:var(--ink);color:#fff;border-radius:99px;padding:10px 22px;font-size:15px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+.toast.show{opacity:1}
+
+footer{text-align:center;padding:26px 0 10px;color:var(--ink-4);font-size:13px}
+footer a{color:var(--ink-4);text-decoration:none}
+
+/* ===================== COACH ===================== */
+#coachView{display:none}
+.coach-badge{display:inline-block;background:var(--lilac-deep);color:#fff;font-size:12.5px;font-weight:700;border-radius:99px;padding:3px 12px;letter-spacing:.03em}
+.paste-box{margin:14px 0}
+.panel{background:var(--card);border:1px solid var(--border-soft);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:20px 22px;margin:16px 0}
+.panel h3{font-size:17.5px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.panel h3 .dot{width:9px;height:9px;border-radius:99px;background:var(--pistachio-deep);display:inline-block}
+.panel.lilac h3 .dot{background:var(--lilac-deep)}
+.flag{background:var(--danger-wash);border-right:4px solid var(--danger);border-radius:var(--r-sm);padding:10px 14px;margin:8px 0;font-size:15px;color:#7a3733}
+.flag b{color:var(--danger)}
+.okflag{background:var(--pistachio-wash);border-right:4px solid var(--pistachio-deep);border-radius:var(--r-sm);padding:10px 14px;margin:8px 0;font-size:15px;color:#3f5c38}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px 14px}
+.stat .v{font-family:var(--serif);font-weight:800;font-size:26px;color:var(--pistachio-deep);line-height:1.1}
+.stat.lil .v{color:var(--lilac-deep)}
+.stat .l{font-size:13px;color:var(--ink-3);margin-top:3px}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px dashed var(--border-soft);font-size:15.5px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--ink-3);flex-shrink:0}
+.kv .val{font-weight:600;text-align:left}
+.rec{background:var(--lilac-wash);border-radius:var(--r-md);padding:12px 15px;margin:9px 0;font-size:15.5px}
+.rec b{color:var(--lilac-deep)}
+.d2{padding:13px 0;border-top:1px dashed var(--border)}
+.d2:first-of-type{border-top:none}
+.d2 .t{font-weight:700;font-size:15.5px;margin-bottom:2px}
+.d2 .s{font-size:14px;color:var(--ink-3);margin-bottom:8px}
+.suggest{font-size:13.5px;color:var(--pistachio-deep);background:var(--pistachio-wash);display:inline-block;border-radius:99px;padding:2px 12px;margin-bottom:8px;cursor:pointer}
+ul.list{padding-right:20px;font-size:15.5px}
+ul.list li{margin:4px 0}
+.shoplist h4{font-size:15px;color:var(--lilac-deep);margin:12px 0 4px;font-weight:700}
+.raw{font-size:14px;color:var(--ink-2);background:var(--bg-elevated);border-radius:var(--r-sm);padding:8px 12px;margin:5px 0;white-space:pre-wrap}
+.raw b{color:var(--ink)}
+@media(max-width:480px){ .row{flex-direction:column} body{font-size:16px} }
+@media(prefers-reduced-motion:reduce){ *{transition:none!important} html{scroll-behavior:auto} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============================= CLIENT VIEW ============================= -->
+<div id="clientView">
+<header>
+  <div class="mark">מ<span>·</span></div>
+  <h1>שאלון התאמה אישית</h1>
+  <div class="sub">המעקב שלי · הצעד הראשון במסע</div>
+</header>
+<div class="intro">
+  <b>איך זה עובד?</b> עונים על השאלות בקצב שלכם (5–7 דקות), התשובות נשמרות אוטומטית במכשיר.
+  בסוף לוחצים על כפתור השליחה, וזהו. אין תשובות נכונות או לא נכונות — ככל שהתשובות כנות יותר, ההתאמה תהיה מדויקת יותר.
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="pfill"></div></div>
+  <div class="progress-label"><span id="plabel">0%</span></div>
+</div>
+
+<!-- פרק א -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">א</div><div class="sec-title">נתוני בסיס</div></div>
+  <div class="sec-note">הנתונים שמהם נחשב עבורך את התוכנית המדויקת.</div>
+  <div class="q"><label class="q-label" for="f_name">מה השם שלך? <span class="req">*</span></label>
+    <input type="text" id="f_name" data-req="1" autocomplete="name"></div>
+  <div class="q"><div class="row">
+    <div><label class="q-label" for="f_age">גיל <span class="req">*</span></label><input type="number" id="f_age" data-req="1" min="16" max="95" inputmode="numeric"></div>
+    <div><label class="q-label">מין <span class="req">*</span></label>
+      <div class="chips" id="f_sex" data-req="1" data-chips="single">
+        <div class="chip" data-v="m">זכר</div><div class="chip" data-v="f">נקבה</div>
+      </div></div>
+  </div></div>
+  <div class="q"><div class="row">
+    <div><label class="q-label" for="f_height">גובה (ס״מ) <span class="req">*</span></label><input type="number" id="f_height" data-req="1" min="130" max="220" inputmode="numeric"></div>
+    <div><label class="q-label" for="f_weight">משקל נוכחי (ק״ג) <span class="req">*</span></label><input type="number" id="f_weight" data-req="1" min="40" max="250" step="0.1" inputmode="decimal"></div>
+  </div>
+  <div class="q-hint" style="margin-top:8px">את המשקל עדיף למדוד בבוקר, אחרי שירותים ולפני אוכל.</div></div>
+  <div class="q"><label class="q-label">איך נראה רוב היום שלך? <span class="req">*</span></label>
+    <div class="chips" id="f_occupation" data-req="1" data-chips="single">
+      <div class="chip" data-v="sit">בעיקר בישיבה</div>
+      <div class="chip" data-v="stand">בעמידה או בתנועה חלק מהיום</div>
+      <div class="chip" data-v="phys">פיזי רוב היום</div>
+    </div></div>
+</div>
+
+<!-- פרק ב -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ב</div><div class="sec-title">פעילות גופנית</div></div>
+  <div class="q"><label class="q-label">כמה פעמים בשבוע את/ה מתאמן/ת? <span class="req">*</span></label>
+    <div class="chips" id="f_exfreq" data-req="1" data-chips="single">
+      <div class="chip" data-v="none">לא כרגע</div>
+      <div class="chip" data-v="low">1–2</div>
+      <div class="chip" data-v="mid">3–4</div>
+      <div class="chip" data-v="high">5 ומעלה</div>
+    </div></div>
+  <div class="q"><label class="q-label" for="f_extype">אם כן — מה סוג האימון ומשך ממוצע?</label>
+    <div class="q-hint">למשל: ״הליכה 40 דקות״, ״חדר כושר שעה״.</div>
+    <input type="text" id="f_extype"></div>
+  <div class="q"><label class="q-label" for="f_exlove">פעילות שאהבת בעבר או שתמיד רצית לנסות?</label>
+    <input type="text" id="f_exlove"></div>
+</div>
+
+<!-- פרק ג -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ג</div><div class="sec-title">סדר היום שלך</div></div>
+  <div class="sec-note">שעות ביום רגיל, בערך. לא צריך דיוק של דקה.</div>
+  <div class="q"><label class="q-label" for="f_wake">שעת השכמה ביום רגיל <span class="req">*</span></label>
+    <input type="time" id="f_wake" data-req="1"></div>
+  <div class="q"><label class="q-label">האכילה הראשונה ביום <span class="req">*</span></label>
+    <div class="row">
+      <div><input type="time" id="f_firstmeal_t" data-req="1"></div>
+      <div><input type="text" id="f_firstmeal_w" placeholder="מה בדרך כלל? (למשל: פרוסה וקפה)"></div>
+    </div></div>
+  <div class="q"><label class="q-label">האכילה האחרונה ביום <span class="req">*</span></label>
+    <div class="q-hint">כולל נשנוש מול הטלוויזיה. בכנות, זה מה שעוזר.</div>
+    <div class="row">
+      <div><input type="time" id="f_lastmeal_t" data-req="1"></div>
+      <div><input type="text" id="f_lastmeal_w" placeholder="מה בדרך כלל?"></div>
+    </div></div>
+  <div class="q"><label class="q-label" for="f_sleep">שעת שינה בדרך כלל <span class="req">*</span></label>
+    <input type="time" id="f_sleep" data-req="1"></div>
+</div>
+
+<!-- פרק ד -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ד</div><div class="sec-title">מתוקים, מטוגנים ושתייה</div></div>
+  <div class="q"><label class="q-label" for="f_sweets">אילו מתוקים נכנסים אצלך, מתי, ומה בדרך כלל קורה סביבם? <span class="req">*</span></label>
+    <div class="q-hint">למשל: ״שוקולד אחרי ארוחת ערב מול הטלוויזיה״, ״עוגיות בישיבות בעבודה״, ״גלידה כשאני לחוץ״.</div>
+    <textarea id="f_sweets" data-req="1"></textarea></div>
+  <div class="q"><label class="q-label" for="f_fried">אילו מאכלים מטוגנים נכנסים בשבוע רגיל, ומתי?</label>
+    <textarea id="f_fried"></textarea></div>
+  <div class="q"><label class="q-label">קפה ביום <span class="req">*</span></label>
+    <div class="row">
+      <div><label class="q-hint">כמה כוסות</label><input type="number" id="f_coffee_n" data-req="1" min="0" max="15" inputmode="numeric"></div>
+      <div><label class="q-hint">כפיות סוכר בכוס</label><input type="number" id="f_coffee_sugar" min="0" max="6" step="0.5" inputmode="decimal"></div>
+    </div>
+    <div style="margin-top:8px"><label class="q-hint">כמה חלב בכוס?</label>
+      <div class="chips" id="f_coffee_milk" data-chips="single">
+        <div class="chip" data-v="none">בלי / שחור</div>
+        <div class="chip" data-v="splash">מעט (הבהרה)</div>
+        <div class="chip" data-v="half">כחצי כוס</div>
+        <div class="chip" data-v="most">בעיקר חלב (הפוך)</div>
+      </div></div></div>
+  <div class="q"><label class="q-label" for="f_drinks">משקאות נוספים בשבוע רגיל</label>
+    <div class="q-hint">משקאות קלים, מיצים, אלכוהול, שוקו, תה ממותק — כולל כמות משוערת.</div>
+    <textarea id="f_drinks"></textarea></div>
+</div>
+
+<!-- פרק ה -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ה</div><div class="sec-title">אכילה בחוץ וסוף שבוע</div></div>
+  <div class="q"><label class="q-label">באיזו תדירות את/ה אוכל/ת בחוץ או מזמין/ה אוכל? <span class="req">*</span></label>
+    <div class="chips" id="f_out_freq" data-req="1" data-chips="single">
+      <div class="chip" data-v="rare">כמעט אף פעם</div>
+      <div class="chip" data-v="weekly">פעם בשבוע</div>
+      <div class="chip" data-v="often">2–3 בשבוע</div>
+      <div class="chip" data-v="daily">כמעט כל יום</div>
+    </div>
+    <div style="margin-top:10px"><input type="text" id="f_out_what" placeholder="איפה ומה בדרך כלל? (מסעדה, משלוח, חדר אוכל)"></div></div>
+  <div class="q"><label class="q-label" for="f_family">האם יש ארוחה משפחתית קבועה שלא מתפשרים עליה?</label>
+    <div class="q-hint">למשל ארוחת שישי בערב, ארוחת ערב עם הילדים ב-19:00. לציין יום, שעה ואופי. זה לא מכשול — התוכנית תיבנה סביב זה.</div>
+    <textarea id="f_family"></textarea></div>
+</div>
+
+<!-- פרק ו -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ו</div><div class="sec-title">העדפות ובריאות</div></div>
+  <div class="q"><label class="q-label">העדפות והגבלות תזונתיות</label>
+    <div class="chips" id="f_diet" data-chips="multi">
+      <div class="chip lil" data-v="veg">צמחוני</div>
+      <div class="chip lil" data-v="vegan">טבעוני</div>
+      <div class="chip lil" data-v="kosher">כשרות</div>
+      <div class="chip lil" data-v="gluten">רגישות לגלוטן</div>
+      <div class="chip lil" data-v="lactose">רגישות ללקטוז</div>
+      <div class="chip lil" data-v="nuts">אלרגיה לאגוזים</div>
+    </div>
+    <div style="margin-top:10px"><input type="text" id="f_diet_other" placeholder="הגבלה נוספת? (רשות)"></div></div>
+  <div class="q"><label class="q-label" for="f_medical">מחלות רקע <span class="req">*</span></label>
+    <div class="q-hint">סוכרת או טרום-סוכרת, בלוטת התריס, לחץ דם, לב, כליות, אחר. אם אין — לכתוב ״אין״.</div>
+    <textarea id="f_medical" data-req="1"></textarea></div>
+  <div class="q"><label class="q-label" for="f_meds">תרופות, תוספים או זריקות באופן קבוע <span class="req">*</span></label>
+    <div class="q-hint">כולל זריקות להרזיה (אוזמפיק, וויגובי, מונג׳רו וכדומה). אם אין — לכתוב ״אין״.</div>
+    <textarea id="f_meds" data-req="1"></textarea></div>
+  <div class="q"><label class="q-label" for="f_ed">האם התמודדת בעבר או בהווה עם יחסים מורכבים עם אוכל?</label>
+    <div class="q-hint">למשל הפרעת אכילה, דיאטות קיצוניות חוזרות, אכילה כפייתית.</div>
+    <textarea id="f_ed"></textarea>
+    <div class="privacy">🔒 התשובות בפרק הזה מגיעות לרן בלבד, ומטרתן אחת — שהתוכנית תהיה בטוחה ונכונה עבורך.</div></div>
+</div>
+
+<!-- פרק ז -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ז</div><div class="sec-title">ולסיום</div></div>
+  <div class="q"><label class="q-label" for="f_why">מה ה״למה״ שלך?</label>
+    <div class="q-hint">משפט אישי שיזכיר לך למה התחלת. יופיע ברגעים הנכונים באפליקציה. אפשר גם למלא אחר כך.</div>
+    <textarea id="f_why"></textarea></div>
+  <div class="q"><label class="q-label" for="f_reminder">באיזו שעה נוח לך לקבל תזכורת יומית?</label>
+    <input type="time" id="f_reminder" value="08:00"></div>
+</div>
+
+<div class="finish">
+  <h2>סיימת? כל הכבוד 🎉</h2>
+  <p>לחיצה אחת והתשובות בדרך לרן. משם נבנה יחד את התוכנית שלך.</p>
+  <div class="btn-row">
+    <a class="btn btn-wa" id="btnWa">שליחה בוואטסאפ</a>
+    <button class="btn btn-ghost" id="btnCopy">העתקת התשובות</button>
+  </div>
+  <div style="margin-top:12px"><a href="#" id="btnReset" style="font-size:13.5px;color:var(--ink-3)">מילוי חדש (ניקוי הטופס ללקוח אחר)</a></div>
+  <div class="missing" id="missingBox"></div>
+</div>
+
+<footer>המעקב שלי · <a href="#coach" id="coachLink">·</a></footer>
+</div>
+
+<!-- ============================= COACH VIEW ============================= -->
+<div id="coachView">
+<header>
+  <div class="mark">מ<span>·</span></div>
+  <h1>מסך המלווה</h1>
+  <div style="margin-top:8px"><span class="coach-badge">לעיניך בלבד — הלקוח לא רואה את המסך הזה</span></div>
+</header>
+
+<div class="panel lilac">
+  <h3><span class="dot"></span>טעינת תשובות</h3>
+  <div class="paste-box"><textarea id="pasteBox" placeholder="הדבק כאן את ההודעה שהלקוח שלח (או רק את שורת הקוד שבסופה)"></textarea></div>
+  <div class="btn-row" style="justify-content:flex-start">
+    <button class="btn btn-lilac" id="btnAnalyzePaste">ניתוח ההודעה</button>
+    <button class="btn btn-ghost" id="btnAnalyzeForm">ניתוח הטופס שמולא כאן (בשיחה)</button>
+  </div>
+</div>
+
+<div id="coachResults" style="display:none">
+
+  <div class="panel"><h3><span class="dot" style="background:var(--danger)"></span>דגלים לתשומת לב</h3><div id="cFlags"></div></div>
+
+  <div class="panel"><h3><span class="dot"></span>המספרים של <span id="cName"></span></h3>
+    <div class="stat-grid" id="cStats"></div>
+    <div style="margin-top:14px" id="cCalcDetails"></div>
+  </div>
+
+  <div class="panel lilac"><h3><span class="dot"></span>חלון האכילה — מחושב אוטומטית</h3><div id="cWindow"></div></div>
+
+  <div class="panel lilac"><h3><span class="dot"></span>מה שצף מהתשובות — המלצות עבורך</h3><div id="cRecs"></div></div>
+
+  <div class="panel"><h3><span class="dot" style="background:var(--lilac-deep)"></span>הכנה לשיחה — 11 ההחלטות של שלב 2</h3>
+    <div class="sec-note">כל שדה מגיע עם הצעה מוכנה. בשיחה עם הלקוח רק מאשרים או מתקנים.</div>
+    <div id="cDecisions"></div>
+  </div>
+
+  <div class="panel shoplist"><h3><span class="dot"></span>רשימת קניות וציוד ללקוח</h3>
+    <div class="sec-note">נבנית אוטומטית לפי ההגבלות התזונתיות והפתרונות שנבחרו למעלה.</div>
+    <div id="cShop"></div>
+  </div>
+
+  <div class="panel"><h3><span class="dot" style="background:var(--lilac-deep)"></span>סיכום מלא לקלוד</h3>
+    <div class="sec-note">אחרי השיחה: לחיצה אחת מעתיקה סיכום מובנה. מדביקים בצ׳אט עם המשפט ״צור כלי מותאם ללקוח הזה״.</div>
+    <div class="btn-row" style="justify-content:flex-start">
+      <button class="btn btn-lilac" id="btnBrief">העתקת הסיכום המלא</button>
+    </div>
+  </div>
+
+  <div class="panel"><h3><span class="dot" style="background:var(--ink-4)"></span>התשובות הגולמיות</h3><div id="cRaw"></div></div>
+</div>
+
+<footer><a href="#" id="backLink">חזרה לשאלון</a></footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+/* ================= helpers ================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s??'').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function copyText(txt, msg){
+  const done = ()=>toast(msg||'הועתק ✓');
+  if(navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done)); }
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); done();}catch(e){toast('העתקה נכשלה — סמן והעתק ידנית');} document.body.removeChild(ta); }
+const pad = n => String(n).padStart(2,'0');
+function tMin(t){ if(!t||!/^\d{1,2}:\d{2}$/.test(t)) return null; const [h,m]=t.split(':').map(Number); return h*60+m; }
+function tFmt(min){ min=((min%1440)+1440)%1440; return pad(Math.floor(min/60))+':'+pad(min%60); }
+const r1 = x => Math.round(x*10)/10;
+
+/* ================= form state ================= */
+const TEXT_FIELDS = ['f_name','f_age','f_height','f_weight','f_extype','f_exlove','f_wake','f_firstmeal_t','f_firstmeal_w','f_lastmeal_t','f_lastmeal_w','f_sleep','f_sweets','f_fried','f_coffee_n','f_coffee_sugar','f_drinks','f_out_what','f_family','f_diet_other','f_medical','f_meds','f_ed','f_why','f_reminder'];
+const CHIP_FIELDS = ['f_sex','f_occupation','f_exfreq','f_coffee_milk','f_out_freq','f_diet'];
+const REQ = ['f_name','f_age','f_sex','f_height','f_weight','f_occupation','f_exfreq','f_wake','f_firstmeal_t','f_lastmeal_t','f_sleep','f_sweets','f_coffee_n','f_out_freq','f_medical','f_meds'];
+const REQ_NAMES = {f_name:'שם',f_age:'גיל',f_sex:'מין',f_height:'גובה',f_weight:'משקל',f_occupation:'אופי היום',f_exfreq:'תדירות אימונים',f_wake:'שעת השכמה',f_firstmeal_t:'שעת אכילה ראשונה',f_lastmeal_t:'שעת אכילה אחרונה',f_sleep:'שעת שינה',f_sweets:'מתוקים',f_coffee_n:'כמות קפה',f_out_freq:'אכילה בחוץ',f_medical:'מחלות רקע',f_meds:'תרופות'};
+
+/* chips */
+document.querySelectorAll('[data-chips]').forEach(group=>{
+  const multi = group.dataset.chips==='multi';
+  group.addEventListener('click', e=>{
+    const chip = e.target.closest('.chip'); if(!chip) return;
+    if(multi){ chip.classList.toggle('on'); }
+    else { group.querySelectorAll('.chip').forEach(c=>c.classList.remove('on')); chip.classList.add('on'); }
+    saveDraft(); updateProgress();
+  });
+});
+function chipVal(id){ const g=$(id); if(!g) return null;
+  if(g.dataset.chips==='multi') return [...g.querySelectorAll('.chip.on')].map(c=>c.dataset.v);
+  const on=g.querySelector('.chip.on'); return on?on.dataset.v:null; }
+function setChip(id,val){ const g=$(id); if(!g||val==null) return;
+  const vals = Array.isArray(val)?val:[val];
+  g.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', vals.includes(c.dataset.v))); }
+
+function collect(){
+  const d={};
+  TEXT_FIELDS.forEach(f=>d[f]=($(f)?.value||'').trim());
+  CHIP_FIELDS.forEach(f=>d[f]=chipVal(f));
+  d._v=2; d._ts=new Date().toISOString().slice(0,10);
+  return d;
+}
+function restore(d){
+  TEXT_FIELDS.forEach(f=>{ if($(f) && d[f]!=null) $(f).value=d[f]; });
+  CHIP_FIELDS.forEach(f=>setChip(f,d[f]));
+}
+
+/* autosave */
+function saveDraft(){ try{ localStorage.setItem('quest_draft', JSON.stringify(collect())); }catch(e){} }
+TEXT_FIELDS.forEach(f=>{ const el=$(f); if(el){ const h=()=>{saveDraft();updateProgress();}; el.addEventListener('input',h); el.addEventListener('change',h); } });
+try{ const dr=localStorage.getItem('quest_draft'); if(dr) restore(JSON.parse(dr)); }catch(e){}
+
+/* progress */
+function fieldFilled(f){
+  if(CHIP_FIELDS.includes(f)){ const v=chipVal(f); return Array.isArray(v)? v.length>0 : !!v; }
+  return !!($(f)?.value||'').trim();
+}
+function updateProgress(){
+  const done = REQ.filter(fieldFilled).length;
+  const pct = Math.round(done/REQ.length*100);
+  $('pfill').style.width=pct+'%';
+  $('plabel').textContent = pct===100 ? 'הכל מולא ✓' : pct+'%';
+}
+updateProgress();
+
+/* ================= encode / share ================= */
+function encodeData(d){ return btoa(unescape(encodeURIComponent(JSON.stringify(d)))); }
+function decodeData(s){ return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+
+function missingReq(){ return REQ.filter(f=>!fieldFilled(f)); }
+function rangeErrors(){
+  const errs=[];
+  const age=+($('f_age').value); if($('f_age').value && (age<16||age>95)) errs.push(['f_age','גיל בין 16 ל-95']);
+  const h=+($('f_height').value); if($('f_height').value && (h<130||h>220)) errs.push(['f_height','גובה בס״מ, בין 130 ל-220']);
+  const w=+($('f_weight').value); if($('f_weight').value && (w<40||w>250)) errs.push(['f_weight','משקל בק״ג, בין 40 ל-250']);
+  return errs;
+}
+function compactData(d){
+  const c={};
+  for(const k in d){ const v=d[k]; if(v===''||v==null) continue; if(Array.isArray(v)&&!v.length) continue; c[k]=v; }
+  return c;
+}
+function clientMessage(){
+  const d=collect();
+  const lines=[
+    'שאלון התאמה אישית — '+d.f_name,
+    'קוד לניתוח (לא למחוק): Q2:'+encodeData(compactData(d))
+  ];
+  return lines.join('\n');
+}
+function showIssues(items){
+  const box=$('missingBox');
+  box.style.display='block';
+  box.innerHTML='כמעט שם! צריך לתקן: '+items.map(([f,label])=>'<a href="#" data-goto="'+f+'" style="color:inherit;font-weight:700;text-decoration:underline">'+label+'</a>').join(' · ');
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+}
+$('missingBox').addEventListener('click',e=>{
+  const a=e.target.closest('[data-goto]'); if(!a) return;
+  e.preventDefault();
+  const el=$(a.dataset.goto);
+  if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); const inp=el.tagName==='DIV'?el:el; setTimeout(()=>{ if(inp.focus) try{inp.focus({preventScroll:true});}catch(err){} },450); }
+});
+function tryShare(){
+  const box=$('missingBox');
+  const miss=missingReq().map(f=>[f,REQ_NAMES[f]]);
+  const errs=rangeErrors();
+  if(miss.length||errs.length){ showIssues(miss.concat(errs)); return null; }
+  box.style.display='none';
+  return clientMessage();
+}
+$('btnCopy').addEventListener('click',()=>{ const m=tryShare(); if(m) copyText(m,'התשובות הועתקו ✓ אפשר להדביק לרן'); });
+$('btnReset').addEventListener('click',e=>{
+  e.preventDefault();
+  if(confirm('לנקות את כל התשובות בטופס? (לא ניתן לשחזר)')){
+    try{ localStorage.removeItem('quest_draft'); }catch(err){}
+    location.hash=''; location.reload();
+  }
+});
+$('btnWa').addEventListener('click',e=>{
+  e.preventDefault(); const m=tryShare(); if(!m) return;
+  copyText(m,'ההודעה מוכנה ✓ נפתח וואטסאפ');
+  setTimeout(()=>window.open('https://wa.me/972523603966?text='+encodeURIComponent(m),'_blank'),350);
+});
+
+/* ================= view switching ================= */
+function showCoach(on){
+  $('clientView').style.display = on?'none':'block';
+  $('coachView').style.display = on?'block':'none';
+  window.scrollTo(0,0);
+}
+$('coachLink').addEventListener('click',e=>{e.preventDefault(); showCoach(true); location.hash='coach';});
+$('backLink').addEventListener('click',e=>{e.preventDefault(); showCoach(false); location.hash='';});
+if(location.hash==='#coach') showCoach(true);
+
+/* ================= ANALYSIS ENGINE ================= */
+let A=null; // current analysis
+
+function analyze(d){
+  const sex=d.f_sex, age=+d.f_age||0, h=+d.f_height||0, w=+d.f_weight||0;
+  const out={d, name:d.f_name||'הלקוח', flags:[], okflags:[], recs:[]};
+
+  /* BMR + TDEE */
+  out.bmr = sex==='f' ? 10*w+6.25*h-5*age-161 : 10*w+6.25*h-5*age+5;
+  const occ={sit:1.2,stand:1.35,phys:1.5}[d.f_occupation]||1.2;
+  const ex={none:0,low:0.05,mid:0.12,high:0.2}[d.f_exfreq]||0;
+  out.factor=Math.min(occ+ex,1.9);
+  out.tdee=Math.round(out.bmr*out.factor);
+
+  /* budget with floor */
+  out.floor = sex==='f'?1200:1500;
+  out.budget = Math.max(out.tdee-500, out.floor);
+  out.floored = out.budget>out.tdee-500;
+  out.deficit = Math.max(out.tdee-out.budget,0);
+  out.weeklyKg = r1(out.deficit*7/7700);
+
+  /* target suggestion: 7%, cap 8kg, range 5-10% */
+  out.tMin=r1(w*0.05); out.tMax=r1(Math.min(w*0.10,8));
+  out.suggestedLoss=r1(Math.min(w*0.07,8));
+  out.suggestedTarget=Math.round((w-out.suggestedLoss)*2)/2;
+  out.protein = t => Math.round(1.2*t);
+  out.weeks = t => out.weeklyKg>0 ? Math.ceil((w-t)/out.weeklyKg) : null;
+
+  /* eating window */
+  const first=tMin(d.f_firstmeal_t), sleep=tMin(d.f_sleep), wake=tMin(d.f_wake), last=tMin(d.f_lastmeal_t);
+  out.newStart = first!=null ? tFmt(first+120) : null;
+  out.newLast  = sleep!=null ? tFmt(sleep-240) : null;
+  out.sleepDur = (sleep!=null&&wake!=null) ? ((wake-sleep+1440)%1440)/60 : null;
+  out.lastGap  = (sleep!=null&&last!=null) ? ((sleep-last+1440)%1440)/60 : null;
+
+  /* medical flags */
+  const meds=(d.f_meds||''), medical=(d.f_medical||''), ed=(d.f_ed||'');
+  const has=(txt,arr)=>arr.some(k=>txt.includes(k));
+  const notNone = t => t && !/^אין\.?$/.test(t.trim());
+  if(has(meds,['אוזמפיק','וויגובי','ויגובי','מונג','סקסנדה','טרוליסיטי','GLP','גי אל פי']))
+    out.flags.push('<b>זריקות GLP-1</b> — תיאבון מדוכא: להקפיד על יעד החלבון כעדיפות ראשונה, לוודא שהתקציב לא נמוך מדי, ולשקול קצב איטי יותר.');
+  if(has(medical,['סוכרת','סכרת']))
+    out.flags.push('<b>סוכרת / טרום-סוכרת</b> — סדר האכילה (ירק → חלבון → פחמימה) וההליכה אחרי הארוחה חשובים במיוחד. לוודא תיאום עם הרופא המטפל.');
+  if(has(medical,['תריס','בלוטת']))
+    out.flags.push('<b>בלוטת התריס</b> — ייתכן קצב ירידה איטי מהמחושב. לתאם ציפיות מראש.');
+  if(notNone(ed))
+    out.flags.push('<b>יחסים מורכבים עם אוכל</b> — לא מיישמים דחיית ארוחת בוקר, לא סופרים קלוריות מול הלקוח, דגש על קשב לשובע והרגלים. לשקול שיתוף איש מקצוע בתחום.');
+  if(out.sleepDur!=null && out.sleepDur<7)
+    out.flags.push('<b>שינה קצרה ('+r1(out.sleepDur)+' שעות)</b> — שינה קצרה מגבירה רעב ומקשה על ירידה. להגדיר שינה כאחד היעדים.');
+  if(notNone(medical) && !has(medical,['סוכרת','סכרת','תריס','בלוטת']))
+    out.flags.push('<b>רקע רפואי</b>: ״'+esc(medical)+'״ — לשיקולך.');
+  if(!out.flags.length) out.okflags.push('אין דגלים רפואיים או התנהגותיים מיוחדים. אפשר להריץ את התוכנית המלאה כולל דחיית בוקר.');
+  out.edFlag = notNone(ed);
+
+  /* diet substitutions */
+  const diet=d.f_diet||[];
+  out.diet=diet;
+  out.sub={ salad:'טופו או חזה עוף', porridgeProtein:'כף אבקת חלבון ללא טעם (ואם אין — 2 יוגורטים 1.5%)', oats:'קוואקר גרוס גס', bagNuts:'3–4 אגוזים', eggsOk:true, dairyOk:true };
+  if(diet.includes('veg')) out.sub.salad='טופו או קטניות (צמחוני)';
+  if(diet.includes('vegan')){ out.sub.salad='טופו או קטניות (טבעוני)'; out.sub.porridgeProtein='אבקת חלבון צמחית ללא טעם / יוגורט סויה'; out.sub.eggsOk=false; out.sub.dairyOk=false; }
+  if(diet.includes('gluten')) out.sub.oats='אמרנט או שיבולת שועל ללא גלוטן';
+  if(diet.includes('lactose')&&!diet.includes('vegan')){ out.sub.porridgeProtein='כף אבקת חלבון ללא טעם (בלי החלופה של יוגורט רגיל — יוגורט סויה או דל-לקטוז)'; out.sub.dairyOk=false; }
+  if(diet.includes('nuts')) out.sub.bagNuts='כף גרעיני חמנייה או דלעת (במקום אגוזים — אלרגיה)';
+  out.sub.kosherNote = diet.includes('kosher') ? 'כשרות: הדייסה חלבית (יוגורט) והסלט יכול להיות בשרי (עוף) — לתכנן אותם בארוחות נפרדות, או לבחור טופו/קטניות לסלט' : null;
+
+  /* sweets trigger classification + if-then rules */
+  const sw=(d.f_sweets||'');
+  out.triggers=[];
+  if(has(sw,['לחץ','סטרס','עצב','כעס','מתח','בדידות','חרדה','עצבים']))
+    out.triggers.push({t:'אכילה רגשית', tool:'טכניקת ההתמודדות עם דחפים (נשימות, קבלה, גלים) — להכניס לתוכן הליווי ולתרגל בשיחה.',
+      rule:'אם עולה בי חשק חזק בעקבות לחץ או רגש, אז אני עוצר ל-5 נשימות עמוקות ונותן לגל לחלוף לפני שאני מחליט'});
+  if(has(sw,['שעמום','טלוויזיה','ספה','הרגל','ערב','לילה']))
+    out.triggers.push({t:'הרגל של ערב / שעמום', tool:'המתוק המתוכנן נקבע לשעה הזו בדיוק + שינוי סביבה (המתוקים לא בבית / במקום לא נגיש) + ההליכה אחרי ארוחת הערב שוברת את הרצף ספה-נשנוש.',
+      rule:'אם אני מול הטלוויזיה ומרגיש חשק, אז אני קם להכין כוס תה, ולוקח רק את המתוק המתוכנן אם עוד לא היה היום'});
+  if(has(sw,['עבודה','ישיב','משרד','חבר','אירוע','משפח']))
+    out.triggers.push({t:'חברתי / סביבת עבודה', tool:'תכנון מראש: להגיע לישיבה אחרי חטיף חלבון או עם שקית ירקות, ולהחליט מראש מה כן.',
+      rule:'אם מגיע כיבוד בישיבה או באירוע, אז אני לוקח רק את מה שהחלטתי מראש ומתיישב רחוק מהמגש'});
+  if(!out.triggers.length && sw)
+    out.triggers.push({t:'דפוס לא מסווג', tool:'לברר בשיחה מה קורה סביב המתוקים — רגש, הרגל או סביבה — ולבחור כלי בהתאם.',
+      rule:'אם עולה חשק לא מתוכנן, אז אני שותה כוס מים וממתין 10 דקות לפני שאני מחליט'});
+
+  /* flex day detection */
+  const fam=(d.f_family||'');
+  const days=[['ראשון','יום ראשון'],['שני','יום שני'],['שלישי','יום שלישי'],['רביעי','יום רביעי'],['חמישי','יום חמישי'],['שישי','יום שישי'],['שבת','שבת']];
+  out.flexDay=null; out.flexDayNum=null;
+  for(let i=0;i<days.length;i++){ if(fam.includes(days[i][0])){ out.flexDay=days[i][1]; out.flexDayNum=i; break; } }
+  if(!out.flexDay && (d.f_out_freq==='weekly'||d.f_out_freq==='often') ) out.flexDay='לפי יום המסעדה הקבוע — לברר בשיחה';
+
+  /* coffee targets */
+  const cups=+d.f_coffee_n||0, sugar=+d.f_coffee_sugar||0;
+  out.coffee={cups,sugar,milk:d.f_coffee_milk};
+  out.coffeeRec=null;
+  if(cups>0){
+    const parts=[];
+    if(sugar>0) parts.push('ירידה הדרגתית לאפס סוכר (חוסך כ-'+Math.round(sugar*cups*20*7)+' קלוריות בשבוע)');
+    if(d.f_coffee_milk==='half'||d.f_coffee_milk==='most') parts.push('חיתוך כמות החלב בחצי');
+    if(parts.length) out.coffeeRec=parts.join(' + ');
+  }
+
+  /* quick solutions recommendation */
+  out.solutions=['veg_bags'];
+  out.solutions.push(out.sub.eggsOk ? 'eggs' : 'shake');
+  out.solNames={veg_bags:'שקיות ירקות אישיות', eggs:'ביצים קשות', shake:'שייק ירוק', salad_v:'סלט עם רוטב וינגרט'};
+
+  /* walk anchor: biggest meal guess */
+  out.walkAfter = fam ? 'ארוחת הערב' : 'ארוחת הצהריים';
+
+  return out;
+}
+
+/* ================= COACH RENDER ================= */
+function renderCoach(a){
+  A=a; const d=a.d;
+  $('coachResults').style.display='block';
+  $('cName').textContent=a.name;
+
+  /* flags */
+  $('cFlags').innerHTML = a.flags.map(f=>'<div class="flag">'+f+'</div>').join('') + a.okflags.map(f=>'<div class="okflag">'+f+'</div>').join('');
+
+  /* stats */
+  const t=a.suggestedTarget;
+  $('cStats').innerHTML =
+    stat(a.tdee,'הוצאה יומית (TDEE)') +
+    stat(a.budget,'תקציב קלורי יומי'+(a.floored?' · רצפה!':'')) +
+    stat(a.protein(t)+' ג׳','חלבון יומי · כ-'+Math.round(a.protein(t)/3)+' ג׳ בארוחה','lil') +
+    stat(a.weeklyKg+' ק״ג','קצב שבועי צפוי') +
+    stat(t+' ק״ג','הצעת יעד שלב א׳','lil') +
+    stat(a.weeks(t)??'—','שבועות ליעד');
+  function stat(v,l,cls){ return '<div class="stat '+(cls||'')+'"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
+
+  $('cCalcDetails').innerHTML =
+    kv('BMR (מנוחה)', Math.round(a.bmr)+' קלוריות') +
+    kv('מקדם פעילות', a.factor.toFixed(2)) +
+    kv('גירעון בפועל', a.deficit+' קלוריות ביום' + (a.floored?' — הרצפה ('+a.floor+') נדרכה, הקצב איטי מחצי ק״ג':'')) +
+    kv('טווח יעד מותר (5–10%)', 'ירידה של '+a.tMin+' עד '+a.tMax+' ק״ג · כלומר יעד בין '+r1((+d.f_weight)-a.tMax)+' ל-'+r1((+d.f_weight)-a.tMin)+' ק״ג');
+  function kv(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span class="val">'+v+'</span></div>'; }
+
+  /* window */
+  let winHtml =
+    kv2('אכילה ראשונה היום', (d.f_firstmeal_t||'—')+(d.f_firstmeal_w?' · '+esc(d.f_firstmeal_w):'')) +
+    kv2('← התחלה חדשה (＋2 שעות)', '<b style="color:var(--pistachio-deep)">'+(a.newStart||'—')+'</b>') +
+    kv2('שעת שינה', d.f_sleep||'—') +
+    kv2('← ארוחה אחרונה (שינה −4 שעות)', '<b style="color:var(--pistachio-deep)">'+(a.newLast||'—')+'</b>');
+  if(a.lastGap!=null) winHtml += kv2('מרווח נוכחי בין אכילה אחרונה לשינה', r1(a.lastGap)+' שעות'+(a.lastGap<4?' — <b style="color:var(--danger)">קצר מהיעד</b>':' ✓'));
+  if(a.edFlag) winHtml += '<div class="flag" style="margin-top:10px">בגלל הדגל של יחסים מורכבים עם אוכל — <b>לא מפעילים את דחיית הבוקר</b>. חלון האכילה נקבע רק מצד הערב.</div>';
+  if(d.f_family) winHtml += '<div class="rec"><b>אילוץ משפחתי מהשאלון:</b> ״'+esc(d.f_family)+'״ — הכלל מתגמש סביב זה, לא נשבר.</div>';
+  $('cWindow').innerHTML=winHtml;
+  function kv2(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span class="val">'+v+'</span></div>'; }
+
+  /* recommendations */
+  let recs='';
+  recs+='<div class="rec"><b>סדר אכילה בכל ארוחה (לכולם):</b> ירק קודם ← חלבון ← פחמימה בסוף. משתלב עם ״כל ארוחה נפתחת בירק״'+((d.f_medical||'').match(/סוכרת|סכרת/)?' — <b>קריטי במיוחד עם הרקע הסוכרתי</b>':'')+'.</div>';
+  a.triggers.forEach(tr=>{ recs+='<div class="rec"><b>'+tr.t+':</b> '+tr.tool+(tr.rule?'<br><b>כלל אם-אז מוכן:</b> ״'+tr.rule+'״':'')+'</div>'; });
+  recs+='<div class="rec"><b>משפטים מוכנים לשיחה · פלטו:</b> ״המשקל שלך יעצור מתישהו לשבוע-שבועיים, וזה חלק מהתוכנית, לא סימן שמשהו נשבר. כשזה יקרה לא נשנה כלום: נבדוק היקף מותניים, כי הגוף ממשיך להשתנות גם כשהמשקל עומד. רק אם גם שבוע שלישי יציב, נבדוק יחד חלבון ושינה לפני שנוגעים בתקציב.״</div>';
+  recs+='<div class="rec"><b>משפטים מוכנים לשיחה · סולם הרעב:</b> ״נעבוד עם סולם של 1 עד 10: 3 זה רעב אמיתי וזה הזמן לאכול, 7 זה נעים ומספיק וכאן עוצרים, 8 ומעלה אומר שעברנו. במקום לנחש מה זה 80 אחוז, פשוט תשאל את עצמך באמצע הארוחה: איפה אני על הסולם?״</div>';
+  recs+='<div class="rec"><b>תוכנית סיום ושלב ב׳ (סיכום אוטומטי ללקוח):</b><ul class="list" style="margin-top:6px"><li>בהגעה ל-'+t+' ק״ג: שבועיים של תחזוקה מכוונת</li><li>התקציב עולה ל-'+(a.budget+300)+' קלוריות ביום, כל ההרגלים נשארים</li><li>שקילה שבועית והיקף ממשיכים כרגיל</li><li>אחרי שבועיים מחליטים יחד: שלב ב׳ עם יעד חדש, או תחזוקה קבועה</li></ul></div>';
+  if(a.coffeeRec) recs+='<div class="rec"><b>קפה ('+a.coffee.cups+' כוסות ביום):</b> '+a.coffeeRec+'.</div>';
+  if((d.f_drinks||'').trim()) recs+='<div class="rec"><b>משקאות נוספים:</b> ״'+esc(d.f_drinks)+'״ — לזהות יחד את הקלוריות השקופות ולבחור החלפה אחת.</div>';
+  if((d.f_fried||'').trim()) recs+='<div class="rec"><b>מטוגנים:</b> ״'+esc(d.f_fried)+'״ — להציע חלופת תנור/אייר-פרייר לאחד מהם, לא לכולם בבת אחת.</div>';
+  if(a.diet.length||d.f_diet_other) recs+='<div class="rec"><b>החלפות אוטומטיות בתפריט:</b> סלט — '+a.sub.salad+' · דייסה — '+a.sub.oats+', '+a.sub.porridgeProtein+' · שקית ירקות — '+a.sub.bagNuts+(d.f_diet_other?' · נוסף: '+esc(d.f_diet_other):'')+'</div>';
+  if(a.sub.kosherNote) recs+='<div class="rec"><b>שים לב:</b> '+a.sub.kosherNote+'.</div>';
+  const outScript='תסריט מסעדה/משלוח: ירק ראשון · חלבון במרכז המנה · עצירה ב-80%';
+  if(d.f_out_freq==='often'||d.f_out_freq==='daily') recs+='<div class="rec"><b>אכילה בחוץ תכופה — התסריט הופך מרכזי:</b> '+outScript+'.'+(d.f_out_what?' (״'+esc(d.f_out_what)+'״)':'')+'</div>';
+  else recs+='<div class="rec"><b>'+outScript+'</b> — נכנס לתוכן הליווי של כולם, גם ליציאה של אחת לשבועיים.</div>';
+  if((d.f_exlove||'').trim()) recs+='<div class="rec"><b>תנועה שהלקוח אוהב:</b> ״'+esc(d.f_exlove)+'״ — להשתמש בזה כעוגן להצעת התנועה, הנאה ולא עונש.</div>';
+  $('cRecs').innerHTML=recs||'<div class="okflag">אין המלצות מיוחדות מעבר לתוכנית הבסיס.</div>';
+
+  /* decisions */
+  const flexSug = a.flexDay||'';
+  /* goal candidates engine — built from the answers, best 3 first */
+  const pool=[];
+  pool.push('חלבון בכל ארוחה ('+a.protein(t)+' ג׳ ביום)');
+  pool.push('עצירה ב-80% שובע');
+  pool.push('10 דקות הליכה אחרי '+a.walkAfter);
+  if(a.newLast && !a.edFlag && a.lastGap!=null && a.lastGap<4) pool.push('אכילה אחרונה עד '+a.newLast);
+  if(a.coffee.cups>0 && a.coffee.sugar>0) pool.push('קפה בלי סוכר');
+  if(a.triggers.some(x=>x.t.includes('הרגל')||x.t.includes('רגשית'))) pool.push('המתוק המתוכנן בלבד — בשעה שנקבעה');
+  if(a.sleepDur!=null && a.sleepDur<7) pool.push('כיבוי אורות עד '+tFmt((tMin(d.f_wake)??420)-450));
+  pool.push('2 ירקות בכל יציאה מהבית');
+  pool.push('כל ארוחה נפתחת בירק');
+  const goalsSug = pool.slice(0,3);
+  a.goalPool = pool;
+  $('cDecisions').innerHTML = [
+    dec('d_target','משקל יעד שלב א׳','הטווח המותר: '+r1((+d.f_weight)-a.tMax)+'–'+r1((+d.f_weight)-a.tMin)+' ק״ג', t, 'number'),
+    dec('d_weeks','משך המסע (שבועות)','לפי קצב של '+a.weeklyKg+' ק״ג בשבוע', a.weeks(t)??'', 'number'),
+    dec('d_start','תחילת אכילה יומית', a.edFlag?'ללא דחייה (דגל)':'הוצע אוטומטית: שעתיים אחרי ההרגל הנוכחי', a.edFlag?(d.f_firstmeal_t||''):(a.newStart||''), 'time'),
+    dec('d_last','ארוחה אחרונה', 'הוצע אוטומטית: 4 שעות לפני השינה', a.newLast||'', 'time'),
+    dec('d_flex','היום הגמיש הקבוע','זוהה מהשאלון — יוגדר באפליקציה כיום גמיש אוטומטי (מיקוד חלבון, בלי שבירת רצף)', flexSug, 'text'),
+    dec('d_sol','שני הפתרונות המהירים','הומלץ לפי ההגבלות: '+a.solutions.map(s=>a.solNames[s]).join(' + ')+'. אפשר להחליף לסלט וינגרט / שייק ירוק.', a.solutions.map(s=>a.solNames[s]).join(' + '), 'text'),
+    dec('d_walk','ההליכה היומית (10 דקות)','אחרי הארוחה הגדולה. הצעה: '+a.walkAfter, 'אחרי '+a.walkAfter, 'text'),
+    dec('d_strength','אימון כוח','פעמיים בשבוע, 15–20 דקות, גם משקל גוף בבית. לקבוע ימים.'+((d.f_extype||'').trim()?' מתאמן כבר: ״'+esc(d.f_extype)+'״':''), '', 'text'),
+    dec('d_sweet','המתוק המתוכנן','מנה אחת ביום, בשעה קבועה, בתוך התקציב. לפי הטריגר: '+(a.triggers[0]?a.triggers[0].t:'—'), '', 'text'),
+    dec('d_ifthen','כלל האם-אז האישי','נוסח אוטומטית מהטריגר המרכזי. בשיחה מחדדים יחד את המצב המדויק ואת הפעולה, ככל שהניסוח ספציפי יותר, הוא עובד יותר', (a.triggers[0]&&a.triggers[0].rule)||'', 'text'),
+    dec('d_goals','3 המטרות היומיות לאפליקציה','נבחרו אוטומטית מהתשובות. המאגר המלא: '+a.goalPool.join(' · '), goalsSug.join(' | '), 'text'),
+    dec('d_plan','שני חלונות התכנון','כחצי שעה בשבת + כחצי שעה באמצע השבוע — לקבוע שעות', '', 'text'),
+    dec('d_metric','מדד התקדמות משני','שקילה: פעם בשבוע בלבד, אותו יום, בבוקר, אחרי שירותים, לפני אוכל. בנוסף: היקף מותניים אחת לשבועיים (דורש סרט מדידה) או ״בגד ייחוס״', 'היקף מותניים', 'text'),
+  ].join('');
+  function dec(id,title,sub,val,type){
+    return '<div class="d2"><div class="t">'+title+'</div><div class="s">'+sub+'</div>'+
+      '<input type="'+type+'" id="'+id+'" value="'+esc(val)+'">'+'</div>';
+  }
+  $('d_metric').addEventListener('input',renderShop);
+  $('d_sol').addEventListener('input',renderShop);
+
+  /* live recalc when target weight changes during the call */
+  const tl=document.createElement('div');
+  tl.className='suggest'; tl.id='targetLive'; tl.style.marginTop='8px'; tl.style.cursor='default';
+  $('d_target').parentNode.appendChild(tl);
+  function liveTarget(){
+    const nt=parseFloat($('d_target').value);
+    if(!nt||nt<=0){ tl.textContent=''; return; }
+    const loss=r1((+d.f_weight)-nt);
+    const wk=a.weeks(nt), days=wk!=null?wk*7:null;
+    const inRange = loss>=a.tMin-0.01 && loss<=a.tMax+0.01;
+    tl.innerHTML = 'ירידה: '+loss+' ק״ג · חלבון: <b>'+a.protein(nt)+' ג׳</b> (כ-'+Math.round(a.protein(nt)/3)+' בארוחה) · '+(wk!=null?('משך: <b>'+wk+' שבועות ('+days+' ימים)</b>'):'')+(inRange?'':' · <span style="color:var(--danger)">מחוץ לטווח 5–10%!</span>');
+    if(wk!=null && $('d_weeks')) $('d_weeks').value=wk;
+  }
+  $('d_target').addEventListener('input',liveTarget);
+  liveTarget();
+
+  renderShop();
+
+  /* raw answers */
+  const milk={none:'בלי / שחור',splash:'מעט',half:'כחצי כוס',most:'בעיקר חלב'}[d.f_coffee_milk]||'—';
+  const outf={rare:'כמעט אף פעם',weekly:'פעם בשבוע',often:'2–3 בשבוע',daily:'כמעט כל יום'}[d.f_out_freq]||'—';
+  const rows=[
+    ['שם · גיל · מין', d.f_name+' · '+d.f_age+' · '+(d.f_sex==='f'?'נקבה':'זכר')],
+    ['גובה · משקל', d.f_height+' ס״מ · '+d.f_weight+' ק״ג'],
+    ['אופי היום · אימונים', ({sit:'ישיבה',stand:'עמידה/תנועה',phys:'פיזי'}[d.f_occupation]||'')+' · '+({none:'ללא',low:'1–2',mid:'3–4',high:'5+'}[d.f_exfreq]||'')+(d.f_extype?' · '+d.f_extype:'')],
+    ['השכמה · שינה', d.f_wake+' · '+d.f_sleep],
+    ['אכילה ראשונה', d.f_firstmeal_t+(d.f_firstmeal_w?' · '+d.f_firstmeal_w:'')],
+    ['אכילה אחרונה', d.f_lastmeal_t+(d.f_lastmeal_w?' · '+d.f_lastmeal_w:'')],
+    ['מתוקים', d.f_sweets],
+    ['מטוגנים', d.f_fried||'—'],
+    ['קפה', d.f_coffee_n+' כוסות · '+(d.f_coffee_sugar||0)+' כפיות סוכר · '+milk],
+    ['משקאות', d.f_drinks||'—'],
+    ['אכילה בחוץ', outf+(d.f_out_what?' · '+d.f_out_what:'')],
+    ['ארוחה משפחתית', d.f_family||'—'],
+    ['הגבלות', (d.f_diet||[]).join(', ')+(d.f_diet_other?' · '+d.f_diet_other:'')||'—'],
+    ['מחלות רקע', d.f_medical],
+    ['תרופות', d.f_meds],
+    ['יחסים עם אוכל', d.f_ed||'—'],
+    ['ה״למה״', d.f_why||'—'],
+    ['תזכורת', d.f_reminder||'—'],
+  ];
+  $('cRaw').innerHTML=rows.map(r=>'<div class="raw"><b>'+esc(r[0])+':</b> '+esc(r[1])+'</div>').join('');
+}
+
+/* shopping + equipment list */
+function renderShop(){
+  if(!A) return; const a=A;
+  const sol=($('d_sol')?.value||'').toLowerCase();
+  const metric=($('d_metric')?.value||'');
+  const g=[];
+  g.push(['לדייסת הפתיחה (קבוע לכולם)',[
+    'זרעי צ׳יה', a.sub.oats, a.sub.porridgeProtein, 'קינמון טחון', 'דבש או סוכר'
+  ]]);
+  g.push(['לסלט היומי',[
+    'בטטות (לתנור)', 'ירקות טריים לחיתוך', 'קטניות משימורים (חומוס / שעועית / עדשים)', a.sub.salad,
+    'לרוטב הווינגרט: שמן זית, חומץ בן יין או לימון, חרדל דיז׳ון, דבש, מלח ופלפל'
+  ]]);
+  g.push(['לקופסת הירקות במקרר (2 ירקות ליום × 3–4 ימים)',[
+    'מלפפונים', 'חסה', 'גזרים', 'עגבניות שרי', 'סלרי'
+  ]]);
+  const solItems=[];
+  if(sol.includes('ביצים')) solItems.push('ביצים (להכנת קשות ל-5 ימים)');
+  if(sol.includes('שקיות')||sol.includes('ירקות אישיות')) solItems.push('שקיות רב-פעמיות אקולוגיות', 'נייר סופג', a.sub.bagNuts);
+  if(sol.includes('שייק')) solItems.push('עלים ירוקים', 'פירות קפואים / בננות להקפאה', 'תמרים');
+  if(sol.includes('סלט')||sol.includes('וינגרט')) solItems.push('רכיבי וינגרט (למעלה) בכמות כפולה');
+  if(solItems.length) g.push(['לפתרונות המהירים שנבחרו', solItems]);
+  const equip=['קופסאות אחסון אטומות לירקות ולדייסה'];
+  if(metric.includes('היקף')||metric.includes('מותנ')) equip.push('סרט מדידה של תופרות (עולה שקלים בודדים — למדידת היקף מותניים בגובה הטבור)');
+  if(sol.includes('שייק')) equip.push('בלנדר איכותי');
+  g.push(['ציוד חד-פעמי (קונים פעם אחת)', equip]);
+  g.push(['מתכון הווינגרט (מחזיק שבוע במקרר)',[
+    '4 כפות שמן זית · 2 כפות חומץ בן יין או מיץ לימון · כפית חרדל דיז׳ון · כפית דבש · מלח ופלפל',
+    'לנער בצנצנת סגורה. החרדל מחזיק את הרוטב אחיד. מנה = 2 כפות (כ-90 קלוריות, בתוך התקציב)'
+  ]]);
+  $('cShop').innerHTML=g.map(([h,items])=>'<h4>'+h+'</h4><ul class="list">'+items.map(i=>'<li>'+esc(i)+'</li>').join('')+'</ul>').join('');
+}
+
+/* brief for Claude */
+$('btnBrief').addEventListener('click',()=>{
+  if(!A){ toast('קודם לנתח תשובות'); return; }
+  const a=A,d=a.d, gv=id=>($(id)?.value||'').trim();
+  const target=+gv('d_target')||a.suggestedTarget;
+  const lines=[
+'צור כלי מותאם ללקוח הזה — שאלון v2',
+'==============================',
+'— פרטים —',
+'שם: '+d.f_name, 'גיל: '+d.f_age+' · מין: '+(d.f_sex==='f'?'נקבה':'זכר')+' · גובה: '+d.f_height+' · משקל: '+d.f_weight,
+'',
+'— חישובים —',
+'TDEE: '+a.tdee+' · תקציב יומי: '+a.budget+(a.floored?' (רצפה)':'')+' · גירעון: '+a.deficit,
+'חלבון יומי: '+a.protein(target)+' ג׳ (1.2 × משקל יעד) · כ-'+Math.round(a.protein(target)/3)+' ג׳ בכל אחת מ-3 ארוחות',
+'קצב שבועי: '+a.weeklyKg+' ק״ג',
+'',
+'— החלטות שלב 2 (מהשיחה) —',
+'משקל יעד שלב א׳: '+target,
+'משך המסע: '+(gv('d_weeks')||a.weeks(target))+' שבועות = '+((+gv('d_weeks')||a.weeks(target)||0)*7)+' ימים באפליקציה',
+'תחילת אכילה: '+gv('d_start')+' · ארוחה אחרונה: '+gv('d_last'),
+'יום גמיש קבוע: '+(gv('d_flex')||'אין'),
+'פתרונות מהירים: '+gv('d_sol'),
+'הליכה יומית: '+gv('d_walk'),
+'אימון כוח: '+(gv('d_strength')||'לקבוע'),
+'מתוק מתוכנן: '+(gv('d_sweet')||'לקבוע'),
+'כלל אם-אז אישי: '+(gv('d_ifthen')||'לקבוע'),
+'3 מטרות יומיות: '+gv('d_goals'),
+'חלונות תכנון שבועיים: '+(gv('d_plan')||'שבת + אמצע שבוע'),
+'מדד משני: '+gv('d_metric'),
+'',
+'— דגלים —',
+...(a.flags.length? a.flags.map(f=>'• '+f.replace(/<[^>]+>/g,'')) : ['אין']),
+'',
+'— טריגרים למתוקים —',
+...a.triggers.map(t=>'• '+t.t+' → '+t.tool),
+'',
+'— החלפות תזונתיות —',
+'הגבלות: '+((d.f_diet||[]).join(', ')||'אין')+(d.f_diet_other?' · '+d.f_diet_other:''),
+'סלט: '+a.sub.salad+' · דייסה: '+a.sub.oats+' + '+a.sub.porridgeProtein+' · שקית ירקות: '+a.sub.bagNuts,
+(a.sub.kosherNote?'• '+a.sub.kosherNote:''),
+'',
+'— עמודי התוכנית (קבועים, לשילוב בתוכן הכלי) —',
+'• שני מפתחות חובה: (1) קשב לשובע — עצירה ב-80%, זכירת עיכוב 20 דקות קיבה-מוח (2) ירקות בכל ארוחה — כל ארוחה נפתחת בירק',
+'• סדר אכילה: ירק ← חלבון ← פחמימה',
+'• דייסת הפתיחה: כף שטוחה צ׳יה + 3 כפות '+a.sub.oats+' + כפית סוכר/דבש + '+a.sub.porridgeProtein+' + כף קינמון',
+'• סלט יומי חובה: בטטה מהתנור בקוביות + ירק טרי + 3 כפות קטניות + '+a.sub.salad+' + 2 כפות וינגרט',
+'• וינגרט: 4 כפות שמן זית, 2 כפות חומץ בן יין/לימון, כפית חרדל דיז׳ון, כפית דבש, מלח ופלפל',
+'• קופסת ירקות במקרר: 2 ירקות ליום ל-3-4 ימים · כלל: 2 ירקות בכל יציאה מהבית',
+'• תסריט מסעדה: ירק ראשון, חלבון במרכז, עצירה ב-80%',
+'• פרוטוקול שקילה: פעם בשבוע, אותו יום, בבוקר, אחרי שירותים, לפני אוכל',
+'• כשנופלים: חריגה היא נתון, לא כישלון. הארוחה הבאה חוזרת לתוכנית — לא ״מחר״. בלי ימי פיצוי ובלי ענישה',
+'• מפתחות בונוס לשלב מאוחר: 20-30 לעיסות לביס, אכילה בלי מסכים',
+'• סולם רעב 1-10: 3=רעב אמיתי וזמן לאכול, 7=נעים ומספיק וכאן עוצרים, 8+=עברנו. זו ההגדרה המעשית של עצירה ב-80%',
+'• חלוקת חלבון: היעד היומי מתחלק לכ-3 מנות שוות, לא הכל בערב',
+'• פרוטוקול פלטו: שבועיים יציבות = לא משנים כלום ובודקים היקף מותניים · שבוע שלישי = בדיקת חלבון ושינה · רק אז שוקלים התאמת תקציב',
+'• תוכנית סיום: בהגעה ליעד, שבועיים תחזוקה מכוונת בתקציב '+(a.budget+300)+' קלוריות עם כל ההרגלים, ואז החלטה משותפת על שלב ב׳ או תחזוקה קבועה',
+(a.triggers.some(x=>x.t.includes('רגשית'))?'• לכלול את טכניקת 5 השלבים להתמודדות עם דחפים (נשימות ← קבלה ← גלים ← תודעת קושי ← שיקוף)':''),
+'',
+'— תשובות גולמיות —',
+'השכמה: '+d.f_wake+' · שינה: '+d.f_sleep+' · שינה בפועל: '+(a.sleepDur!=null?r1(a.sleepDur)+' שעות':'—'),
+'אכילה ראשונה: '+d.f_firstmeal_t+' ('+(d.f_firstmeal_w||'')+')',
+'אכילה אחרונה: '+d.f_lastmeal_t+' ('+(d.f_lastmeal_w||'')+')',
+'מתוקים: '+d.f_sweets,
+'מטוגנים: '+(d.f_fried||'—'),
+'קפה: '+d.f_coffee_n+' כוסות, '+(d.f_coffee_sugar||0)+' כפיות סוכר, חלב: '+(d.f_coffee_milk||'—')+' · יעד: אפס סוכר, חצי חלב',
+'משקאות: '+(d.f_drinks||'—'),
+'אכילה בחוץ: '+(d.f_out_freq||'')+' · '+(d.f_out_what||''),
+'ארוחה משפחתית: '+(d.f_family||'—'),
+'רפואי: '+d.f_medical+' · תרופות: '+d.f_meds+' · יחסים עם אוכל: '+(d.f_ed||'—'),
+'פעילות: '+(d.f_occupation||'')+' · '+(d.f_exfreq||'')+' · '+(d.f_extype||'')+' · אוהב: '+(d.f_exlove||'—'),
+'ה״למה״: '+(d.f_why||'—'),
+'שעת תזכורת: '+(d.f_reminder||'08:00'),
+'',
+'— CLIENT_CONFIG מוכן להדבקה בקוד האפליקציה —',
+'const CLIENT_CONFIG = {',
+"    name: '"+(d.f_name||'').replace(/'/g,'׳')+"',",
+'    startWeight: '+(+d.f_weight||0)+',',
+'    targetWeight: '+target+',',
+'    calorieBudget: '+a.budget+',',
+'    proteinTarget: '+a.protein(target)+',',
+"    eatStart: "+(gv('d_start')?"'"+gv('d_start')+"'":'null')+',',
+"    eatLast: "+(gv('d_last')?"'"+gv('d_last')+"'":'null')+',',
+'    flexWeekday: '+(a.flexDayNum!=null?a.flexDayNum:'null')+',   // 0=ראשון..6=שבת',
+"    flexLabel: '"+(gv('d_flex')||'').replace(/'/g,'׳')+"',",
+'    waistTracking: '+((gv('d_metric')||'').includes('היקף')?'true':'false')+',',
+"    ifThenRule: '"+(gv('d_ifthen')||'').replace(/'/g,'׳')+"',",
+"    why: '"+(d.f_why||'').replace(/'/g,'׳').replace(/\n/g,' ')+"'",
+'};',
+  ];
+  copyText(lines.join('\n'),'הסיכום המלא הועתק ✓ להדביק לקלוד');
+});
+
+/* coach buttons */
+function analyzePaste(){
+  const txt=$('pasteBox').value;
+  const m=txt.match(/Q2:([A-Za-z0-9+/=]+)/);
+  if(!m){ toast('לא נמצא קוד בהודעה — לוודא שהועתקה במלואה'); return false; }
+  try{ renderCoach(analyze(decodeData(m[1]))); toast('נותח ✓'); return true; }
+  catch(e){ toast('הקוד פגום — לבקש מהלקוח לשלוח שוב'); return false; }
+}
+$('btnAnalyzePaste').addEventListener('click',analyzePaste);
+$('pasteBox').addEventListener('paste',()=>{ setTimeout(()=>{ if(/Q2:[A-Za-z0-9+/=]+/.test($('pasteBox').value)) analyzePaste(); },60); });
+$('btnAnalyzeForm').addEventListener('click',()=>{
+  const miss=missingReq();
+  if(miss.length){ toast('חסר בטופס: '+miss.map(f=>REQ_NAMES[f]).join(', ')); return; }
+  const errs=rangeErrors();
+  if(errs.length){ toast('לתקן: '+errs.map(e=>e[1]).join(' · ')); return; }
+  renderCoach(analyze(collect())); toast('נותח ✓');
+});
+</script>
+</body>
+</html>

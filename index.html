@@ -1680,7 +1680,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 9500;
+            z-index: 500;
             padding: 20px;
             animation: fadeIn 0.3s ease-out;
         }
@@ -1798,7 +1798,6 @@
         }
         
         .commitment-option:active { transform: scale(0.98); }
-        .commitment-option * { pointer-events: none; }
         
         .commitment-option.selected {
             background: var(--pistachio-wash);
@@ -1875,9 +1874,6 @@
             flex-direction: column;
             max-height: 90vh;
             overflow: hidden;
-        }
-        .modal.modal-with-sticky-footer .modal-scroll-area {
-            padding-bottom: 48px;
         }
         .modal-scroll-area {
             flex: 1;
@@ -3273,7 +3269,6 @@
         }
         
         .type-btn:active { transform: scale(0.97); }
-        .type-btn * { pointer-events: none; }
         
         .type-btn.selected {
             background: var(--lilac-wash);
@@ -8296,202 +8291,6 @@
             font-style: italic;
         }
 
-        /* ============ COMEBACK WARM STRIP (inside catch-up) ============ */
-        .catchup-warm-strip {
-            background: var(--pistachio-wash, rgba(169, 211, 158, 0.15));
-            border: 1px solid rgba(107, 156, 94, 0.25);
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin: 12px 0 16px;
-            text-align: center;
-        }
-        .catchup-warm-why {
-            font-family: var(--serif);
-            font-size: 16px;
-            font-style: italic;
-            color: var(--ink-primary);
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-        .catchup-warm-stats {
-            display: flex;
-            justify-content: center;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .catchup-warm-stat {
-            font-size: 13px;
-            color: var(--ink-secondary, #5a5752);
-        }
-        .catchup-warm-stat strong {
-            font-size: 16px;
-            color: var(--pistachio-deep, #6b9c5e);
-            display: block;
-        }
-
-        /* ============ SOS - "רגע קשה" ============ */
-        #sosModal .reality-modal,
-        #diaryShareModal .reality-modal {
-            max-height: 88vh;
-            overflow-y: auto;
-        }
-        .sos-open-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            margin: var(--s-4, 16px) 0;
-            background: var(--paper, #fdfbf6);
-            border: 1.5px dashed var(--lilac-deep, #9169c8);
-            border-radius: 16px;
-            cursor: pointer;
-            font-family: inherit;
-            text-align: start;
-            transition: transform 0.1s ease;
-        }
-        .sos-open-btn:active { transform: scale(0.98); }
-        .sos-open-icon { font-size: 22px; flex-shrink: 0; }
-        .sos-open-title {
-            font-family: var(--serif);
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--ink-primary);
-        }
-        .sos-open-sub {
-            font-size: 13px;
-            color: var(--ink-tertiary, #8a867e);
-            margin-top: 1px;
-        }
-        .sos-why-quote {
-            background: var(--lilac-wash, rgba(206, 162, 253, 0.14));
-            border-inline-start: 3px solid var(--lilac-deep, #9169c8);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin: 14px 0;
-            font-family: var(--serif);
-            font-style: italic;
-            font-size: 17px;
-            line-height: 1.55;
-            color: var(--ink-primary);
-        }
-        .sos-why-label {
-            font-family: var(--sans, inherit);
-            font-style: normal;
-            font-size: 11px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--lilac-deep, #9169c8);
-            margin-bottom: 4px;
-        }
-        .sos-achievements {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin: 14px 0;
-        }
-        .sos-ach {
-            background: var(--pistachio-wash, rgba(169, 211, 158, 0.15));
-            border-radius: 12px;
-            padding: 10px 6px;
-            text-align: center;
-        }
-        .sos-ach-num {
-            font-family: var(--serif);
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--pistachio-deep, #6b9c5e);
-        }
-        .sos-ach-label {
-            font-size: 11.5px;
-            color: var(--ink-tertiary, #8a867e);
-            margin-top: 2px;
-        }
-        .sos-grounding {
-            font-size: 14.5px;
-            line-height: 1.6;
-            color: var(--ink-secondary, #5a5752);
-            margin: 12px 0 16px;
-        }
-        .sos-continue-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--pistachio-deep, #6b9c5e);
-            color: #fff;
-            border: none;
-            border-radius: 14px;
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .sos-secondary-btn {
-            width: 100%;
-            padding: 12px;
-            margin-top: 8px;
-            background: none;
-            border: none;
-            color: var(--ink-tertiary, #8a867e);
-            font-family: inherit;
-            font-size: 14px;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        /* ============ DIARY SHARE (email to coach) ============ */
-        .diary-share-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            margin-top: var(--s-4, 16px);
-            background: var(--paper, #fdfbf6);
-            border: 1px solid var(--border-hair, rgba(0,0,0,0.08));
-            border-radius: 16px;
-            cursor: pointer;
-            font-family: inherit;
-            text-align: start;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            transition: transform 0.1s ease;
-        }
-        .diary-share-btn:active { transform: scale(0.98); }
-        .diary-option-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            margin-top: 10px;
-            background: var(--pistachio-wash, rgba(169, 211, 158, 0.15));
-            border: 1px solid rgba(107, 156, 94, 0.25);
-            border-radius: 14px;
-            cursor: pointer;
-            font-family: inherit;
-            text-align: start;
-        }
-        .diary-option-btn.secondary {
-            background: var(--paper, #fdfbf6);
-            border: 1px solid var(--border-hair, rgba(0,0,0,0.1));
-        }
-        .diary-option-icon { font-size: 20px; flex-shrink: 0; }
-        .diary-option-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--ink-primary);
-        }
-        .diary-option-sub {
-            font-size: 12.5px;
-            color: var(--ink-tertiary, #8a867e);
-            margin-top: 1px;
-        }
-        .diary-share-note {
-            font-size: 12.5px;
-            color: var(--ink-tertiary, #8a867e);
-            line-height: 1.5;
-            margin-top: 12px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -8509,15 +8308,10 @@
         <div class="modal-input-label">משקל התחלה</div>
         <div class="modal-input-row">
             <input type="number" class="modal-input" id="startWeightInput" 
-                   inputmode="decimal" step="0.1" min="40" max="200">
+                   inputmode="decimal" step="0.1" value="82" min="40" max="200">
             <span class="modal-input-unit">ק״ג</span>
         </div>
-        <div class="modal-input-label" style="margin-top: 12px;">משקל יעד</div>
-        <div class="modal-input-row">
-            <input type="number" class="modal-input" id="targetWeightInput" 
-                   inputmode="decimal" step="0.1" value="76" min="30" max="200">
-            <span class="modal-input-unit">ק״ג</span>
-        </div>
+        <div class="modal-note">היעד קבוע: 76 ק״ג</div>
         <button class="btn-primary" onclick="startJourney()">התחלתי</button>
     </div>
 </div>
@@ -8587,7 +8381,7 @@
         </div>
         <div class="modal-actions">
             <button class="btn-modal-secondary" onclick="skipCommitment()">דלג</button>
-            <button class="btn-primary" onclick="saveCommitment()" id="saveCommitBtn" style="padding: 12px;">שמור</button>
+            <button class="btn-primary" onclick="saveCommitment()" id="saveCommitBtn" disabled style="padding: 12px;">שמור</button>
         </div>
     </div>
 </div>
@@ -8622,15 +8416,14 @@
 <!-- ============ CATCH-UP CARD - Recovery from missed days ============ -->
 <div class="catchup-overlay" id="catchupOverlay">
     <button class="anchor-close-x" onclick="closeCatchUp()" aria-label="סגור">✕</button>
-    <div class="catchup-greeting">✨ טוב שחזרת</div>
-    <div id="catchupWarmStrip"></div>
-    <div class="catchup-subtitle" id="catchupSubtitle">נמשיך מאיפה שעצרנו. בלי אשמה — פשוט ממשיכים.</div>
+    <div class="catchup-greeting">✨ ברוך השב, רן</div>
+    <div class="catchup-subtitle" id="catchupSubtitle">ראיתי שלא נפגשנו כמה ימים. זה בסדר!<br>אפשר להשלים בקצב שלך:</div>
     
     <div class="catchup-days-list" id="catchupDaysList">
         <!-- Days populated dynamically -->
     </div>
     
-    <button class="catchup-cta" onclick="closeCatchUp()">➡️ ממשיכים מהיום</button>
+    <button class="catchup-cta" onclick="closeCatchUp()">➡️ המשך להיום</button>
 </div>
 
 <!-- ============ PAST DAY BANNER - removed: catch-up now directs to meal logger ============ -->
@@ -8781,6 +8574,7 @@
             </button>
         </div>
         <div id="specialDayBannerContainer"></div>
+        <div id="eatWindowChip" style="display:none;text-align:center;font-size:13.5px;color:#6b9c5e;background:#f0f7ed;border-radius:99px;padding:5px 16px;margin:8px auto 4px;width:fit-content"></div>
         <div class="habits-wrap">
             <div class="habits-grid" id="habitsGrid"></div>
         </div>
@@ -8901,14 +8695,9 @@
     </div>
     </section>
     
-    <!-- ====== SOS - moment of temptation / wanting to quit ====== -->
-    <button class="sos-open-btn" onclick="openSosModal()">
-        <span class="sos-open-icon">🫂</span>
-        <span style="flex: 1; min-width: 0;">
-            <span class="sos-open-title" style="display: block;">בא לך לוותר? לחץ כאן</span>
-            <span class="sos-open-sub" style="display: block;">תזכורת של 30 שניות למה התחלת ומה כבר השגת</span>
-        </span>
-    </button>
+    <div style="text-align:center;margin:18px 0 2px">
+        <a href="#" onclick="openFallModal();return false" style="font-size:13.5px;color:#8a8780;text-decoration:none;border-bottom:1px dashed #d8d5cd">יום לא פשוט? יש לנו כלל לזה</a>
+    </div>
 
     <div class="editorial-footer">
         <span class="ef-mark">· fin ·</span>
@@ -9020,16 +8809,6 @@
         <div class="section-title-text">ארוחות היום</div>
     </div>
     <div class="logged-meals-list" id="loggedMealsList"></div>
-
-    <!-- Send diary to Ran -->
-    <button class="diary-share-btn" onclick="openDiaryShare()">
-        <span class="diary-option-icon">📧</span>
-        <span style="flex: 1; min-width: 0;">
-            <span class="diary-option-title" style="display: block;">שלח יומן אכילה לרן</span>
-            <span class="diary-option-sub" style="display: block;">יומן מסודר לפי ימים ושעות · ישירות למייל</span>
-        </span>
-        <span style="color: var(--ink-tertiary); font-size: 20px;">‹</span>
-    </button>
 </div>
 
 <!-- ============ SCREEN: WEIGHT ============ -->
@@ -9058,6 +8837,23 @@
             <div class="week-badge-small" id="prevWeekBadge">שבוע 1</div>
             <button class="week-nav-btn" id="weekNavNext">›</button>
         </div>
+    </div>
+
+    <div class="weight-input-card" id="waistCard" style="display:none">
+        <div class="weight-week-label">היקף מותניים</div>
+        <div class="weight-week-status" id="waistStatusLabel">אחת לשבועיים · בגובה הטבור · סרט מדידה</div>
+        <div class="weight-input-row">
+            <input type="number" class="weight-input" id="waistInput"
+                   inputmode="decimal" step="0.5" placeholder="--" min="40" max="200">
+            <span class="weight-unit">ס״מ</span>
+        </div>
+        <button class="btn-primary" id="saveWaistBtn">שמירת היקף</button>
+        <div class="weight-week-status" id="waistLastLabel" style="margin-top:10px"></div>
+    </div>
+
+    <div class="weight-input-card" id="plateauCard" style="display:none">
+        <div class="weight-week-label">המשקל יציב? זה שלב צפוי</div>
+        <div class="weight-week-status" id="plateauText" style="white-space:normal;line-height:1.65;margin-top:6px"></div>
     </div>
 
     <div class="section-title">
@@ -9169,31 +8965,21 @@
                 <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">התראה יומית</div>
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">תזכורת אוטומטית של 3 המטרות · הכי מומלץ להתקין כאפליקציה קודם</div>
                 
-                <!-- Time picker: custom stepper (no native dialog, never clipped) -->
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; padding: 12px; background: var(--paper-cool); border-radius: 10px;">
-                    <span style="font-size: 14px; color: var(--ink-secondary); font-family: var(--sans);">שעת התזכורת</span>
-                    <div dir="ltr" style="display: flex; align-items: center; gap: 6px;">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                            <button onclick="bumpNotifTime('h',1)" aria-label="שעה +" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▲</button>
-                            <div id="notifHourDisplay" style="width:46px;text-align:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-primary);">15</div>
-                            <button onclick="bumpNotifTime('h',-1)" aria-label="שעה -" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▼</button>
-                        </div>
-                        <div style="font-size:22px;font-weight:700;color:var(--ink-tertiary);">:</div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                            <button onclick="bumpNotifTime('m',5)" aria-label="דקות +" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▲</button>
-                            <div id="notifMinuteDisplay" style="width:46px;text-align:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-primary);">30</div>
-                            <button onclick="bumpNotifTime('m',-5)" aria-label="דקות -" style="width:40px;height:26px;border:1px solid var(--border);border-radius:8px;background:white;font-size:14px;line-height:1;cursor:pointer;color:var(--ink-secondary);padding:0;">▼</button>
-                        </div>
-                    </div>
-                    <span style="font-size: 11px; color: var(--ink-tertiary);" id="notifTimeHint"></span>
+                <!-- Time picker row -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px; background: var(--paper-cool); border-radius: 10px;">
+                    <label for="notifTimeInput" style="font-size: 13px; color: var(--ink-secondary); font-family: var(--sans);">שעה:</label>
+                    <input type="time" id="notifTimeInput" 
+                           onchange="onNotifTimeChange()"
+                           style="padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; font-family: inherit; background: white; color: var(--ink-primary);">
+                    <span style="font-size: 11px; color: var(--ink-tertiary); margin-inline-start: auto;" id="notifTimeHint"></span>
                 </div>
-
+                
                 <!-- Enable/disable button -->
-                <button id="notifToggleBtn" onclick="toggleDailyNotifications()"
-                        style="margin-top: 10px; background: var(--ink-primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer; font-family: var(--sans); font-weight: 600; width: 100%;">🔕 הפעל התראות יומיות</button>
-
-                <!-- Scheduling support status / help -->
-                <div id="notifSupportHint" style="font-size: 12px; color: var(--ink-tertiary); margin-top: 8px; line-height: 1.55;"></div>
+                <button id="notifToggleBtn" 
+                        onclick="toggleDailyNotifications()"
+                        style="margin-top: 10px; background: var(--ink-primary); color: white; 
+                               border: none; padding: 10px 20px; border-radius: 20px; font-size: 14px; cursor: pointer;
+                               font-family: var(--sans); font-weight: 600; width: 100%;">🔕 הפעל התראות יומיות</button>
             </div>
         </div>
     </div>
@@ -9207,42 +8993,6 @@
                 <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">סקור 14 ימים אחורה · בחר יום והשלם נתונים</div>
             </div>
             <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
-        </div>
-    </div>
-
-    <!-- Edit "why" anytime -->
-    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
-        <div onclick="openWhyEditor()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
-            <div style="font-size: 24px;">💭</div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">ה"למה" שלי</div>
-                <div id="whyMorePreview" style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">הוסף משפט שיזכיר לך למה התחלת</div>
-            </div>
-            <div style="color: var(--ink-tertiary); font-size: 20px;">‹</div>
-        </div>
-    </div>
-
-    <!-- SOS - moment of crisis -->
-    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
-        <div onclick="openSosModal()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
-            <div style="font-size: 24px;">🫂</div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">רגע קשה</div>
-                <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">כשבא לוותר · תזכורת למה התחלת ומה כבר השגת</div>
-            </div>
-            <div style="color: var(--lilac-deep); font-size: 20px;">‹</div>
-        </div>
-    </div>
-
-    <!-- Send meal diary to Ran -->
-    <div class="settings-card" style="cursor: pointer; padding: 0; margin-top: var(--s-3);">
-        <div onclick="openDiaryShare()" style="display: flex; align-items: center; padding: var(--s-4) var(--s-5); gap: var(--s-3);">
-            <div style="font-size: 24px;">📧</div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink-primary);">שליחת יומן אכילה לרן</div>
-                <div style="font-size: 13px; color: var(--ink-tertiary); margin-top: 2px;">יומן מסודר לפי ימים ושעות · ישירות למייל</div>
-            </div>
-            <div style="color: var(--pistachio-deep); font-size: 20px;">‹</div>
         </div>
     </div>
 
@@ -9401,64 +9151,22 @@
     </div>
 </div>
 
-<!-- ============ SOS MODAL - "רגע קשה" (crisis / urge moment) ============ -->
-<div class="reality-modal-overlay" id="sosModal">
-    <div class="reality-modal">
-        <div class="reality-modal-handle"></div>
-        <div class="reality-modal-title">רגע קשה? זה חלק מהמסע.</div>
-        <div id="sosContent">
-            <!-- Populated by openSosModal() -->
-        </div>
-        <button class="sos-continue-btn" onclick="sosContinue()">אני ממשיך 💪</button>
-        <button class="sos-secondary-btn" onclick="sosOpenReality()">קרה משהו? רשום בלי שיפוט</button>
-    </div>
-</div>
-
-<!-- ============ MANUAL MEAL MODAL - replaces prompt() windows ============ -->
-<div class="reality-modal-overlay" id="manualMealModal">
-    <div class="reality-modal">
-        <div class="reality-modal-handle"></div>
-        <div class="reality-modal-title" id="manualMealTitle">הזנה ידנית</div>
-        <div class="reality-modal-sub">מלא מה שידוע - גם אומדן גס עוזר.</div>
-
-        <textarea class="reality-input" id="manualMealText" 
-                  placeholder="תיאור הארוחה..." rows="2" dir="rtl"></textarea>
-
-        <div class="reality-cal-row">
-            <div class="reality-cal-label">קלוריות (אומדן):</div>
-            <input type="number" class="reality-cal-input" id="manualMealCal" 
-                   inputmode="numeric" placeholder="0" min="0" max="3000">
-        </div>
-        <div class="reality-cal-row">
-            <div class="reality-cal-label">חלבון (גר׳):</div>
-            <input type="number" class="reality-cal-input" id="manualMealProtein" 
-                   inputmode="numeric" placeholder="0" min="0" max="300">
-        </div>
-
-        <div class="reality-modal-btns">
-            <button class="reality-save-btn" onclick="saveManualMeal()">שמור</button>
-            <button class="reality-cancel-btn" onclick="closeManualMeal()">ביטול</button>
-        </div>
-    </div>
-</div>
-
-<!-- ============ DIARY SHARE - send meal diary to Ran ============ -->
-<div class="reality-modal-overlay" id="diaryShareModal">
-    <div class="reality-modal">
-        <div class="reality-modal-handle"></div>
-        <div class="reality-modal-title">📧 שליחת יומן אכילה לרן</div>
-        <div class="reality-modal-sub">
-            היומן מסודר לפי ימים, ובכל יום לפי שעות - כולל סיכום קלוריות וחלבון יומי.
-        </div>
-        <div id="diaryShareOptions">
-            <!-- Populated by openDiaryShare() -->
-        </div>
-        <div class="diary-share-note" id="diaryShareNote"></div>
-        <button class="sos-secondary-btn" onclick="closeDiaryShare()">סגור</button>
-    </div>
-</div>
-
 <!-- ============ DAY TYPE MODAL ============ -->
+<!-- ============ MODAL: כשנופלים ============ -->
+<div class="modal-overlay" id="fallModal" style="display: none;" onclick="if(event.target===this)closeFallModal()">
+    <div class="modal">
+        <div class="modal-title">חרגת? זה חלק מהתוכנית</div>
+        <div class="modal-text">
+            חריגה היא <strong>נתון</strong>, לא כישלון. היא לא מוחקת שום דבר ממה שכבר בנית.<br><br>
+            <strong>הכלל שלנו אחד:</strong> הארוחה הבאה חוזרת לתוכנית. לא ״מחר״, לא ״יום ראשון״. הארוחה הבאה.<br><br>
+            בלי ימי פיצוי, בלי ענישה, בלי דילוג על ארוחות. מה שקובע את התוצאה זה מה שעושים בשעה הקרובה.<br><br>
+            💡 עכשיו: כוס מים, 10 דקות הליכה, וממשיכים כרגיל.
+        </div>
+        <div class="modal-text" id="fallRuleLine" style="display:none;background:#f7f0ff;border-radius:12px;padding:12px 14px;margin-top:4px"></div>
+        <button class="btn-primary" onclick="closeFallModal()" style="width:100%">הארוחה הבאה · בתוכנית</button>
+    </div>
+</div>
+
 <div class="modal-overlay" id="dayTypeModal" style="display: none;">
     <div class="modal">
         <div class="modal-title">סוג היום</div>
@@ -9533,7 +9241,7 @@
         <div class="workout-section">
             <div class="workout-section-label">סוג אימון</div>
             <div class="type-options" id="typeOptions">
-                <button class="type-btn" data-type="jumprope">
+                <button class="type-btn" data-type="jumprope" style="background: var(--pistachio-wash); border: 2px solid var(--pistachio-deep);">
                     <span style="font-size: 24px;">🪢</span>
                     <span>קפיצת חבל</span>
                 </button>
@@ -9592,7 +9300,7 @@
         <div class="modal-sticky-footer">
             <div class="modal-actions">
                 <button class="btn-modal-secondary" onclick="closeWorkoutModal()">סגור</button>
-                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" style="padding: 12px;">שמור</button>
+                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" disabled style="padding: 12px;">שמור</button>
             </div>
         </div>
     </div>
@@ -9653,20 +9361,23 @@
 
 <script>
 // ==================== CONFIG ====================
-// ===== הגדרות לקוח - לשנות רק כאן בעת שכפול ללקוח חדש =====
-const CLIENT_START_WEIGHT = 82;  // משקל התחלה של הלקוח (ק"ג)
-const GOAL_WEIGHT = 76;          // משקל יעד של הלקוח (ק"ג)
-function goalWeight() {
-    return (state && state.goal && typeof state.goal.targetWeight === 'number')
-        ? state.goal.targetWeight : GOAL_WEIGHT;
-}
+// CLIENT_CONFIG — נוצר אוטומטית משאלון ההתאמה (מסך המלווה מפיק בלוק מוכן להדבקה)
+const CLIENT_CONFIG = {
+    name: 'רן',
+    startWeight: 82,
+    targetWeight: 76,
+    calorieBudget: null,     // תקציב קלורי יומי מהשאלון
+    proteinTarget: null,     // גרם חלבון ליום (1.2 × משקל יעד)
+    eatStart: null,          // 'HH:MM' תחילת אכילה יומית
+    eatLast: null,           // 'HH:MM' ארוחה אחרונה
+    flexWeekday: null,       // יום גמיש קבוע: 0=ראשון ... 6=שבת, או null
+    flexLabel: '',           // למשל: 'ארוחת שישי משפחתית'
+    waistTracking: true,     // מעקב היקף מותניים אחת לשבועיים
+    ifThenRule: '',          // כלל אם-אז אישי, למשל: 'אם אני מול הטלוויזיה ומרגיש חשק, אז...'
+    why: ''
+};
+const GOAL_WEIGHT = CLIENT_CONFIG.targetWeight;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-// Prefill the start-weight input from the client config (runs after DOM is parsed at end of body)
-document.addEventListener('DOMContentLoaded', () => {
-    const swInput = document.getElementById('startWeightInput');
-    if (swInput && !swInput.value) swInput.value = CLIENT_START_WEIGHT;
-});
 
 const HABITS = [
     { id: 'protein', icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\">\n    <circle cx=\"20\" cy=\"20\" r=\"17\" stroke=\"#A9D39E\" stroke-width=\"0.7\" stroke-dasharray=\"2 3\" opacity=\"0.5\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"14\" fill=\"#f0f7ed\" stroke=\"#A9D39E\" stroke-width=\"1\"/>\n    <ellipse cx=\"20\" cy=\"20\" rx=\"9\" ry=\"6\" fill=\"#CEA2FD\" opacity=\"0.25\"/>\n    <ellipse cx=\"20\" cy=\"20\" rx=\"9\" ry=\"6\" fill=\"none\" stroke=\"#9169c8\" stroke-width=\"1.2\"/>\n    <ellipse cx=\"17\" cy=\"19\" rx=\"1\" ry=\"0.8\" fill=\"#9169c8\" opacity=\"0.7\"/>\n    <ellipse cx=\"22\" cy=\"20.5\" rx=\"0.9\" ry=\"0.7\" fill=\"#9169c8\" opacity=\"0.5\"/>\n    <ellipse cx=\"19\" cy=\"22\" rx=\"0.8\" ry=\"0.6\" fill=\"#9169c8\" opacity=\"0.6\"/>\n    <path d=\"M 13 14 Q 11 12 12.5 11\" stroke=\"#6b9c5e\" stroke-width=\"0.8\" \n          stroke-linecap=\"round\" fill=\"none\"/>\n    <circle cx=\"12.5\" cy=\"10.5\" r=\"0.6\" fill=\"#A9D39E\"/>\n    <path d=\"M 27 26 Q 29 28 27.5 29\" stroke=\"#6b9c5e\" stroke-width=\"0.8\" \n          stroke-linecap=\"round\" fill=\"none\"/>\n    <circle cx=\"27.5\" cy=\"29.5\" r=\"0.6\" fill=\"#A9D39E\"/>\n</svg>", name: 'חלבון בכל ארוחה', desc: 'ביצים/קטניות/יוגורט/טופו' },
@@ -10135,7 +9846,7 @@ function loadState() {
         s = { 
             started: false, 
             startTimestamp: null, 
-            startWeight: CLIENT_START_WEIGHT,
+            startWeight: CLIENT_CONFIG.startWeight,
             days: {},          // { "1": { protein: true, ..., commitment: 'protein', reflection: '...' } }
             weights: {},
             bestStreak: 0
@@ -10144,11 +9855,12 @@ function loadState() {
     // ===== Migration v5 - PRD additions =====
     if (!s.goal) {
         s.goal = {
-            targetWeight: GOAL_WEIGHT,
+            targetWeight: CLIENT_CONFIG.targetWeight,
             weeklyDeficitTarget: 3500,
             bodyFatOptional: null
         };
     }
+    if (!s.waists) s.waists = {};   // מדידות היקף מותניים: { weekNum: cm }
     if (!s.settings) {
         s.settings = {
             claudeApiKey: '',
@@ -10226,7 +9938,7 @@ function daysInWeek(weekNum) {
 function getCurrentWeight() {
     const weeks = Object.keys(state.weights).map(Number).sort((a, b) => b - a);
     for (const w of weeks) if (state.weights[w] != null) return state.weights[w];
-    return state.startWeight || CLIENT_START_WEIGHT;
+    return state.startWeight || CLIENT_CONFIG.startWeight;
 }
 
 // ==================== DAY TYPES ====================
@@ -10234,10 +9946,20 @@ function getCurrentWeight() {
 // 'flex'     - יום גמיש (אחת לשבוע): אירוח, אירוע מתוכנן. לא שובר סטריק.
 // 'off'      - יום חופש: חג, חופשה, אירוע חריג. לא שובר סטריק.
 
+function dayNumWeekday(dayNum) {
+    // מחזיר 0=ראשון ... 6=שבת עבור יום במסע, או null אם המסע לא התחיל
+    if (!state.startTimestamp) return null;
+    const d = new Date(state.startTimestamp);
+    d.setDate(d.getDate() + (dayNum - 1));
+    return d.getDay();
+}
+
 function getDayType(dayNum) {
     const data = state.days[dayNum];
-    if (!data || !data.day_type) return 'regular';
-    return data.day_type;
+    if (data && data.day_type) return data.day_type;
+    // יום גמיש קבוע מהשאלון: נקבע אוטומטית מראש, ניתן לעקוף ידנית במודל סוג היום
+    if (CLIENT_CONFIG.flexWeekday !== null && dayNumWeekday(dayNum) === CLIENT_CONFIG.flexWeekday) return 'flex';
+    return 'regular';
 }
 
 function isSpecialDay(dayNum) {
@@ -10347,16 +10069,9 @@ function startJourney() {
         showToast('הכנס משקל תקין');
         return;
     }
-    const targetWeight = parseFloat(document.getElementById('targetWeightInput').value);
-    if (isNaN(targetWeight) || targetWeight < 30 || targetWeight > 200) {
-        showToast('הכנס משקל יעד תקין');
-        return;
-    }
     state.started = true;
     state.startTimestamp = Date.now();
     state.startWeight = startWeight;
-    if (!state.goal) state.goal = {};
-    state.goal.targetWeight = targetWeight;
     saveState();
     document.getElementById('startModal').style.display = 'none';
     viewingDayNum = 1;
@@ -10403,10 +10118,7 @@ function selectCommitment(value) {
 }
 
 function saveCommitment() {
-    if (!selectedCommitment) {
-        showToast('בחר מחויבות אחת');
-        return;
-    }
+    if (!selectedCommitment) return;
     if (!state.days[viewingDayNum]) state.days[viewingDayNum] = {};
     state.days[viewingDayNum].commitment = selectedCommitment;
     saveState();
@@ -10596,10 +10308,10 @@ function renderJitTip() {
 
 // ==================== HERO STATS ====================
 function renderHero() {
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const current = getCurrentWeight();
     const totalDelta = startWeight - current;
-    const toGoal = Math.max(0, current - goalWeight());
+    const toGoal = Math.max(0, current - GOAL_WEIGHT);
 
     const currEl = document.getElementById('currentWeight');
     const lossEl = document.getElementById('totalLoss');
@@ -10654,7 +10366,7 @@ function renderGoalJourney() {
     const container = document.getElementById('goalJourney');
     if (!container) return;
     
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const target = (state.goal && state.goal.targetWeight) || GOAL_WEIGHT;
     const current = getCurrentWeight();
     
@@ -11130,7 +10842,106 @@ function renderWeightScreen() {
     document.getElementById('weekNavNext').disabled = weighingWeekNum >= currentWeek;
     
     renderWeekHistory();
+    renderWaistCard();
+    renderPlateauCard();
 }
+
+// ==================== PLATEAU DETECTION ====================
+// מופיע רק כשפלטו קורה בפועל: 3 שקילות אחרונות בטווח של 0.4 ק״ג על פני שבועיים ומעלה
+function renderPlateauCard() {
+    const card = document.getElementById('plateauCard');
+    if (!card) return;
+    const weeks = Object.keys(state.weights).map(Number).filter(w => state.weights[w] != null).sort((a, b) => a - b);
+    let show = false;
+    if (weeks.length >= 3) {
+        const last3 = weeks.slice(-3);
+        const vals = last3.map(w => state.weights[w]);
+        const span = Math.max.apply(null, vals) - Math.min.apply(null, vals);
+        const stillLosing = vals[0] - vals[2] > 0.4; // עדיין יורד יפה - אין פלטו
+        if (span <= 0.4 && !stillLosing && (last3[2] - last3[0]) >= 2) show = true;
+    }
+    if (!show) { card.style.display = 'none'; return; }
+    card.style.display = '';
+    const el = document.getElementById('plateauText');
+    if (el) el.textContent = 'שבועיים-שלושה של יציבות הם חלק נורמלי מהדרך, לא סימן שמשהו נשבר. בשלב הזה לא משנים כלום: מודדים היקף מותניים (הגוף ממשיך להשתנות גם כשהמשקל עומד), וממשיכים להקפיד על חלבון ושינה. אם היציבות נמשכת עוד שבוע, נבדוק יחד את ההקפדה לפני כל שינוי בתקציב.';
+}
+
+// ==================== WAIST TRACKING (אחת לשבועיים) ====================
+function renderWaistCard() {
+    const card = document.getElementById('waistCard');
+    if (!card) return;
+    if (!CLIENT_CONFIG.waistTracking) { card.style.display = 'none'; return; }
+    card.style.display = '';
+    if (!state.waists) state.waists = {};
+    const wk = getCurrentWeekNum();
+    const weeks = Object.keys(state.waists).map(Number).sort((a, b) => b - a);
+    const lastWk = weeks.length ? weeks[0] : null;
+    const due = lastWk === null || (wk - lastWk) >= 2;
+    const status = document.getElementById('waistStatusLabel');
+    if (status) status.textContent = due
+        ? 'הגיע זמן המדידה · בגובה הטבור · סרט מדידה'
+        : 'המדידה הבאה בשבוע ' + (lastWk + 2) + ' · בגובה הטבור';
+    const lastEl = document.getElementById('waistLastLabel');
+    if (lastEl) {
+        if (lastWk !== null) {
+            const prevWk = weeks.length > 1 ? weeks[1] : null;
+            const delta = prevWk !== null ? (state.waists[lastWk] - state.waists[prevWk]) : null;
+            let txt = 'מדידה אחרונה: ' + state.waists[lastWk] + ' ס״מ (שבוע ' + lastWk + ')';
+            if (delta !== null && Math.abs(delta) > 0.01) txt += ' · ' + (delta < 0 ? 'ירידה של ' + Math.abs(delta).toFixed(1) : 'עלייה של ' + delta.toFixed(1)) + ' ס״מ';
+            lastEl.textContent = txt;
+        } else {
+            lastEl.textContent = 'עוד לא נמדד · מדידה ראשונה קובעת את נקודת הפתיחה';
+        }
+    }
+    const input = document.getElementById('waistInput');
+    if (input) input.value = state.waists[wk] || '';
+}
+
+(function attachWaistSave() {
+    const btn = document.getElementById('saveWaistBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+        const input = document.getElementById('waistInput');
+        const val = parseFloat(input.value);
+        if (!val || val < 40 || val > 200) { showToast('הזן היקף תקין בס״מ'); return; }
+        if (!state.waists) state.waists = {};
+        state.waists[getCurrentWeekNum()] = val;
+        saveState();
+        showToast('היקף מותניים נשמר ✓');
+        input.blur();
+        renderWaistCard();
+    });
+})();
+
+// ==================== FALL RECOVERY MODAL (כשנופלים) ====================
+window.openFallModal = function () {
+    if (typeof haptic === 'function') haptic();
+    const ruleEl = document.getElementById('fallRuleLine');
+    if (ruleEl) {
+        if (CLIENT_CONFIG.ifThenRule) {
+            ruleEl.innerHTML = '<strong>הכלל האישי שלך:</strong> ' + CLIENT_CONFIG.ifThenRule;
+            ruleEl.style.display = '';
+        } else {
+            ruleEl.style.display = 'none';
+        }
+    }
+    document.getElementById('fallModal').style.display = 'flex';
+};
+window.closeFallModal = function () {
+    document.getElementById('fallModal').style.display = 'none';
+    if (typeof showToast === 'function') showToast('הארוחה הבאה בתוכנית 💪');
+};
+
+// ==================== EATING WINDOW CHIP ====================
+(function initEatWindowChip() {
+    const chip = document.getElementById('eatWindowChip');
+    if (!chip) return;
+    const parts = [];
+    if (CLIENT_CONFIG.eatStart) parts.push('אכילה מ־' + CLIENT_CONFIG.eatStart);
+    if (CLIENT_CONFIG.eatLast) parts.push('אחרונה עד ' + CLIENT_CONFIG.eatLast);
+    if (CLIENT_CONFIG.proteinTarget) parts.push('חלבון ' + CLIENT_CONFIG.proteinTarget + ' ג׳ (כ־' + Math.round(CLIENT_CONFIG.proteinTarget / 3) + ' בארוחה)');
+    if (parts.length) { chip.textContent = parts.join(' · '); chip.style.display = 'block'; }
+})();
 
 document.getElementById('weekNavPrev').addEventListener('click', () => {
     if (weighingWeekNum > 1) { weighingWeekNum--; renderWeightScreen(); }
@@ -11143,7 +10954,7 @@ document.getElementById('weekNavNext').addEventListener('click', () => {
 function renderWeekHistory() {
     const container = document.getElementById('weekHistory');
     const weeks = Object.keys(state.weights).map(Number).sort((a, b) => b - a);
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
 
     if (weeks.length === 0) {
         container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--ink-muted); font-size: 14px; font-style: italic;">עוד לא שקלת. המשקל הראשון יופיע כאן.</div>';
@@ -11185,7 +10996,7 @@ document.getElementById('saveWeightBtn').addEventListener('click', () => {
         for (let w = weighingWeekNum - 1; w >= 1; w--) {
             if (state.weights[w] != null) return state.weights[w];
         }
-        return state.startWeight || CLIENT_START_WEIGHT;
+        return state.startWeight || CLIENT_CONFIG.startWeight;
     })();
     const delta = val - prevWeight;
     
@@ -11208,9 +11019,7 @@ document.getElementById('saveWeightBtn').addEventListener('click', () => {
 function renderMoreScreen() {
     renderWeeklyWins();
     renderMovementBadges();
-    const whyPrev = document.getElementById('whyMorePreview');
-    if (whyPrev) whyPrev.textContent = state.why ? state.why : 'הוסף משפט שיזכיר לך למה התחלת';
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const weeks = Object.keys(state.weights).map(Number).sort((a, b) => a - b);
     let avg = 0;
     if (weeks.length >= 2) {
@@ -11238,7 +11047,7 @@ function renderMoreScreen() {
 
 function renderWeightChart() {
     const container = document.getElementById('weightChart');
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const weeks = Object.keys(state.weights).map(Number).sort((a, b) => a - b);
     
     if (weeks.length < 1) {
@@ -11248,7 +11057,7 @@ function renderWeightChart() {
 
     const points = [{ x: 0, y: startWeight }, ...weeks.map(w => ({ x: w, y: state.weights[w] }))];
     const maxX = Math.max(15, ...points.map(p => p.x));
-    const allY = [...points.map(p => p.y), goalWeight(), startWeight];
+    const allY = [...points.map(p => p.y), GOAL_WEIGHT, startWeight];
     const minY = Math.min(...allY) - 0.5;
     const maxY = Math.max(...allY) + 0.5;
 
@@ -11258,7 +11067,7 @@ function renderWeightChart() {
 
     const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${scaleX(p.x)} ${scaleY(p.y)}`).join(' ');
     const areaData = pathData + ` L ${scaleX(points[points.length - 1].x)} ${H - P} L ${scaleX(0)} ${H - P} Z`;
-    const goalY = scaleY(goalWeight());
+    const goalY = scaleY(GOAL_WEIGHT);
 
     container.innerHTML = `
         <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
@@ -11437,49 +11246,23 @@ function fillWhyExample(el) {
 
 function saveWhy() {
     const input = document.getElementById('whySetupInput');
-    const val = input ? input.value.trim() : '';
+    const val = input.value.trim();
     if (!val) {
         showToast('תכתוב משפט קצר');
         return;
     }
     state.why = val;
-    state.whySkipped = false;
     saveState();
     document.getElementById('whySetupModal').style.display = 'none';
-    if (typeof haptic === 'function') haptic();
+    haptic();
     showToast('נשמר. זה יופיע כשתצטרך אותו 💫');
-    if (typeof renderWhyCard === 'function') renderWhyCard();
-    const whyPrev = document.getElementById('whyMorePreview');
-    if (whyPrev) whyPrev.textContent = val;
-    if (typeof goToTodayTop === 'function') goToTodayTop();
+    renderWhyCard();
 }
 
 function skipWhySetup() {
-    try {
-        state.whySkipped = true;
-        saveState();
-    } catch (e) { console.warn('[Why] skip failed:', e); }
-    const modal = document.getElementById('whySetupModal');
-    if (modal) modal.style.display = 'none';
-    if (typeof haptic === 'function') haptic();
-    // Return to the top of the main screen, not wherever the page was scrolled
-    if (typeof goToTodayTop === 'function') goToTodayTop();
-}
-
-// Switch to the Today tab and scroll to the very top
-function goToTodayTop() {
-    const todayBtn = document.querySelector('.nav-btn[data-screen="screen-today"]');
-    if (todayBtn) todayBtn.click();
-    requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'auto' }));
-    setTimeout(() => window.scrollTo({ top: 0 }), 60);
-}
-
-function openWhyEditor() {
-    const input = document.getElementById('whySetupInput');
-    if (input) input.value = state.why || '';
-    const modal = document.getElementById('whySetupModal');
-    if (modal) modal.style.display = 'flex';
-    if (typeof haptic === 'function') haptic();
+    state.whySkipped = true;
+    saveState();
+    document.getElementById('whySetupModal').style.display = 'none';
 }
 
 function renderWhyCard() {
@@ -11590,10 +11373,10 @@ function renderMomentumCard() {
         return;
     }
     
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const currentWeight = state.weights[weeks[weeks.length - 1]];
     const totalLoss = startWeight - currentWeight;
-    const totalNeeded = startWeight - goalWeight();
+    const totalNeeded = startWeight - GOAL_WEIGHT;
     const progressPct = Math.max(0, Math.min(100, (totalLoss / totalNeeded) * 100));
     
     // Calculate rate
@@ -11601,7 +11384,7 @@ function renderMomentumCard() {
     const avgPerWeek = weekSpan > 0 ? totalLoss / weekSpan : 0;
     
     // Project
-    const remaining = currentWeight - goalWeight();
+    const remaining = currentWeight - GOAL_WEIGHT;
     let forecast = '';
     if (remaining <= 0) {
         forecast = 'הגעת ליעד! 🎉';
@@ -11873,7 +11656,7 @@ function handleImport(event) {
                 // This ensures any new fields (goal, settings, etc.) are added without losing user data.
                 localStorage.setItem('ran_tracker_v4', JSON.stringify(data.state));
                 state = loadState();  // applies migration
-                if (!state.startWeight) state.startWeight = CLIENT_START_WEIGHT;
+                if (!state.startWeight) state.startWeight = 82;
                 if (!state.bestStreak) state.bestStreak = 0;
                 saveState();
                 viewingDayNum = getCurrentDayNum() || 1;
@@ -11962,11 +11745,8 @@ function selectDayType(type) {
     
     if (!state.days[viewingDayNum]) state.days[viewingDayNum] = {};
     
-    if (type === 'regular') {
-        delete state.days[viewingDayNum].day_type;
-    } else {
-        state.days[viewingDayNum].day_type = type;
-    }
+    // שמירה מפורשת תמיד (כולל 'regular') כדי לאפשר עקיפה של היום הגמיש הקבוע
+    state.days[viewingDayNum].day_type = type;
     
     saveState();
     closeDayTypeModal();
@@ -12006,16 +11786,20 @@ function renderSpecialDayBanner() {
     const type = getDayType(viewingDayNum);
     
     if (type === 'flex') {
+        const isAuto = !(state.days[viewingDayNum] && state.days[viewingDayNum].day_type);
+        const title = (isAuto && CLIENT_CONFIG.flexLabel) ? CLIENT_CONFIG.flexLabel : 'ארוחה מתוכננת היום';
+        const autoNote = isAuto ? '<div class="sdb-hint">היום הגמיש הקבוע שלך · חלק מהתוכנית מראש</div>' : '';
         container.innerHTML = `
             <div class="special-day-banner flex">
                 <div class="sdb-label">יום גמיש</div>
-                <div class="sdb-title">ארוחה מתוכננת היום</div>
+                <div class="sdb-title">${title}</div>
                 <div class="sdb-body">
                     לא כל יום חייב להיות מושלם. התמקד במה שכן בשליטתך.
                 </div>
                 <div class="flex-focus-note">
                     💡 ההתמקדות היום: חלבון בכל ארוחה, מודעות לכמות.
                 </div>
+                ${autoNote}
             </div>
         `;
     } else if (type === 'off') {
@@ -12225,10 +12009,8 @@ function openWorkoutModal() {
 function updateSaveBtn() {
     const btn = document.getElementById('saveWorkoutBtn');
     if (!btn) return;
-    // Button stays clickable; saveWorkout() validates and guides the user.
-    // Dim slightly until duration+type chosen, but never block the tap.
-    const ready = !!(workoutDraft.duration && workoutDraft.type);
-    btn.style.opacity = ready ? '1' : '0.6';
+    // Require duration + type (mood optional)
+    btn.disabled = !(workoutDraft.duration && workoutDraft.type);
 }
 
 /* ============================================================
@@ -13365,10 +13147,10 @@ function analyzeTrend() {
     const weeks = Object.keys(state.weights).map(Number).sort((a, b) => a - b);
     if (weeks.length < 2) return null;
     
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const lastWeight = state.weights[weeks[weeks.length - 1]];
     const totalLost = startWeight - lastWeight;
-    const goalLost = startWeight - goalWeight();
+    const goalLost = startWeight - GOAL_WEIGHT;
     const pct = Math.round((totalLost / goalLost) * 100);
     
     if (totalLost > 0 && pct >= 10) {
@@ -13432,9 +13214,9 @@ function renderForecast() {
         return;
     }
     
-    const startWeight = state.startWeight || CLIENT_START_WEIGHT;
+    const startWeight = state.startWeight || CLIENT_CONFIG.startWeight;
     const lastWeight = state.weights[weeks[weeks.length - 1]];
-    const remaining = lastWeight - goalWeight();
+    const remaining = lastWeight - GOAL_WEIGHT;
     
     if (remaining <= 0.2) {
         container.innerHTML = `
@@ -13472,7 +13254,7 @@ function renderForecast() {
     container.innerHTML = `
         <div class="forecast-banner">
             <div class="forecast-label">חיזוי</div>
-            <div class="forecast-text">בקצב הזה תגיע ל-${goalWeight()} ק״ג ב<span class="date">${dateStr}</span>. <strong>${weeksToGoal}</strong> שבועות מהיום.</div>
+            <div class="forecast-text">בקצב הזה תגיע ל-${GOAL_WEIGHT} ק״ג ב<span class="date">${dateStr}</span>. <strong>${weeksToGoal}</strong> שבועות מהיום.</div>
         </div>
     `;
 }
@@ -14512,7 +14294,21 @@ function confirmMeal() {
 function editMeal() {
     if (!pendingMealAnalysis) return;
     haptic();
-    openManualMealModal('edit');
+    const calRaw = prompt('קלוריות:', pendingMealAnalysis.calories_estimate);
+    if (calRaw === null) return;
+    const proteinRaw = prompt('חלבון (גר׳):', pendingMealAnalysis.protein_g);
+    if (proteinRaw === null) return;
+    
+    let cal = parseInt(calRaw, 10);
+    let protein = parseInt(proteinRaw, 10);
+    if (isNaN(cal) || cal < 0) cal = 0;
+    if (cal > 3000) cal = 3000;
+    if (isNaN(protein) || protein < 0) protein = 0;
+    if (protein > 300) protein = 300;
+    
+    pendingMealAnalysis.calories_estimate = cal;
+    pendingMealAnalysis.protein_g = protein;
+    showMealPreview(pendingMealAnalysis);
 }
 
 function cancelMealPreview() {
@@ -14522,63 +14318,21 @@ function cancelMealPreview() {
 
 function openManualMeal() {
     haptic();
-    openManualMealModal('new');
-}
-
-// ===== Manual meal modal - replaces the old prompt() windows =====
-let manualMealMode = 'new'; // 'new' | 'edit'
-
-function openManualMealModal(mode) {
-    manualMealMode = mode;
-    const titleEl = document.getElementById('manualMealTitle');
-    const textEl = document.getElementById('manualMealText');
-    const calEl = document.getElementById('manualMealCal');
-    const proteinEl = document.getElementById('manualMealProtein');
-
-    if (mode === 'edit' && pendingMealAnalysis) {
-        titleEl.textContent = 'עריכת ארוחה';
-        textEl.value = pendingMealAnalysis.text || '';
-        calEl.value = pendingMealAnalysis.calories_estimate ?? '';
-        proteinEl.value = pendingMealAnalysis.protein_g ?? '';
-    } else {
-        titleEl.textContent = 'הזנה ידנית';
-        textEl.value = document.getElementById('mealInput').value.trim();
-        calEl.value = '';
-        proteinEl.value = '';
-    }
-
-    document.getElementById('manualMealModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-    if (!textEl.value) setTimeout(() => textEl.focus(), 100);
-}
-
-function closeManualMeal() {
-    document.getElementById('manualMealModal').classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-function saveManualMeal() {
-    haptic();
-    const text = document.getElementById('manualMealText').value.trim();
-    if (!text) { showToast('תאר את הארוחה במילה-שתיים'); return; }
-
+    const text = document.getElementById('mealInput').value.trim() || prompt('תיאור הארוחה:');
+    if (!text) return;
+    const calRaw = prompt('קלוריות (אומדן):');
+    if (calRaw === null) return;
+    const proteinRaw = prompt('חלבון (גר׳):');
+    if (proteinRaw === null) return;
+    
     // Validate: 0-3000 cal, 0-300 g protein
-    let cal = parseInt(document.getElementById('manualMealCal').value, 10);
-    let protein = parseInt(document.getElementById('manualMealProtein').value, 10);
+    let cal = parseInt(calRaw, 10);
+    let protein = parseInt(proteinRaw, 10);
     if (isNaN(cal) || cal < 0) cal = 0;
     if (cal > 3000) cal = 3000;
     if (isNaN(protein) || protein < 0) protein = 0;
     if (protein > 300) protein = 300;
-
-    if (manualMealMode === 'edit' && pendingMealAnalysis) {
-        pendingMealAnalysis.text = text;
-        pendingMealAnalysis.calories_estimate = cal;
-        pendingMealAnalysis.protein_g = protein;
-        closeManualMeal();
-        showMealPreview(pendingMealAnalysis);
-        return;
-    }
-
+    
     pendingMealAnalysis = {
         text,
         calories_estimate: cal,
@@ -14592,7 +14346,6 @@ function saveManualMeal() {
         detected_window: null  // manual entries rely on selectedMealWindow
     };
     document.getElementById('mealInput').value = text;
-    closeManualMeal();
     confirmMeal();
 }
 
@@ -15323,63 +15076,19 @@ function dayNumToHebrewDate(dayNum) {
     return `${dayName}, ${dayOfMonth} ${monthName}`;
 }
 
-// Warm strip: remind the user of their "why" and what they already achieved.
-// Shown when returning after an absence - the opposite of a guilt trip.
-function renderCatchupWarmStrip() {
-    const container = document.getElementById('catchupWarmStrip');
-    if (!container) return;
-    const a = getJourneyAchievements();
-    const whyHtml = state.why
-        ? `<div class="catchup-warm-why">"${escapeHtml(state.why)}"</div>`
-        : '';
-    const stats = [];
-    if (a.daysOnJourney > 0) stats.push(`<div class="catchup-warm-stat"><strong>${a.daysOnJourney}</strong>ימים במסע</div>`);
-    if (a.kgLost > 0) stats.push(`<div class="catchup-warm-stat"><strong>${a.kgLost.toFixed(1)}</strong>ק״ג ירדו</div>`);
-    if (a.bestStreak > 0) stats.push(`<div class="catchup-warm-stat"><strong>${a.bestStreak}</strong>סטריק שיא</div>`);
-    if (a.totalMeals > 0) stats.push(`<div class="catchup-warm-stat"><strong>${a.totalMeals}</strong>ארוחות נרשמו</div>`);
-    if (!whyHtml && stats.length === 0) { container.innerHTML = ''; return; }
-    container.innerHTML = `
-        <div class="catchup-warm-strip">
-            ${whyHtml}
-            <div class="catchup-warm-stats">${stats.slice(0, 3).join('')}</div>
-        </div>
-    `;
-}
-
-// Everything the user already achieved - one place, reused by
-// the comeback strip and the SOS moment.
-function getJourneyAchievements() {
-    const daysOnJourney = Math.max(0, getCurrentDayNum());
-    const bestStreak = state.bestStreak || 0;
-    const startWeight = state.startWeight || 0;
-    const currentWeight = getCurrentWeight();
-    const kgLost = Math.max(0, startWeight - currentWeight);
-    let totalMeals = 0;
-    let activeDays = 0;
-    if (state.days) {
-        for (const key of Object.keys(state.days)) {
-            const d = state.days[key];
-            const mealCount = (d.meals || []).length;
-            totalMeals += mealCount;
-            if (mealCount > 0 || Object.values(d).some(v => v === true)) activeDays++;
-        }
-    }
-    return { daysOnJourney, bestStreak, kgLost, totalMeals, activeDays };
-}
-
 function renderCatchUp() {
-    renderCatchupWarmStrip();
     const missedDays = getMissedDays();
     const subtitleEl = document.getElementById('catchupSubtitle');
     const listEl = document.getElementById('catchupDaysList');
     
     if (missedDays.length === 0) {
-        subtitleEl.innerHTML = 'הכל מעודכן - כל הכבוד! 🎉';
+        subtitleEl.innerHTML = 'אין ימים חסרים - כל הכבוד! 🎉';
         listEl.innerHTML = '';
         return;
     }
     
-    subtitleEl.innerHTML = `נמשיך מאיפה שעצרנו. אם זכורות לך ארוחות מהימים האחרונים אפשר להשלים אותן -<br>ואפשר גם פשוט להמשיך מהיום. שתי האפשרויות מצוינות:`;
+    const daysWord = missedDays.length === 1 ? 'יום' : 'ימים';
+    subtitleEl.innerHTML = `ראיתי שיש ${missedDays.length} ${daysWord} שעדיין לא רשמת בהם.<br>לחץ על "השלם" כדי לעבור ללוגר הארוחות עם תאריך מוגדר מראש:`;
     
     listEl.innerHTML = missedDays.map(dayNum => {
         const dateStr = dayNumToHebrewDate(dayNum);
@@ -15391,7 +15100,7 @@ function renderCatchUp() {
                 <div class="catchup-day-status missing">📝</div>
                 <div class="catchup-day-info">
                     <div class="catchup-day-title">${dateStr}</div>
-                    <div class="catchup-day-detail">אפשר להשלים: ${missingText}</div>
+                    <div class="catchup-day-detail">חסר: ${missingText}</div>
                 </div>
                 <button class="catchup-day-action" onclick="openPastDayForEditing(${dayNum})">השלם</button>
             </div>
@@ -15400,10 +15109,7 @@ function renderCatchUp() {
 }
 
 function showCatchUp() {
-    // Never open on top of another modal — it would cover it and block all taps.
-    const anyModalOpen = Array.from(document.querySelectorAll('.modal-overlay'))
-        .some(m => m.style.display && m.style.display !== 'none');
-    if (anyModalOpen) return;
+    // (Daily Anchor was removed - no conflict check needed)
     renderCatchUp();
     document.getElementById('catchupOverlay').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -15848,190 +15554,92 @@ window.addEventListener('load', () => {
         }
     }, 1500);
 });
+
 /* ============================================================
-   ===== DAILY NOTIFICATIONS via SERVER WEB PUSH ==============
-   Works on Android AND iOS (iOS 16.4+, app must be installed to
-   Home Screen). The browser subscribes to push and sends the
-   subscription + chosen time + timezone to Supabase. A scheduled
-   GitHub Action reads subscriptions and sends the daily push.
+   ===== DAILY NOTIFICATIONS at 15:30 =========================
    ============================================================ */
 
-// ---- CONFIG: fill these in after you set up Supabase + VAPID (see SETUP.md) ----
-const PUSH_CONFIG = {
-    vapidPublicKey: 'BBQcWsgw2XqpOah3NJnoeA51lcGNrzHEaK4tB_jxNODzp70iPyyOFWPtsebsxoDFu8h5viN6IMFs6-W0kvFPyTU',
-    supabaseUrl:    'https://sigsjmjhhcplwyebfphq.supabase.co',
-    supabaseAnonKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpZ3NqbWpoaGNwbHd5ZWJmcGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NTQ0ODcsImV4cCI6MjA5NzAzMDQ4N30.bHoR2cNtPRZeR_uCAEnaqgOn4Z8uPKsKWyteOI5axEs'
-};
-function pushConfigReady() {
-    return PUSH_CONFIG.vapidPublicKey.indexOf('REPLACE') === -1
-        && PUSH_CONFIG.supabaseUrl.indexOf('REPLACE') === -1
-        && PUSH_CONFIG.supabaseAnonKey.indexOf('REPLACE') === -1;
-}
-
+// Default notification time - can be overridden by user setting (stored in localStorage)
 const NOTIF_HOUR_DEFAULT = 15;
 const NOTIF_MINUTE_DEFAULT = 30;
 const NOTIF_STORAGE_KEY = 'nutrition_notif_settings_v1';
 
+// Get currently configured hour/minute (with fallback to defaults)
+function getNotifHour() {
+    const settings = getNotifSettings();
+    return (settings.hour !== undefined && settings.hour !== null) ? settings.hour : NOTIF_HOUR_DEFAULT;
+}
+function getNotifMinute() {
+    const settings = getNotifSettings();
+    return (settings.minute !== undefined && settings.minute !== null) ? settings.minute : NOTIF_MINUTE_DEFAULT;
+}
+// Format current notif time as "HH:MM" for display
+function getNotifTimeStr() {
+    const h = String(getNotifHour()).padStart(2, '0');
+    const m = String(getNotifMinute()).padStart(2, '0');
+    return `${h}:${m}`;
+}
+
 function getNotifSettings() {
     try {
         const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-        if (!raw) return { enabled: false };
+        if (!raw) return { enabled: false, lastShownDate: null };
         return JSON.parse(raw);
     } catch {
-        return { enabled: false };
+        return { enabled: false, lastShownDate: null };
     }
 }
+
 function saveNotifSettings(settings) {
-    try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(settings)); } catch {}
-}
-function getNotifHour() {
-    const s = getNotifSettings();
-    return (s.hour !== undefined && s.hour !== null) ? s.hour : NOTIF_HOUR_DEFAULT;
-}
-function getNotifMinute() {
-    const s = getNotifSettings();
-    return (s.minute !== undefined && s.minute !== null) ? s.minute : NOTIF_MINUTE_DEFAULT;
-}
-function getNotifTimeStr() {
-    return `${String(getNotifHour()).padStart(2,'0')}:${String(getNotifMinute()).padStart(2,'0')}`;
-}
-function getUserTimezone() {
-    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Jerusalem'; }
-    catch { return 'Asia/Jerusalem'; }
-}
-
-/* ---- Platform detection (iOS needs special handling) ---- */
-function isIOS() {
-    return /iphone|ipad|ipod/i.test(navigator.userAgent)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-function isStandalone() {
-    return window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
-}
-
-/* ---- VAPID key helper ---- */
-function urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-    const raw = atob(base64);
-    const out = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
-    return out;
-}
-
-/* ---- Talk to Supabase via security-definer RPCs (anon key is safe to expose) ---- */
-async function supabaseRpc(fn, body) {
-    const res = await fetch(`${PUSH_CONFIG.supabaseUrl}/rest/v1/rpc/${fn}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': PUSH_CONFIG.supabaseAnonKey,
-            'Authorization': 'Bearer ' + PUSH_CONFIG.supabaseAnonKey
-        },
-        body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error('Supabase RPC ' + fn + ' failed: ' + res.status);
-    return res;
-}
-
-// Subscribe to push (if needed) and store the subscription + time + tz on the server
-async function registerPush() {
-    if (!pushConfigReady()) throw new Error('Push not configured yet');
-    const reg = await navigator.serviceWorker.ready;
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-        sub = await reg.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(PUSH_CONFIG.vapidPublicKey)
-        });
-    }
-    const json = sub.toJSON();
-    await supabaseRpc('register_subscription', {
-        p_endpoint: json.endpoint,
-        p_p256dh: json.keys.p256dh,
-        p_auth: json.keys.auth,
-        p_hour: getNotifHour(),
-        p_minute: getNotifMinute(),
-        p_tz: getUserTimezone()
-    });
-    const s = getNotifSettings();
-    s.endpoint = json.endpoint;
-    saveNotifSettings(s);
-    return true;
-}
-
-// Remove the subscription from the server and unsubscribe locally
-async function unregisterPush() {
     try {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
-        if (sub) {
-            if (pushConfigReady()) {
-                try { await supabaseRpc('unregister_subscription', { p_endpoint: sub.endpoint }); } catch {}
-            }
-            await sub.unsubscribe();
-        }
-    } catch (e) { console.warn('[Push] unregister failed:', e); }
+        localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(settings));
+    } catch {}
 }
 
-// Enable: permission -> subscribe -> store on server
+// Request permission - call when user clicks "enable notifications" button
 async function enableDailyNotifications() {
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-        // On iOS this is the usual cause: opened in Safari tab, not the installed app
-        if (isIOS() && !isStandalone()) {
-            alert('כדי לקבל התראות באייפון:\n\n1. פתח את הדף בספארי\n2. לחץ על כפתור השיתוף (ריבוע עם חץ למעלה)\n3. בחר "הוסף למסך הבית"\n4. פתח את האפליקציה מהאייקון החדש, ואז הפעל התראות מכאן');
-            return false;
-        }
-        alert('הדפדפן הזה לא תומך בהתראות 😕\nנסה Chrome / Edge עדכני, או התקן את האפליקציה למסך הבית.');
+    if (!('Notification' in window)) {
+        alert('הדפדפן הזה לא תומך בהתראות 😕\nנסה Chrome, Edge, או Safari עדכני.');
         return false;
     }
-    if (isIOS() && !isStandalone()) {
-        alert('באייפון חובה קודם להתקין את האפליקציה למסך הבית:\n\nכפתור שיתוף ⬆️ ‹ "הוסף למסך הבית", ואז לפתוח מהאייקון ולהפעיל מכאן.');
-        return false;
-    }
-    if (!pushConfigReady()) {
-        alert('האפליקציה עדיין לא חוברה לשרת ההתראות.\nהשלם את שלבי ההקמה (ראה SETUP.md).');
-        return false;
-    }
-    if (Notification.permission === 'denied') {
-        alert('ההתראות חסומות 🔕\n\nהגדרות ‹ האתר/האפליקציה ‹ התראות ‹ אפשר. ואז נסה שוב.');
-        return false;
-    }
-    let permission = Notification.permission;
-    if (permission !== 'granted') permission = await Notification.requestPermission();
-    if (permission !== 'granted') return false;
-
-    try {
-        const s = getNotifSettings();
-        s.enabled = true;
-        saveNotifSettings(s);
-        await registerPush();
+    
+    if (Notification.permission === 'granted') {
+        const settings = getNotifSettings();
+        settings.enabled = true;
+        saveNotifSettings(settings);
         showNotifConfirmation(`✓ התראות יומיות הופעלו לשעה ${getNotifTimeStr()}`);
-        // immediate local test so the user sees it works now
-        setTimeout(() => sendTestNotification(), 1000);
         return true;
-    } catch (e) {
-        console.warn('[Push] enable failed:', e);
-        alert('משהו השתבש בהרשמה להתראות. בדוק חיבור אינטרנט ואת הגדרות ההקמה.');
-        const s = getNotifSettings(); s.enabled = false; saveNotifSettings(s);
+    }
+    
+    if (Notification.permission === 'denied') {
+        alert('ההתראות חסומות בדפדפן 🔕\n\nאיך לאפשר:\n1. לחץ על סמל המנעול ליד הכתובת\n2. אפשר התראות\n3. רענן את הדף');
         return false;
     }
+    
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+        const settings = getNotifSettings();
+        settings.enabled = true;
+        saveNotifSettings(settings);
+        showNotifConfirmation(`✓ התראות יומיות הופעלו לשעה ${getNotifTimeStr()}`);
+        // Test notification
+        setTimeout(() => sendDailyNotification(true), 1000);
+        return true;
+    }
+    return false;
 }
 
-async function disableDailyNotifications() {
-    const s = getNotifSettings();
-    s.enabled = false;
-    saveNotifSettings(s);
-    await unregisterPush();
+function disableDailyNotifications() {
+    const settings = getNotifSettings();
+    settings.enabled = false;
+    saveNotifSettings(settings);
     showNotifConfirmation('התראות יומיות בוטלו');
 }
 
 function showNotifConfirmation(text) {
     const toast = document.createElement('div');
     toast.style.cssText = `
-        position: fixed; left: 50%; transform: translateX(-50%);
-        bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+        position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
         background: var(--ink-primary); color: white; padding: 14px 22px;
         border-radius: 24px; font-size: 16px; z-index: 99999;
         box-shadow: 0 4px 20px rgba(0,0,0,0.25); font-family: var(--sans);
@@ -16043,32 +15651,110 @@ function showNotifConfirmation(text) {
     setTimeout(() => toast.remove(), 3500);
 }
 
-// Local test notification (proves permission + service worker work right now)
+// Build notification body from current goals
 function buildGoalsNotificationBody() {
     try {
-        if (typeof generateFocusPoints !== 'function') return 'בדוק את 3 המטרות של היום באפליקציה';
-        const f = generateFocusPoints();
-        if (!f || f.length === 0) return 'בדוק את 3 המטרות של היום באפליקציה';
-        return f.slice(0, 3).join('\n');
-    } catch { return 'בדוק את 3 המטרות של היום באפליקציה'; }
-}
-function sendTestNotification() {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    const title = '🧪 בדיקה - 3 המטרות שלך';
-    const body = buildGoalsNotificationBody();
-    const tag = 'daily-goals-test';
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'SHOW_NOTIFICATION', title, body, tag });
-    } else {
-        try { new Notification(title, { body, tag, lang: 'he', dir: 'rtl' }); } catch {}
+        if (typeof generateFocusPoints !== 'function') {
+            return 'בדוק את 3 המטרות של היום באפליקציה';
+        }
+        const focuses = generateFocusPoints();
+        if (!focuses || focuses.length === 0) {
+            return 'בדוק את 3 המטרות של היום באפליקציה';
+        }
+        // Strip emoji prefixes for cleaner notification text
+        return focuses.slice(0, 3).join('\n');
+    } catch {
+        return 'בדוק את 3 המטרות של היום באפליקציה';
     }
 }
 
-/* ---- Public API for the UI ---- */
+// Send the actual notification
+function sendDailyNotification(isTest = false) {
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    
+    const title = isTest ? '🧪 בדיקה - 3 המטרות שלך' : '🎯 3 המטרות שלך להיום';
+    const body = buildGoalsNotificationBody();
+    const tag = 'daily-goals-' + new Date().toDateString();
+    
+    // Prefer SW notification (works better when app is in background)
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SHOW_NOTIFICATION',
+            title, body, tag
+        });
+    } else {
+        // Fallback: direct notification
+        try {
+            new Notification(title, {
+                body,
+                tag,
+                lang: 'he',
+                dir: 'rtl'
+            });
+        } catch (err) {
+            console.warn('[Notif] Direct notification failed:', err);
+        }
+    }
+    
+    if (!isTest) {
+        const settings = getNotifSettings();
+        settings.lastShownDate = new Date().toDateString();
+        saveNotifSettings(settings);
+    }
+}
+
+// Check every minute if it's time
+function checkNotificationTime() {
+    const settings = getNotifSettings();
+    if (!settings.enabled) return;
+    if (Notification.permission !== 'granted') return;
+    
+    const now = new Date();
+    const today = now.toDateString();
+    
+    // Already sent today?
+    if (settings.lastShownDate === today) return;
+    
+    const h = now.getHours();
+    const m = now.getMinutes();
+    
+    const targetHour = getNotifHour();
+    const targetMinute = getNotifMinute();
+    
+    // Window: targetHour:targetMinute to +5 min (5-minute window for safety)
+    if (h === targetHour && m >= targetMinute && m < targetMinute + 5) {
+        sendDailyNotification(false);
+    }
+}
+
+// Start checking every 60 seconds while app is open
+let notifCheckInterval = null;
+function startNotificationChecker() {
+    if (notifCheckInterval) return;
+    // Check immediately on load
+    checkNotificationTime();
+    // Then every minute
+    notifCheckInterval = setInterval(checkNotificationTime, 60 * 1000);
+}
+
+// Also check when app comes back to foreground
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+        checkNotificationTime();
+    }
+});
+
+// Start checker on load
+window.addEventListener('load', () => {
+    setTimeout(startNotificationChecker, 2000);
+});
+
+// Public API for the button in UI
 window.toggleDailyNotifications = async function() {
-    const s = getNotifSettings();
-    if (s.enabled && window.Notification && Notification.permission === 'granted') {
-        await disableDailyNotifications();
+    const settings = getNotifSettings();
+    if (settings.enabled && Notification.permission === 'granted') {
+        disableDailyNotifications();
         updateNotifButtonUI();
     } else {
         const ok = await enableDailyNotifications();
@@ -16078,62 +15764,50 @@ window.toggleDailyNotifications = async function() {
 
 window.updateNotifButtonUI = function() {
     const btn = document.getElementById('notifToggleBtn');
+    const timeInput = document.getElementById('notifTimeInput');
     const timeHint = document.getElementById('notifTimeHint');
-    const supportHint = document.getElementById('notifSupportHint');
-    const s = getNotifSettings();
-    const granted = window.Notification && Notification.permission === 'granted';
-    const isOn = s.enabled && granted;
-
+    const settings = getNotifSettings();
+    const isOn = settings.enabled && Notification.permission === 'granted';
+    
     if (btn) {
-        btn.textContent = isOn ? `🔔 התראות פעילות · ${getNotifTimeStr()}` : '🔕 הפעל התראות יומיות';
+        const timeStr = getNotifTimeStr();
+        btn.textContent = isOn ? `🔔 התראות פעילות · ${timeStr}` : '🔕 הפעל התראות יומיות';
         btn.style.background = isOn ? 'var(--pistachio-deep)' : 'var(--ink-primary)';
     }
-    const hourEl = document.getElementById('notifHourDisplay');
-    const minEl = document.getElementById('notifMinuteDisplay');
-    if (hourEl) hourEl.textContent = String(getNotifHour()).padStart(2, '0');
-    if (minEl) minEl.textContent = String(getNotifMinute()).padStart(2, '0');
-    if (timeHint) timeHint.textContent = isOn ? '✓ פעיל' : '';
-
-    if (supportHint) {
-        if (isIOS() && !isStandalone()) {
-            supportHint.innerHTML = '📲 <b>אייפון:</b> כדי לקבל התראות, התקן קודם למסך הבית (כפתור שיתוף ‹ "הוסף למסך הבית"), ואז פתח מהאייקון.';
-        } else if (!pushConfigReady()) {
-            supportHint.innerHTML = '⚙️ האפליקציה עדיין לא חוברה לשרת ההתראות (ראה מדריך ההקמה).';
-        } else if (window.Notification && Notification.permission === 'denied') {
-            supportHint.innerHTML = '🔕 ההתראות חסומות. אפשר אותן בהגדרות ההתראות של האפליקציה ונסה שוב.';
-        } else if (isOn) {
-            supportHint.innerHTML = '✓ ההתראה תישלח כל יום בשעה שבחרת, גם כשהאפליקציה <b>סגורה</b> (iPhone ו-Android).';
-        } else {
-            supportHint.innerHTML = 'בחר שעה והפעל. ההתראה תגיע כל יום גם כשהאפליקציה סגורה.';
-        }
+    
+    // Sync time input with current setting
+    if (timeInput && !timeInput.dataset.userTyping) {
+        timeInput.value = getNotifTimeStr();
+    }
+    
+    if (timeHint) {
+        timeHint.textContent = isOn ? '✓ פעיל' : '';
     }
 };
 
-let _notifSyncTimer = null;
-window.bumpNotifTime = function(unit, delta) {
-    const s = getNotifSettings();
-    let h = (s.hour !== undefined && s.hour !== null) ? s.hour : NOTIF_HOUR_DEFAULT;
-    let m = (s.minute !== undefined && s.minute !== null) ? s.minute : NOTIF_MINUTE_DEFAULT;
-    if (unit === 'h') {
-        h = (h + delta + 24) % 24;
-    } else {
-        let total = h * 60 + m + delta;
-        total = (total + 24 * 60) % (24 * 60);
-        h = Math.floor(total / 60); m = total % 60;
-    }
-    s.hour = h; s.minute = m;
-    saveNotifSettings(s);
+// Called when user changes the time picker
+window.onNotifTimeChange = function() {
+    const timeInput = document.getElementById('notifTimeInput');
+    if (!timeInput || !timeInput.value) return;
+    
+    // Parse "HH:MM"
+    const [hStr, mStr] = timeInput.value.split(':');
+    const h = parseInt(hStr, 10);
+    const m = parseInt(mStr, 10);
+    if (isNaN(h) || isNaN(m) || h < 0 || h > 23 || m < 0 || m > 59) return;
+    
+    // Save to settings
+    const settings = getNotifSettings();
+    settings.hour = h;
+    settings.minute = m;
+    // Reset the "lastShownDate" so the user can test today if they want
+    settings.lastShownDate = null;
+    saveNotifSettings(settings);
+    
     if (typeof haptic === 'function') haptic();
+    showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`);
     updateNotifButtonUI();
-    if (s.enabled && window.Notification && Notification.permission === 'granted' && pushConfigReady()) {
-        clearTimeout(_notifSyncTimer);
-        _notifSyncTimer = setTimeout(async () => {
-            try { await registerPush(); showNotifConfirmation(`✓ שעת התראה עודכנה ל-${getNotifTimeStr()}`); }
-            catch (e) { console.warn('[Push] time update failed:', e); }
-        }, 900);
-    }
 };
-
 
 // Update button on load
 window.addEventListener('load', () => {
@@ -16169,335 +15843,6 @@ function showPwaUpdateBanner() {
 function reloadForUpdate() {
     location.reload();
 }
-
-/* ============================================================
-   ===== SOS - "רגע קשה" - urge / wanting-to-quit moment ======
-   Catches the user exactly when they're about to fall:
-   shows their "why", what they already achieved, and one
-   small practical action. Pull, not push - opened by choice.
-   ============================================================ */
-
-function openSosModal() {
-    if (typeof haptic === 'function') haptic();
-    const content = document.getElementById('sosContent');
-    if (!content) return;
-
-    const a = getJourneyAchievements();
-
-    // 1. Their "why" - the anchor. If missing, invite them to write one.
-    let whyHtml;
-    if (state.why) {
-        whyHtml = `
-            <div class="sos-why-quote">
-                <div class="sos-why-label">למה התחלת</div>
-                ${escapeHtml(state.why)}
-            </div>`;
-    } else {
-        whyHtml = `
-            <div class="sos-why-quote" onclick="closeSosModal(); openWhyEditor();" style="cursor: pointer;">
-                <div class="sos-why-label">למה התחלת</div>
-                עוד לא כתבת לעצמך למה. לחץ כאן לכתוב משפט אחד - הוא יופיע כאן בפעם הבאה.
-            </div>`;
-    }
-
-    // 2. What was already achieved - proof it's working.
-    const achievements = [];
-    if (a.daysOnJourney > 0) achievements.push({ num: a.daysOnJourney, label: 'ימים במסע' });
-    if (a.kgLost > 0) achievements.push({ num: a.kgLost.toFixed(1), label: 'ק״ג ירדו' });
-    if (a.bestStreak > 0) achievements.push({ num: a.bestStreak, label: 'סטריק שיא' });
-    if (achievements.length < 3 && a.totalMeals > 0) achievements.push({ num: a.totalMeals, label: 'ארוחות נרשמו' });
-    if (achievements.length < 3 && a.activeDays > 0) achievements.push({ num: a.activeDays, label: 'ימים פעילים' });
-
-    const achHtml = achievements.length > 0 ? `
-        <div class="sos-achievements">
-            ${achievements.slice(0, 3).map(x => `
-                <div class="sos-ach">
-                    <div class="sos-ach-num">${x.num}</div>
-                    <div class="sos-ach-label">${x.label}</div>
-                </div>`).join('')}
-        </div>` : '';
-
-    // 3. One small practical action - urges pass.
-    const groundingOptions = [
-        'הדחף הכי חזק נמשך בערך 10 דקות - ואז נחלש. שתה כוס מים גדולה, וקבע עם עצמך: מחליטים רק בעוד 10 דקות.',
-        'רגע אחד קשה לא מוחק את כל מה שבנית. צא לסיבוב קצר של 5 דקות, נשום - ותחזור להחליט עם ראש צלול.',
-        'לא צריך להיות מושלם היום. מספיק לא לוותר היום. פעולה אחת קטנה - כוס מים, הליכה קצרה - וזה מאחוריך.'
-    ];
-    const grounding = groundingOptions[Math.floor(Math.random() * groundingOptions.length)];
-
-    content.innerHTML = whyHtml + achHtml + `<div class="sos-grounding">${grounding}</div>`;
-
-    document.getElementById('sosModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeSosModal() {
-    document.getElementById('sosModal').classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-function sosContinue() {
-    if (typeof haptic === 'function') haptic();
-    closeSosModal();
-    showToast('כל הכבוד. יום אחד בכל פעם 💪');
-}
-
-function sosOpenReality() {
-    closeSosModal();
-    // Small delay so the sheets don't visually collide
-    setTimeout(() => { if (typeof openRealityLog === 'function') openRealityLog(); }, 150);
-}
-
-window.openSosModal = openSosModal;
-window.closeSosModal = closeSosModal;
-window.sosContinue = sosContinue;
-window.sosOpenReality = sosOpenReality;
-
-/* ============================================================
-   ===== MEAL DIARY EXPORT - send to Ran by email ==============
-   Builds a clean plain-text report: chronological days,
-   meals sorted by hour inside each day, daily totals,
-   deviations (reality logs), and the weight history.
-   Sending: mailto (pre-filled, user taps Send) or file share.
-   ============================================================ */
-
-const DIARY_EMAIL = 'ranrosto@gmail.com';
-
-// Full calendar date for a journey day: "יום שני · 29/06/2026"
-function diaryFullDateLabel(dayNum) {
-    if (!state.startTimestamp) return `יום ${dayNum}`;
-    const startDate = new Date(state.startTimestamp);
-    const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-    d.setDate(d.getDate() + (dayNum - 1));
-    const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    return `יום ${dayNames[d.getDay()]} · ${dd}/${mm}/${d.getFullYear()}`;
-}
-
-// Build the report text. lastNDays = null => full journey.
-function buildMealDiaryText(lastNDays = null) {
-    const currentDay = getCurrentDayNum();
-    if (currentDay < 1) return null;
-    const firstDay = lastNDays ? Math.max(1, currentDay - lastNDays + 1) : 1;
-
-    const sep = '──────────────────────────';
-    const lines = [];
-    lines.push('יומן אכילה · המעקב שלי');
-    lines.push(`${diaryFullDateLabel(firstDay)}  עד  ${diaryFullDateLabel(currentDay)}`);
-    const a = getJourneyAchievements();
-    const startW = state.startWeight ? `${state.startWeight.toFixed(1)}` : '-';
-    const curW = getCurrentWeight() ? `${getCurrentWeight().toFixed(1)}` : '-';
-    lines.push(`משקל התחלה: ${startW} ק״ג · משקל נוכחי: ${curW} ק״ג · יום ${currentDay} במסע`);
-    lines.push('');
-
-    let loggedDays = 0;
-    for (let d = firstDay; d <= currentDay; d++) {
-        const day = (state.days && state.days[d]) ? state.days[d] : {};
-        const meals = (day.meals || []).map(m => ({ ...m, _kind: 'meal' }));
-        const reality = (day.realityLogs || []).map(r => ({ ...r, _kind: 'reality' }));
-        const items = [...meals, ...reality];
-
-        lines.push(sep);
-        lines.push(`📅 ${diaryFullDateLabel(d)} (יום ${d})`);
-
-        if (items.length === 0) {
-            lines.push('   לא נרשמו ארוחות ביום זה');
-            lines.push('');
-            continue;
-        }
-        loggedDays++;
-
-        // Sort by hour - HH:MM string compare is safe for zero-padded times
-        items.sort((x, y) => String(x.time || '00:00').localeCompare(String(y.time || '00:00')));
-
-        let dayCal = 0, dayProtein = 0;
-        for (const it of items) {
-            const time = it.time || '--:--';
-            const cal = it.calories || 0;
-            dayCal += cal;
-            if (it._kind === 'meal') {
-                const protein = it.protein || 0;
-                dayProtein += protein;
-                let macro = `${cal} קק״ל · ${Math.round(protein)}ג חלבון`;
-                if (it.carbs) macro += ` · ${Math.round(it.carbs)}ג פחמ׳`;
-                if (it.fat) macro += ` · ${Math.round(it.fat)}ג שומן`;
-                lines.push(`   ${time} · ${it.text || 'ארוחה'}`);
-                lines.push(`          ${macro}`);
-                if (it.comment) lines.push(`          הערה: ${it.comment}`);
-            } else {
-                lines.push(`   ${time} · ⚠️ סטייה: ${it.text || ''} · ${cal} קק״ל`);
-            }
-        }
-        lines.push(`   ▸ סה״כ יומי: ${dayCal} קק״ל · ${Math.round(dayProtein)}ג חלבון · ${items.length} רישומים`);
-        lines.push('');
-    }
-
-    // Weights section
-    if (state.weights && Object.keys(state.weights).length > 0) {
-        lines.push(sep);
-        lines.push('⚖️ שקילות שבועיות:');
-        const weeks = Object.keys(state.weights).map(Number).sort((x, y) => x - y);
-        for (const w of weeks) {
-            if (state.weights[w] != null) lines.push(`   שבוע ${w}: ${Number(state.weights[w]).toFixed(1)} ק״ג`);
-        }
-        lines.push('');
-    }
-
-    lines.push(sep);
-    lines.push(`נשלח מתוך "המעקב שלי" · ${loggedDays} ימים עם רישום בטווח`);
-
-    return lines.join('\n');
-}
-
-function openDiaryShare() {
-    if (typeof haptic === 'function') haptic();
-    const currentDay = getCurrentDayNum();
-    if (currentDay < 1) {
-        showToast('התחל את המסע כדי שיהיה יומן לשלוח');
-        return;
-    }
-    const opts = document.getElementById('diaryShareOptions');
-    let canShareFiles = false;
-    try {
-        canShareFiles = !!(navigator.canShare && navigator.canShare({ files: [new File([''], 't.txt', { type: 'text/plain' })] }));
-    } catch (e) { canShareFiles = false; }
-
-    let html = `
-        <button class="diary-option-btn" onclick="diaryEmailQuick(7)">
-            <span class="diary-option-icon">📧</span>
-            <span style="flex:1; min-width:0;">
-                <span class="diary-option-title" style="display:block;">שליחה מהירה במייל</span>
-                <span class="diary-option-sub" style="display:block;">7 הימים האחרונים · נפתח מייל מוכן, נשאר רק ללחוץ שליחה</span>
-            </span>
-        </button>
-        <button class="diary-option-btn secondary" onclick="diaryEmailQuick(14)">
-            <span class="diary-option-icon">📧</span>
-            <span style="flex:1; min-width:0;">
-                <span class="diary-option-title" style="display:block;">מייל · 14 ימים אחרונים</span>
-                <span class="diary-option-sub" style="display:block;">לסיכום דו-שבועי</span>
-            </span>
-        </button>`;
-
-    if (canShareFiles) {
-        html += `
-        <button class="diary-option-btn secondary" onclick="diaryShareFullFile()">
-            <span class="diary-option-icon">📤</span>
-            <span style="flex:1; min-width:0;">
-                <span class="diary-option-title" style="display:block;">היומן המלא · שיתוף כקובץ</span>
-                <span class="diary-option-sub" style="display:block;">כל הימים מתחילת המסע · בחר Gmail ושלח ל-${DIARY_EMAIL}</span>
-            </span>
-        </button>`;
-    } else {
-        html += `
-        <button class="diary-option-btn secondary" onclick="diaryDownloadFullFile()">
-            <span class="diary-option-icon">⬇️</span>
-            <span style="flex:1; min-width:0;">
-                <span class="diary-option-title" style="display:block;">היומן המלא · הורדה כקובץ</span>
-                <span class="diary-option-sub" style="display:block;">כל הימים מתחילת המסע · צרף למייל ל-${DIARY_EMAIL}</span>
-            </span>
-        </button>`;
-    }
-
-    opts.innerHTML = html;
-    const note = document.getElementById('diaryShareNote');
-    if (note) note.textContent = 'המייל נפתח מוכן עם הכתובת של רן. שום דבר לא נשלח בלי אישור שלך.';
-
-    document.getElementById('diaryShareModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeDiaryShare() {
-    document.getElementById('diaryShareModal').classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-// mailto has practical URL-length limits (mainly on Android).
-// If the requested range is too long, shrink it day by day and tell the user.
-function diaryEmailQuick(days) {
-    if (typeof haptic === 'function') haptic();
-    let useDays = days;
-    let body = buildMealDiaryText(useDays);
-    if (!body) { showToast('אין עדיין נתונים לשלוח'); return; }
-
-    const MAX_BODY_CHARS = 5500; // conservative, keeps encoded mailto URL safe on Android+iOS
-    while (body.length > MAX_BODY_CHARS && useDays > 2) {
-        useDays -= 1;
-        body = buildMealDiaryText(useDays);
-    }
-
-    const subject = `יומן אכילה · ${diaryFullDateLabel(getCurrentDayNum())}`;
-    const url = `mailto:${DIARY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    closeDiaryShare();
-    if (useDays < days) {
-        showToast(`היומן ארוך - נשלחים ${useDays} ימים אחרונים. ליומן מלא: שיתוף כקובץ`);
-    }
-    // Navigate to the mail app
-    window.location.href = url;
-}
-
-async function diaryShareFullFile() {
-    if (typeof haptic === 'function') haptic();
-    const text = buildMealDiaryText(null);
-    if (!text) { showToast('אין עדיין נתונים לשלוח'); return; }
-    const file = new File([text], 'meal-diary.txt', { type: 'text/plain' });
-    try {
-        await navigator.share({
-            files: [file],
-            title: 'יומן אכילה',
-            text: `יומן אכילה מלא · לשליחה אל ${DIARY_EMAIL}`
-        });
-        closeDiaryShare();
-        showToast('הקובץ שותף ✓');
-    } catch (err) {
-        // User cancelled or share failed - fall back to download
-        if (err && err.name !== 'AbortError') diaryDownloadFullFile();
-    }
-}
-
-function diaryDownloadFullFile() {
-    const text = buildMealDiaryText(null);
-    if (!text) { showToast('אין עדיין נתונים לשלוח'); return; }
-    const blob = new Blob(['\uFEFF' + text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const aEl = document.createElement('a');
-    aEl.href = url;
-    aEl.download = 'meal-diary.txt';
-    document.body.appendChild(aEl);
-    aEl.click();
-    document.body.removeChild(aEl);
-    URL.revokeObjectURL(url);
-    closeDiaryShare();
-    showToast(`הקובץ ירד. צרף אותו למייל אל ${DIARY_EMAIL}`);
-}
-
-window.openDiaryShare = openDiaryShare;
-window.closeDiaryShare = closeDiaryShare;
-window.diaryEmailQuick = diaryEmailQuick;
-window.diaryShareFullFile = diaryShareFullFile;
-window.diaryDownloadFullFile = diaryDownloadFullFile;
-
-// Close SOS / Diary / Manual-meal sheets on background tap
-document.addEventListener('click', (e) => {
-    const sos = document.getElementById('sosModal');
-    if (sos && e.target === sos) closeSosModal();
-    const diary = document.getElementById('diaryShareModal');
-    if (diary && e.target === diary) closeDiaryShare();
-    const manual = document.getElementById('manualMealModal');
-    if (manual && e.target === manual) closeManualMeal();
-});
-
-// Close SOS / Diary / Manual-meal sheets on ESC
-document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    const sos = document.getElementById('sosModal');
-    if (sos && sos.classList.contains('show')) { closeSosModal(); return; }
-    const diary = document.getElementById('diaryShareModal');
-    if (diary && diary.classList.contains('show')) { closeDiaryShare(); return; }
-    const manual = document.getElementById('manualMealModal');
-    if (manual && manual.classList.contains('show')) { closeManualMeal(); return; }
-});
 </script>
 
 </body>
