@@ -287,13 +287,12 @@ ul.list li{margin:4px 0}
   <div class="btn-row">
     <a class="btn btn-wa" id="btnWa">שליחה בוואטסאפ</a>
     <a class="btn btn-lilac" id="btnMail">שליחה במייל</a>
-    <button class="btn btn-ghost" id="btnCopy">העתקת התשובות</button>
   </div>
   <div style="margin-top:12px"><a href="#" id="btnReset" style="font-size:13.5px;color:var(--ink-3)">מילוי חדש (ניקוי הטופס ללקוח אחר)</a></div>
   <div class="missing" id="missingBox"></div>
 </div>
 
-<footer>המעקב שלי &nbsp;·&nbsp; <a href="#coach" id="coachLink" style="color:var(--ink-3);text-decoration:underline;text-decoration-style:dashed">אזור מלווה</a></footer>
+<footer>המעקב שלי &nbsp;·&nbsp; <a href="#coach" id="coachLink" style="color:var(--ink-3);text-decoration:underline;text-decoration-style:dashed">אזור מלווה</a> &nbsp;·&nbsp; גרסה 3</footer>
 </div>
 
 <!-- ============================= COACH VIEW ============================= -->
@@ -466,7 +465,6 @@ function tryShare(){
   box.style.display='none';
   return clientMessage();
 }
-$('btnCopy').addEventListener('click',()=>{ const m=tryShare(); if(m) copyText(m,'התשובות הועתקו ✓ אפשר להדביק לרן'); });
 $('btnReset').addEventListener('click',e=>{
   e.preventDefault();
   if(confirm('לנקות את כל התשובות בטופס? (לא ניתן לשחזר)')){
