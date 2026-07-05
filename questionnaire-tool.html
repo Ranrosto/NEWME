@@ -107,6 +107,21 @@ footer a{color:var(--ink-4);text-decoration:none}
 .kv .val{font-weight:600;text-align:left}
 .rec{background:var(--lilac-wash);border-radius:var(--r-md);padding:12px 15px;margin:9px 0;font-size:15.5px}
 .rec b{color:var(--lilac-deep)}
+/* visual journey + deficit */
+.journey{background:var(--bg-elevated);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px 18px 14px;margin:6px 0 14px}
+.jrow{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.jw{font-family:var(--serif);font-weight:800;font-size:30px;line-height:1}
+.jw.now{color:var(--ink)} .jw.goal{color:var(--lilac-deep)}
+.jl{font-size:12.5px;color:var(--ink-3)}
+.jtrack{position:relative;height:14px;border-radius:99px;background:linear-gradient(270deg,var(--pistachio),var(--lilac));opacity:.95}
+.jloss{text-align:center;font-size:14px;color:var(--ink-2);margin-top:10px}
+.jloss b{color:var(--pistachio-deep);font-size:17px}
+.gauge{margin:14px 0 4px}
+.gauge-track{position:relative;height:30px;border-radius:12px;background:var(--pistachio-wash);overflow:hidden}
+.gauge-fill{position:absolute;top:0;right:0;height:100%;background:var(--pistachio);border-radius:12px 0 0 12px}
+.gauge-deficit{position:absolute;top:0;left:0;height:100%;background:repeating-linear-gradient(45deg,var(--lilac-light),var(--lilac-light) 6px,var(--lilac-wash) 6px,var(--lilac-wash) 12px);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--lilac-deep)}
+.gauge-labels{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-3);margin-top:5px}
+.factor-note{font-size:13.5px;color:var(--ink-3);background:var(--bg-elevated);border-radius:var(--r-sm);padding:9px 12px;margin-top:10px;line-height:1.55}
 .d2{padding:13px 0;border-top:1px dashed var(--border)}
 .d2:first-of-type{border-top:none}
 .d2 .t{font-weight:700;font-size:15.5px;margin-bottom:2px}
@@ -159,6 +174,9 @@ ul.list li{margin:4px 0}
     <div><label class="q-label" for="f_weight">משקל נוכחי (ק״ג) <span class="req">*</span></label><input type="number" id="f_weight" data-req="1" min="40" max="250" step="0.1" inputmode="decimal"></div>
   </div>
   <div class="q-hint" style="margin-top:8px">את המשקל עדיף למדוד בבוקר, אחרי שירותים ולפני אוכל.</div></div>
+  <div class="q"><label class="q-label" for="f_waist">היקף מותניים (ס״מ, רשות)</label>
+    <div class="q-hint">בגובה הטבור, עם סרט מדידה פשוט. אם אין סרט כרגע, אפשר לדלג ונמדוד בהמשך.</div>
+    <input type="number" id="f_waist" min="50" max="200" step="0.5" inputmode="decimal"></div>
   <div class="q"><label class="q-label">איך נראה רוב היום שלך? <span class="req">*</span></label>
     <div class="chips" id="f_occupation" data-req="1" data-chips="single">
       <div class="chip" data-v="sit">בעיקר בישיבה</div>
@@ -182,6 +200,25 @@ ul.list li{margin:4px 0}
     <input type="text" id="f_extype"></div>
   <div class="q"><label class="q-label" for="f_exlove">פעילות שאהבת בעבר או שתמיד רצית לנסות?</label>
     <input type="text" id="f_exlove"></div>
+  <div class="q"><label class="q-label">איזו תוספת תנועה הכי מתאימה לך? (בלי ציוד, בלי מנוי)</label>
+    <div class="chips" id="f_move_pref" data-chips="single">
+      <div class="chip" data-v="walk">הליכה מהירה</div>
+      <div class="chip" data-v="body">10 דק׳ תרגילי משקל גוף בבית</div>
+      <div class="chip" data-v="stairs">מדרגות</div>
+    </div>
+    <div style="margin-top:10px"><input type="text" id="f_move_days" placeholder="באילו ימים בשבוע הכי נוח? (למשל: שני וחמישי)"></div></div>
+  <div class="q"><label class="q-label">אילו עוד סוגי תנועה יכולים להתאים לך? (אפשר לסמן כמה)</label>
+    <div class="q-hint">לפי זה נבנה עבורך את אפשרויות התנועה והתגים באפליקציה.</div>
+    <div class="chips" id="f_move_multi" data-chips="multi">
+      <div class="chip" data-v="walk">הליכה</div>
+      <div class="chip" data-v="stairs">מדרגות</div>
+      <div class="chip" data-v="body">תרגילי משקל גוף</div>
+      <div class="chip" data-v="rope">קפיצת חבל</div>
+      <div class="chip" data-v="dance">ריקוד</div>
+      <div class="chip" data-v="bike">אופניים</div>
+      <div class="chip" data-v="swim">שחייה</div>
+      <div class="chip" data-v="stretch">מתיחות / יוגה</div>
+    </div></div>
 </div>
 
 <!-- פרק ג -->
@@ -244,6 +281,13 @@ ul.list li{margin:4px 0}
   <div class="q"><label class="q-label" for="f_family">האם יש ארוחה משפחתית קבועה שלא מתפשרים עליה?</label>
     <div class="q-hint">למשל ארוחת שישי בערב, ארוחת ערב עם הילדים ב-19:00. לציין יום, שעה ואופי. זה לא מכשול — התוכנית תיבנה סביב זה.</div>
     <textarea id="f_family"></textarea></div>
+  <div class="q"><label class="q-label">בארוחות גדולות וטעימות, קורה לך שאת/ה פשוט לא מצליח/ה לעצור?</label>
+    <div class="q-hint">מגיעים לארוחה משפחתית, האוכל מעולה, וממשיכים הרבה אחרי השובע.</div>
+    <div class="chips" id="f_bigmeals" data-chips="single">
+      <div class="chip" data-v="yes">כן, מכיר/ה את זה היטב</div>
+      <div class="chip" data-v="sometimes">לפעמים</div>
+      <div class="chip" data-v="no">לא ממש</div>
+    </div></div>
 </div>
 
 <!-- פרק ו -->
@@ -271,9 +315,33 @@ ul.list li{margin:4px 0}
     <div class="privacy">🔒 התשובות בפרק הזה מגיעות לרן בלבד, ומטרתן אחת — שהתוכנית תהיה בטוחה ונכונה עבורך.</div></div>
 </div>
 
-<!-- פרק ז -->
+<!-- פרק ז: תזונה -->
 <div class="section">
-  <div class="sec-head"><div class="sec-letter">ז</div><div class="sec-title">ולסיום</div></div>
+  <div class="sec-head"><div class="sec-letter">ז</div><div class="sec-title">מה עולה על הצלחת</div></div>
+  <div class="sec-note">כדי שהתפריט יתאים לך באמת, ולא ההפך.</div>
+  <div class="q"><label class="q-label" for="f_avoid">אילו מאכלים את/ה לא אוכל/ת או ממש לא אוהב/ת?</label>
+    <div class="q-hint">למשל: דגים, פטריות, קטניות, חציל. הכל לגיטימי.</div>
+    <textarea id="f_avoid"></textarea></div>
+  <div class="q"><label class="q-label" for="f_loves">2-3 ארוחות שאת/ה כבר אוהב/ת ויודע/ת להכין</label>
+    <div class="q-hint">נבנה סביבן, לא נחליף אותן. למשל: ״שקשוקה״, ״פסטה עם טונה״.</div>
+    <textarea id="f_loves"></textarea></div>
+  <div class="q"><label class="q-label">איך את/ה עם בישול?</label>
+    <div class="chips" id="f_cook" data-chips="single">
+      <div class="chip" data-v="basic">מינימלי (חיתוך והרכבה)</div>
+      <div class="chip" data-v="ok">מסתדר/ת עם מתכונים פשוטים</div>
+      <div class="chip" data-v="love">אוהב/ת לבשל</div>
+    </div></div>
+  <div class="q"><label class="q-label">כמה זמן הכנה ריאלי לארוחה ביום עמוס?</label>
+    <div class="chips" id="f_preptime" data-chips="single">
+      <div class="chip" data-v="q10">עד 10 דקות</div>
+      <div class="chip" data-v="q20">עד 20 דקות</div>
+      <div class="chip" data-v="qfree">יש לי זמן</div>
+    </div></div>
+</div>
+
+<!-- פרק ח -->
+<div class="section">
+  <div class="sec-head"><div class="sec-letter">ח</div><div class="sec-title">ולסיום</div></div>
   <div class="q"><label class="q-label" for="f_why">מה ה״למה״ שלך?</label>
     <div class="q-hint">משפט אישי שיזכיר לך למה התחלת. יופיע ברגעים הנכונים באפליקציה. אפשר גם למלא אחר כך.</div>
     <textarea id="f_why"></textarea></div>
@@ -292,7 +360,7 @@ ul.list li{margin:4px 0}
   <div class="missing" id="missingBox"></div>
 </div>
 
-<footer>המעקב שלי &nbsp;·&nbsp; <a href="#coach" id="coachLink" style="color:var(--ink-3);text-decoration:underline;text-decoration-style:dashed">אזור מלווה</a> &nbsp;·&nbsp; גרסה 3</footer>
+<footer>המעקב שלי &nbsp;·&nbsp; <a href="#coach" id="coachLink" style="color:var(--ink-3);text-decoration:underline;text-decoration-style:dashed">אזור מלווה</a> &nbsp;·&nbsp; גרסה 6</footer>
 </div>
 
 <!-- ============================= COACH VIEW ============================= -->
@@ -323,7 +391,13 @@ ul.list li{margin:4px 0}
 
   <div class="panel lilac"><h3><span class="dot"></span>חלון האכילה — מחושב אוטומטית</h3><div id="cWindow"></div></div>
 
+  <div class="panel"><h3><span class="dot"></span>ההרגלים המומלצים ללקוח — לתרגום ישיר לאפליקציה</h3><div id="cHabits"></div></div>
+
   <div class="panel lilac"><h3><span class="dot"></span>מה שצף מהתשובות — המלצות עבורך</h3><div id="cRecs"></div></div>
+
+  <div class="panel lilac"><h3><span class="dot"></span>תפריט יומי מותאם — טיוטה לשיחה</h3><div id="cMenu"></div></div>
+
+  <div class="panel"><h3><span class="dot"></span>תנועה מותאמת ותגים</h3><div id="cMove"></div></div>
 
   <div class="panel"><h3><span class="dot" style="background:var(--lilac-deep)"></span>הכנה לשיחה — 11 ההחלטות של שלב 2</h3>
     <div class="sec-note">כל שדה מגיע עם הצעה מוכנה. בשיחה עם הלקוח רק מאשרים או מתקנים.</div>
@@ -368,8 +442,8 @@ function tFmt(min){ min=((min%1440)+1440)%1440; return pad(Math.floor(min/60))+'
 const r1 = x => Math.round(x*10)/10;
 
 /* ================= form state ================= */
-const TEXT_FIELDS = ['f_name','f_age','f_height','f_weight','f_extype','f_exlove','f_wake','f_firstmeal_t','f_firstmeal_w','f_lastmeal_t','f_lastmeal_w','f_sleep','f_sweets','f_fried','f_coffee_n','f_coffee_sugar','f_drinks','f_out_what','f_family','f_diet_other','f_medical','f_meds','f_ed','f_why','f_reminder'];
-const CHIP_FIELDS = ['f_sex','f_occupation','f_exfreq','f_coffee_milk','f_out_freq','f_diet'];
+const TEXT_FIELDS = ['f_name','f_age','f_height','f_weight','f_waist','f_extype','f_exlove','f_move_days','f_avoid','f_loves','f_wake','f_firstmeal_t','f_firstmeal_w','f_lastmeal_t','f_lastmeal_w','f_sleep','f_sweets','f_fried','f_coffee_n','f_coffee_sugar','f_drinks','f_out_what','f_family','f_diet_other','f_medical','f_meds','f_ed','f_why','f_reminder'];
+const CHIP_FIELDS = ['f_sex','f_occupation','f_exfreq','f_move_pref','f_move_multi','f_cook','f_preptime','f_coffee_milk','f_out_freq','f_bigmeals','f_diet'];
 const REQ = ['f_name','f_age','f_sex','f_height','f_weight','f_occupation','f_exfreq','f_wake','f_firstmeal_t','f_lastmeal_t','f_sleep','f_sweets','f_coffee_n','f_out_freq','f_medical','f_meds'];
 const REQ_NAMES = {f_name:'שם',f_age:'גיל',f_sex:'מין',f_height:'גובה',f_weight:'משקל',f_occupation:'אופי היום',f_exfreq:'תדירות אימונים',f_wake:'שעת השכמה',f_firstmeal_t:'שעת אכילה ראשונה',f_lastmeal_t:'שעת אכילה אחרונה',f_sleep:'שעת שינה',f_sweets:'מתוקים',f_coffee_n:'כמות קפה',f_out_freq:'אכילה בחוץ',f_medical:'מחלות רקע',f_meds:'תרופות'};
 
@@ -520,7 +594,8 @@ function analyze(d){
   out.suggestedLoss=r1(Math.min(w*0.07,8));
   out.suggestedTarget=Math.round((w-out.suggestedLoss)*2)/2;
   out.protein = t => Math.round(1.2*t);
-  out.weeks = t => out.weeklyKg>0 ? Math.ceil((w-t)/out.weeklyKg) : null;
+  out.weeksBase = t => out.weeklyKg>0 ? Math.ceil((w-t)/out.weeklyKg) : null;
+  out.weeks = t => { const b=out.weeksBase(t); return b!=null ? Math.ceil(b*1.25) : null; }; // +25% מרווח ביטחון לבלת״מים ולהאטת הקצב
 
   /* eating window */
   const first=tMin(d.f_firstmeal_t), sleep=tMin(d.f_sleep), wake=tMin(d.f_wake), last=tMin(d.f_lastmeal_t);
@@ -585,13 +660,76 @@ function analyze(d){
   /* coffee targets */
   const cups=+d.f_coffee_n||0, sugar=+d.f_coffee_sugar||0;
   out.coffee={cups,sugar,milk:d.f_coffee_milk};
-  out.coffeeRec=null;
+  out.coffeeRec=null; out.coffeeRule=null;
   if(cups>0){
-    const parts=[];
-    if(sugar>0) parts.push('ירידה הדרגתית לאפס סוכר (חוסך כ-'+Math.round(sugar*cups*20*7)+' קלוריות בשבוע)');
-    if(d.f_coffee_milk==='half'||d.f_coffee_milk==='most') parts.push('חיתוך כמות החלב בחצי');
+    const parts=[]; const ruleParts=[];
+    if(sugar>0){ parts.push('ירידה הדרגתית לאפס סוכר (חוסך כ-'+Math.round(sugar*cups*20*7)+' קלוריות בשבוע)'); ruleParts.push('בלי סוכר בקפה'); }
+    if(d.f_coffee_milk==='half'||d.f_coffee_milk==='most'){ parts.push('חיתוך כמות החלב בחצי'); ruleParts.push('חצי מכמות החלב'); }
     if(parts.length) out.coffeeRec=parts.join(' + ');
+    if(ruleParts.length) out.coffeeRule=ruleParts.join(', ');
   }
+
+  /* big meals + movement preference */
+  out.bigMeals = (d.f_bigmeals==='yes'||d.f_bigmeals==='sometimes');
+  const moveNames={walk:'הליכה מהירה', body:'10 דקות תרגילי משקל גוף בבית', stairs:'עליית מדרגות'};
+  out.movePref = moveNames[d.f_move_pref]||null;
+  out.moveText = out.movePref ? out.movePref+((d.f_move_days||'').trim()?' · '+d.f_move_days.trim():'') : '';
+
+  /* ---- menu engine: dish library (טיוטה, ערכים מקורבים, לאישור רן) ---- */
+  const DISHES={
+    breakfast:[
+      {n:'דייסת הפתיחה (צ׳יה, קוואקר, חלבון, קינמון)',k:330,p:22,t:['veg','lf','quick']},
+      {n:'שקשוקה עם 2 ביצים, סלט ולחם מלא',k:420,p:22,t:['veg','eggs','cook']},
+      {n:'חביתת ירק, גבינה 5% ולחם מלא',k:380,p:24,t:['veg','eggs','quick']},
+      {n:'יוגורט יווני עם פרי, שיבולת שועל וכף צ׳יה',k:340,p:20,t:['veg','quick']},
+      {n:'טוסט מקמח מלא עם גבינה, ביצה וירקות',k:400,p:23,t:['veg','eggs','quick']},
+      {n:'דייסת אמרנט עם יוגורט סויה ופרי',k:350,p:15,t:['veg','vegan','gf','lf','quick']},
+      {n:'ממרח טופו על לחם כוסמין מלא עם ירקות',k:360,p:19,t:['veg','vegan','lf','quick']}
+    ],
+    lunch:[
+      {n:'הסלט היומי: בטטה, ירק טרי, קטניות, טופו/עוף, וינגרט',k:520,p:32,t:['veg','vegan','gf','lf','quick']},
+      {n:'חזה עוף בתנור עם אורז מלא וירקות צלויים',k:560,p:42,t:['gf','lf','cook']},
+      {n:'קציצות עדשים ברוטב עגבניות עם קוסקוס מלא',k:540,p:26,t:['veg','vegan','lf','cook']},
+      {n:'דג אפוי עם תפוחי אדמה וסלט גדול',k:520,p:36,t:['gf','lf','cook']},
+      {n:'פסטה מקמח מלא עם טונה, עגבניות וירקות',k:550,p:33,t:['lf','quick']},
+      {n:'טופו מוקפץ עם ירקות ואטריות אורז',k:500,p:28,t:['veg','vegan','gf','lf','quick']},
+      {n:'מג׳דרה (אורז ועדשים) עם סלט וכף טחינה',k:560,p:22,t:['veg','vegan','gf','lf','cook']}
+    ],
+    dinner:[
+      {n:'2 ביצים קשות/חביתה עם סלט גדול ופרוסת לחם מלא',k:360,p:20,t:['veg','eggs','lf','quick']},
+      {n:'קוטג׳/גבינות עד 5% עם ירקות חתוכים ולחם מלא',k:340,p:24,t:['veg','quick']},
+      {n:'מרק עדשים סמיך עם פרוסת לחם מלא',k:380,p:18,t:['veg','vegan','lf','cook']},
+      {n:'טוסט אבוקדו עם ביצה וירקות',k:390,p:15,t:['veg','eggs','lf','quick']},
+      {n:'סלט טונה עם ירקות, ביצה קשה וקרקרים מלאים',k:380,p:28,t:['lf','quick']},
+      {n:'טופו סקרמבל עם ירקות ולחם מלא',k:360,p:22,t:['veg','vegan','lf','quick']}
+    ]
+  };
+  const avoidTokens=(d.f_avoid||'').split(/[,.\n ]+/).map(s=>s.trim()).filter(s=>s.length>1);
+  const dishOk=x=>{
+    if(diet.includes('vegan') && !x.t.includes('vegan')) return false;
+    if(diet.includes('veg') && !(x.t.includes('veg')||x.t.includes('vegan'))) return false;
+    if(diet.includes('gluten') && !x.t.includes('gf')) return false;
+    if(diet.includes('lactose') && !(x.t.includes('lf')||x.t.includes('vegan'))) return false;
+    if(avoidTokens.some(tok=>x.n.includes(tok))) return false;
+    if(d.f_preptime==='q10' && !x.t.includes('quick')) return false;
+    return true;
+  };
+  const pick=arr=>{ const ok=arr.filter(dishOk); return (ok.length?ok:arr).slice(0,3); };
+  out.menu={
+    split:{breakfast:Math.round(out.budget*0.30), lunch:Math.round(out.budget*0.38), dinner:Math.round(out.budget*0.24), sweet:out.budget-Math.round(out.budget*0.30)-Math.round(out.budget*0.38)-Math.round(out.budget*0.24)},
+    options:{breakfast:pick(DISHES.breakfast), lunch:pick(DISHES.lunch), dinner:pick(DISHES.dinner)}
+  };
+  out.loves=(d.f_loves||'').trim();
+
+  /* ---- movement engine: options + badges per client ---- */
+  const MOVE_NAMES={walk:'הליכה',stairs:'מדרגות',body:'תרגילי משקל גוף',rope:'קפיצת חבל',dance:'ריקוד',bike:'אופניים',swim:'שחייה',stretch:'מתיחות ויוגה'};
+  const multi=(d.f_move_multi||[]).map(k=>MOVE_NAMES[k]).filter(Boolean);
+  const mainMove=out.movePref||multi[0]||'הליכה';
+  const moveSet=[mainMove].concat(multi.filter(m=>m!==mainMove)).slice(0,4);
+  while(moveSet.length<4){ const fill=['הליכה','מתיחות ויוגה','תרגילי משקל גוף','מדרגות'].find(f=>!moveSet.includes(f)); moveSet.push(fill); }
+  out.badgeTheme=mainMove;
+  out.workoutTypes={warmup:moveSet[0],endurance:moveSet[1],hiit:moveSet[2],skills:moveSet[3]};
+  out.movePlan='יומי: 10 דקות '+(moveSet.includes('הליכה')?'הליכה':mainMove)+' אחרי הארוחה הגדולה · פעמיים בשבוע: 15-20 דקות '+mainMove+(moveSet[1]&&moveSet[1]!==mainMove?' · גיוון: '+moveSet[1]:'');
 
   /* quick solutions recommendation */
   out.solutions=['veg_bags'];
@@ -615,20 +753,31 @@ function renderCoach(a){
 
   /* stats */
   const t=a.suggestedTarget;
+  const cw=+d.f_weight;
   $('cStats').innerHTML =
+    '<div class="journey" style="grid-column:1/-1">'+
+      '<div class="jrow"><div><div class="jw now">'+cw+'</div><div class="jl">משקל נוכחי (ק״ג)</div></div>'+
+      '<div style="text-align:left"><div class="jw goal">'+t+'</div><div class="jl">יעד שלב א׳</div></div></div>'+
+      '<div class="jtrack"></div>'+
+      '<div class="jloss">ירידה מתוכננת: <b>'+r1(cw-t)+' ק״ג</b> · בקצב של כ-'+a.weeklyKg+' ק״ג בשבוע</div>'+
+      '<div class="gauge"><div class="gauge-track">'+
+        '<div class="gauge-fill" style="width:'+Math.round(a.budget/a.tdee*100)+'%"></div>'+
+        '<div class="gauge-deficit" style="width:'+Math.round(a.deficit/a.tdee*100)+'%">−'+a.deficit+'</div>'+
+      '</div><div class="gauge-labels"><span>אוכלים: '+a.budget+' קלוריות</span><span>שורפים: '+a.tdee+'</span></div></div>'+
+    '</div>' +
     stat(a.tdee,'הוצאה יומית (TDEE)') +
     stat(a.budget,'תקציב קלורי יומי'+(a.floored?' · רצפה!':'')) +
     stat(a.protein(t)+' ג׳','חלבון יומי · כ-'+Math.round(a.protein(t)/3)+' ג׳ בארוחה','lil') +
-    stat(a.weeklyKg+' ק״ג','קצב שבועי צפוי') +
-    stat(t+' ק״ג','הצעת יעד שלב א׳','lil') +
-    stat(a.weeks(t)??'—','שבועות ליעד');
+    stat(a.weeks(t)??'—','שבועות ליעד · כולל מרווח ביטחון','lil');
   function stat(v,l,cls){ return '<div class="stat '+(cls||'')+'"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
 
   $('cCalcDetails').innerHTML =
     kv('BMR (מנוחה)', Math.round(a.bmr)+' קלוריות') +
     kv('מקדם פעילות', a.factor.toFixed(2)) +
     kv('גירעון בפועל', a.deficit+' קלוריות ביום' + (a.floored?' — הרצפה ('+a.floor+') נדרכה, הקצב איטי מחצי ק״ג':'')) +
-    kv('טווח יעד מותר (5–10%)', 'ירידה של '+a.tMin+' עד '+a.tMax+' ק״ג · כלומר יעד בין '+r1((+d.f_weight)-a.tMax)+' ל-'+r1((+d.f_weight)-a.tMin)+' ק״ג');
+    kv('שבועות: חישוב', (a.weeksBase(t)??'—')+' לפי הקצב + 25% מרווח ביטחון = '+(a.weeks(t)??'—')) +
+    kv('טווח יעד מותר (5–10%)', 'ירידה של '+a.tMin+' עד '+a.tMax+' ק״ג · כלומר יעד בין '+r1((+d.f_weight)-a.tMax)+' ל-'+r1((+d.f_weight)-a.tMin)+' ק״ג') +
+    '<div class="factor-note"><b>מה זה מקדם פעילות?</b> בכמה מוכפל חילוף החומרים במנוחה בגלל התנועה היומיומית והאימונים. הטווח: 1.2 (יושבני לגמרי) עד 1.9 (פעיל מאוד). אצל הלקוח: '+a.factor.toFixed(2)+', לפי אופי היום ותדירות האימונים שדיווח.</div>';
   function kv(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span class="val">'+v+'</span></div>'; }
 
   /* window */
@@ -659,7 +808,30 @@ function renderCoach(a){
   if(d.f_out_freq==='often'||d.f_out_freq==='daily') recs+='<div class="rec"><b>אכילה בחוץ תכופה — התסריט הופך מרכזי:</b> '+outScript+'.'+(d.f_out_what?' (״'+esc(d.f_out_what)+'״)':'')+'</div>';
   else recs+='<div class="rec"><b>'+outScript+'</b> — נכנס לתוכן הליווי של כולם, גם ליציאה של אחת לשבועיים.</div>';
   if((d.f_exlove||'').trim()) recs+='<div class="rec"><b>תנועה שהלקוח אוהב:</b> ״'+esc(d.f_exlove)+'״ — להשתמש בזה כעוגן להצעת התנועה, הנאה ולא עונש.</div>';
+  if(a.bigMeals) recs+='<div class="rec"><b>קושי לעצור בארוחות גדולות ('+(d.f_bigmeals==='yes'?'מזדהה מאוד':'לפעמים')+'):</b> נכנסות לכלי שתי טכניקות: ״החצי השני מחכה״ (צלחת רגילה, חצי, הפסקת 5 דקות, ואז מחליטים) ו״היד הלא דומיננטית״ (מזלג ביד השנייה מכריח את המוח להתרכז ולשאול אם עוד רעבים). ההסבר: למוח לוקח 15-20 דקות להבין שאנחנו שבעים, והטכניקות מעירות את ״המבוגר האחראי״ בזמן.</div>';
+  if(a.moveText) recs+='<div class="rec"><b>תוספת התנועה שנבחרה:</b> '+esc(a.moveText)+' — בלי ציוד ובלי מנוי, נכנסת לכלי כהתחייבות. בשיחה רק מקבעים ימים ושעה.</div>';
   $('cRecs').innerHTML=recs||'<div class="okflag">אין המלצות מיוחדות מעבר לתוכנית הבסיס.</div>';
+
+  /* recommended habits block (top-3 מסומנות, השאר מאגר) */
+  $('cHabits').innerHTML = a.goalPool.map((g,i)=>
+    '<div class="'+(i<3?'okflag':'rec')+'" style="margin:6px 0">'+(i<3?'<b>מומלץ '+(i+1)+':</b> ':'מאגר: ')+esc(g)+'</div>').join('');
+
+  /* menu draft */
+  const m=a.menu;
+  const mealBlock=(title,kcal,arr)=>'<div style="margin:10px 0"><b style="color:var(--lilac-deep)">'+title+' · כ-'+kcal+' קלוריות · '+Math.round(a.protein(t)/3)+' ג׳ חלבון</b><ul class="list" style="margin-top:4px">'+arr.map(x=>'<li>'+esc(x.n)+' <span style="color:var(--ink-3)">(~'+x.k+' קל׳, '+x.p+' ג׳)</span></li>').join('')+'</ul></div>';
+  $('cMenu').innerHTML =
+    '<div class="kv"><span class="k">חלוקת התקציב היומי</span><span class="val">בוקר '+m.split.breakfast+' · צהריים '+m.split.lunch+' · ערב '+m.split.dinner+' · מתוק מתוכנן '+m.split.sweet+'</span></div>'+
+    mealBlock('בוקר (ארוחת הפתיחה)',m.split.breakfast,m.options.breakfast)+
+    mealBlock('צהריים',m.split.lunch,m.options.lunch)+
+    mealBlock('ערב',m.split.dinner,m.options.dinner)+
+    (a.loves?'<div class="rec"><b>הארוחות שהלקוח כבר אוהב:</b> ״'+esc(a.loves)+'״ — לשלב אותן בתפריט בשיחה, מותאמות לתקציב.</div>':'')+
+    '<div class="rec" style="background:var(--pistachio-wash)">הערכים מקורבים וזו טיוטה: בשיחה בוחרים יחד עם הלקוח 2-3 אופציות לכל ארוחה, ואתה מאשר סופית כדיאטן.</div>';
+
+  /* movement + badges */
+  $('cMove').innerHTML =
+    '<div class="kv"><span class="k">התוכנית</span><span class="val">'+esc(a.movePlan)+'</span></div>'+
+    '<div class="kv"><span class="k">נושא התגים באפליקציה</span><span class="val">'+esc(a.badgeTheme)+'</span></div>'+
+    '<div class="kv"><span class="k">4 סוגי האימון שיוצגו</span><span class="val">'+esc(Object.values(a.workoutTypes).join(' · '))+'</span></div>';
 
   /* decisions */
   const flexSug = a.flexDay||'';
@@ -684,7 +856,7 @@ function renderCoach(a){
     dec('d_flex','היום הגמיש הקבוע','זוהה מהשאלון — יוגדר באפליקציה כיום גמיש אוטומטי (מיקוד חלבון, בלי שבירת רצף)', flexSug, 'text'),
     dec('d_sol','שני הפתרונות המהירים','הומלץ לפי ההגבלות: '+a.solutions.map(s=>a.solNames[s]).join(' + ')+'. אפשר להחליף לסלט וינגרט / שייק ירוק.', a.solutions.map(s=>a.solNames[s]).join(' + '), 'text'),
     dec('d_walk','ההליכה היומית (10 דקות)','אחרי הארוחה הגדולה. הצעה: '+a.walkAfter, 'אחרי '+a.walkAfter, 'text'),
-    dec('d_strength','אימון כוח','פעמיים בשבוע, 15–20 דקות, גם משקל גוף בבית. לקבוע ימים.'+((d.f_extype||'').trim()?' מתאמן כבר: ״'+esc(d.f_extype)+'״':''), '', 'text'),
+    dec('d_strength','תנועה ואימון כוח','פעמיים בשבוע, 15–20 דקות, בלי ציוד. הועדף בשאלון: '+(a.moveText||'לא נבחר')+'.'+((d.f_extype||'').trim()?' מתאמן כבר: ״'+esc(d.f_extype)+'״':''), a.moveText||'', 'text'),
     dec('d_sweet','המתוק המתוכנן','מנה אחת ביום, בשעה קבועה, בתוך התקציב. לפי הטריגר: '+(a.triggers[0]?a.triggers[0].t:'—'), '', 'text'),
     dec('d_ifthen','כלל האם-אז האישי','נוסח אוטומטית מהטריגר המרכזי. בשיחה מחדדים יחד את המצב המדויק ואת הפעולה, ככל שהניסוח ספציפי יותר, הוא עובד יותר', (a.triggers[0]&&a.triggers[0].rule)||'', 'text'),
     dec('d_goals','3 המטרות היומיות לאפליקציה','נבחרו אוטומטית מהתשובות. המאגר המלא: '+a.goalPool.join(' · '), goalsSug.join(' | '), 'text'),
@@ -733,6 +905,11 @@ function renderCoach(a){
     ['אכילה בחוץ', outf+(d.f_out_what?' · '+d.f_out_what:'')],
     ['ארוחה משפחתית', d.f_family||'—'],
     ['הגבלות', (d.f_diet||[]).join(', ')+(d.f_diet_other?' · '+d.f_diet_other:'')||'—'],
+    ['היקף מותניים', d.f_waist?d.f_waist+' ס״מ':'—'],
+    ['תזונה: נמנע', d.f_avoid||'—'],
+    ['תזונה: אוהב', d.f_loves||'—'],
+    ['בישול · זמן', ({basic:'מינימלי',ok:'מתכונים פשוטים',love:'אוהב לבשל'}[d.f_cook]||'—')+' · '+({q10:'עד 10 דק׳',q20:'עד 20 דק׳',qfree:'יש זמן'}[d.f_preptime]||'—')],
+    ['תנועה נוספת', (d.f_move_multi||[]).join(', ')||'—'],
     ['מחלות רקע', d.f_medical],
     ['תרופות', d.f_meds],
     ['יחסים עם אוכל', d.f_ed||'—'],
@@ -793,7 +970,7 @@ $('btnBrief').addEventListener('click',()=>{
 '',
 '— החלטות שלב 2 (מהשיחה) —',
 'משקל יעד שלב א׳: '+target,
-'משך המסע: '+(gv('d_weeks')||a.weeks(target))+' שבועות = '+((+gv('d_weeks')||a.weeks(target)||0)*7)+' ימים באפליקציה',
+'משך המסע: '+(gv('d_weeks')||a.weeks(target))+' שבועות (כולל מרווח ביטחון 25%) = '+((+gv('d_weeks')||a.weeks(target)||0)*7)+' ימים באפליקציה',
 'תחילת אכילה: '+gv('d_start')+' · ארוחה אחרונה: '+gv('d_last'),
 'יום גמיש קבוע: '+(gv('d_flex')||'אין'),
 'פתרונות מהירים: '+gv('d_sol'),
@@ -801,7 +978,21 @@ $('btnBrief').addEventListener('click',()=>{
 'אימון כוח: '+(gv('d_strength')||'לקבוע'),
 'מתוק מתוכנן: '+(gv('d_sweet')||'לקבוע'),
 'כלל אם-אז אישי: '+(gv('d_ifthen')||'לקבוע'),
+'כלל קפה: '+(a.coffeeRule||'אין צורך, שותה נקי'),
+'קושי בארוחות גדולות: '+(a.bigMeals?'כן — לכלול בכלי את טכניקות ״החצי השני מחכה״ ו״היד הלא דומיננטית״':'לא'),
+'תנועה נבחרת: '+(gv('d_strength')||a.moveText||'לקבוע'),
+'תוכנית תנועה: '+a.movePlan,
+'נושא תגים: '+a.badgeTheme+' · סוגי אימון: '+Object.values(a.workoutTypes).join(', '),
+'',
+'— תזונה מותאמת —',
+'נמנע/לא אוהב: '+(d.f_avoid||'—')+' · אוהב ויודע להכין: '+(a.loves||'—'),
+'בישול: '+(d.f_cook||'—')+' · זמן הכנה: '+(d.f_preptime||'—'),
+'חלוקת תקציב: בוקר '+a.menu.split.breakfast+' / צהריים '+a.menu.split.lunch+' / ערב '+a.menu.split.dinner+' / מתוק '+a.menu.split.sweet,
+'אופציות בוקר: '+a.menu.options.breakfast.map(x=>x.n).join(' | '),
+'אופציות צהריים: '+a.menu.options.lunch.map(x=>x.n).join(' | '),
+'אופציות ערב: '+a.menu.options.dinner.map(x=>x.n).join(' | '),
 '3 מטרות יומיות: '+gv('d_goals'),
+'מאגר הרגלים נוספים (למסך עוד): '+a.goalPool.slice(3).join(' | '),
 'חלונות תכנון שבועיים: '+(gv('d_plan')||'שבת + אמצע שבוע'),
 'מדד משני: '+gv('d_metric'),
 '',
@@ -861,6 +1052,14 @@ $('btnBrief').addEventListener('click',()=>{
 "    flexLabel: '"+(gv('d_flex')||'').replace(/'/g,'׳')+"',",
 '    waistTracking: '+((gv('d_metric')||'').includes('היקף')?'true':'false')+',',
 "    ifThenRule: '"+(gv('d_ifthen')||'').replace(/'/g,'׳')+"',",
+"    coffeeRule: "+(a.coffeeRule?"'"+a.coffeeRule.replace(/'/g,'׳')+"'":'null')+',',
+'    bigMealsTips: '+(a.bigMeals?'true':'false')+',',
+"    movement: '"+(gv('d_strength')||a.moveText||'').replace(/'/g,'׳')+"',",
+'    startWaist: '+((+d.f_waist)>0?(+d.f_waist):'null')+',',
+"    badgeTheme: '"+a.badgeTheme+"',",
+"    workoutTypes: { warmup: '"+a.workoutTypes.warmup+"', endurance: '"+a.workoutTypes.endurance+"', hiit: '"+a.workoutTypes.hiit+"', skills: '"+a.workoutTypes.skills+"' },",
+"    gender: '"+(d.f_sex||'m')+"',",
+"    habitPool: ["+a.goalPool.slice(3).map(g=>"'"+g.replace(/'/g,'׳')+"'").join(', ')+"],",
 "    why: '"+(d.f_why||'').replace(/'/g,'׳').replace(/\n/g,' ')+"'",
 '};',
   ];
