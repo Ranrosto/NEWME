@@ -286,13 +286,14 @@ ul.list li{margin:4px 0}
   <p>לחיצה אחת והתשובות בדרך לרן. משם נבנה יחד את התוכנית שלך.</p>
   <div class="btn-row">
     <a class="btn btn-wa" id="btnWa">שליחה בוואטסאפ</a>
+    <a class="btn btn-lilac" id="btnMail">שליחה במייל</a>
     <button class="btn btn-ghost" id="btnCopy">העתקת התשובות</button>
   </div>
   <div style="margin-top:12px"><a href="#" id="btnReset" style="font-size:13.5px;color:var(--ink-3)">מילוי חדש (ניקוי הטופס ללקוח אחר)</a></div>
   <div class="missing" id="missingBox"></div>
 </div>
 
-<footer>המעקב שלי · <a href="#coach" id="coachLink">·</a></footer>
+<footer>המעקב שלי &nbsp;·&nbsp; <a href="#coach" id="coachLink" style="color:var(--ink-3);text-decoration:underline;text-decoration-style:dashed">אזור מלווה</a></footer>
 </div>
 
 <!-- ============================= COACH VIEW ============================= -->
@@ -477,6 +478,12 @@ $('btnWa').addEventListener('click',e=>{
   e.preventDefault(); const m=tryShare(); if(!m) return;
   copyText(m,'ההודעה מוכנה ✓ נפתח וואטסאפ');
   setTimeout(()=>window.open('https://wa.me/972523603966?text='+encodeURIComponent(m),'_blank'),350);
+});
+$('btnMail').addEventListener('click',e=>{
+  e.preventDefault(); const m=tryShare(); if(!m) return;
+  copyText(m,'ההודעה הועתקה ✓ נפתח המייל');
+  const subj=encodeURIComponent('שאלון התאמה אישית · '+(($('f_name').value)||'').trim());
+  setTimeout(()=>{ location.href='mailto:ranrosto@gmail.com?subject='+subj+'&body='+encodeURIComponent(m); },350);
 });
 
 /* ================= view switching ================= */
