@@ -3,15 +3,15 @@
    גרסה: 1.4.0
    תפקיד: caching בסיסי + הצגת התראות יומיות
    
-   שינויים בגרסה 1.4.0:
-   - bump ל-v3-1: פיצ'רים חדשים - חזרה חמה אחרי היעדרות,
-     כפתור "רגע קשה" (SOS), ושליחת יומן אכילה במייל
+   שינויים בגרסה 1.5.0:
+   - bump ל-v3-5: הסרת ניתוח Claude מרישום ארוחות (סידור לוקאלי),
+     תיקון שמירת אימון, נשנוש מתוכנן בתקציב
    ============================================================ */
 
 // Cache name is auto-unique PER CLONE (based on this app's folder path), so
 // several participant apps hosted on the same domain never overwrite or
 // delete each other's cached files. Bump CACHE_VERSION to force an update.
-const CACHE_VERSION = 'v3-2';
+const CACHE_VERSION = 'v3-6';
 const CACHE_PREFIX = 'nutrition-tracker-' + self.location.pathname.replace(/sw\.js$/, '');
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
 const CORE_FILES = [

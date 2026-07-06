@@ -248,6 +248,15 @@ ul.list li{margin:4px 0}
   <div class="q"><label class="q-label" for="f_sweets">אילו מתוקים נכנסים אצלך, מתי, ומה בדרך כלל קורה סביבם? <span class="req">*</span></label>
     <div class="q-hint">למשל: ״שוקולד אחרי ארוחת ערב מול הטלוויזיה״, ״עוגיות בישיבות בעבודה״, ״גלידה כשאני לחוץ״.</div>
     <textarea id="f_sweets" data-req="1"></textarea></div>
+  <div class="q"><label class="q-label">כמה פעמים אתה מוצא את עצמך מנשנש בין הארוחות?</label>
+    <div class="chips" id="f_snack_freq" data-chips="single">
+      <div class="chip" data-v="rare">כמעט ולא</div>
+      <div class="chip" data-v="sometimes">כמה פעמים בשבוע</div>
+      <div class="chip" data-v="daily">כל יום</div>
+    </div></div>
+  <div class="q"><label class="q-label" for="f_snack_what">מה הנשנוש הקבוע שאתה הכי אוהב?</label>
+    <div class="q-hint">בכנות מלאה — למשל: ״3 קוביות שוקולד מריר״, ״במבה מול הטלוויזיה״, ״גלידה אחרי ארוחת ערב״. אם יש נשנוש שאתה אוהב, נשמור לו מקום בתוכנית במקום להילחם בו.</div>
+    <input type="text" id="f_snack_what"></input></div>
   <div class="q"><label class="q-label" for="f_fried">אילו מאכלים מטוגנים נכנסים בשבוע רגיל, ומתי?</label>
     <textarea id="f_fried"></textarea></div>
   <div class="q"><label class="q-label">קפה ביום <span class="req">*</span></label>
@@ -360,7 +369,7 @@ ul.list li{margin:4px 0}
   <div class="missing" id="missingBox"></div>
 </div>
 
-<footer>המעקב שלי &nbsp;·&nbsp; גרסה 7</footer>
+<footer>המעקב שלי &nbsp;·&nbsp; גרסה 8</footer>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -384,8 +393,8 @@ function tFmt(min){ min=((min%1440)+1440)%1440; return pad(Math.floor(min/60))+'
 const r1 = x => Math.round(x*10)/10;
 
 /* ================= form state ================= */
-const TEXT_FIELDS = ['f_name','f_age','f_height','f_weight','f_waist','f_extype','f_exlove','f_move_days','f_avoid','f_loves','f_wake','f_firstmeal_t','f_firstmeal_w','f_lastmeal_t','f_lastmeal_w','f_sleep','f_sweets','f_fried','f_coffee_n','f_coffee_sugar','f_drinks','f_out_what','f_family','f_diet_other','f_medical','f_meds','f_ed','f_why','f_reminder'];
-const CHIP_FIELDS = ['f_sex','f_occupation','f_exfreq','f_move_pref','f_move_multi','f_cook','f_preptime','f_coffee_milk','f_out_freq','f_bigmeals','f_diet'];
+const TEXT_FIELDS = ['f_name','f_age','f_height','f_weight','f_waist','f_extype','f_exlove','f_move_days','f_avoid','f_loves','f_wake','f_firstmeal_t','f_firstmeal_w','f_lastmeal_t','f_lastmeal_w','f_sleep','f_sweets','f_snack_what','f_fried','f_coffee_n','f_coffee_sugar','f_drinks','f_out_what','f_family','f_diet_other','f_medical','f_meds','f_ed','f_why','f_reminder'];
+const CHIP_FIELDS = ['f_sex','f_occupation','f_exfreq','f_move_pref','f_move_multi','f_cook','f_preptime','f_coffee_milk','f_out_freq','f_bigmeals','f_diet','f_snack_freq'];
 const REQ = ['f_name','f_age','f_sex','f_height','f_weight','f_occupation','f_exfreq','f_wake','f_firstmeal_t','f_lastmeal_t','f_sleep','f_sweets','f_coffee_n','f_out_freq','f_medical','f_meds'];
 const REQ_NAMES = {f_name:'שם',f_age:'גיל',f_sex:'מין',f_height:'גובה',f_weight:'משקל',f_occupation:'אופי היום',f_exfreq:'תדירות אימונים',f_wake:'שעת השכמה',f_firstmeal_t:'שעת אכילה ראשונה',f_lastmeal_t:'שעת אכילה אחרונה',f_sleep:'שעת שינה',f_sweets:'מתוקים',f_coffee_n:'כמות קפה',f_out_freq:'אכילה בחוץ',f_medical:'מחלות רקע',f_meds:'תרופות'};
 

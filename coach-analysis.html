@@ -187,7 +187,17 @@ ul.list li{margin:4px 0}
   <div class="panel"><h3><span class="dot" style="background:var(--lilac-deep)"></span>סיכום מלא לקלוד</h3>
     <div class="sec-note">אחרי השיחה: לחיצה אחת מעתיקה סיכום מובנה. מדביקים בצ׳אט עם המשפט ״צור כלי מותאם ללקוח הזה״.</div>
     <div class="btn-row" style="justify-content:flex-start">
-      <button class="btn btn-lilac" id="btnBrief">העתקת הסיכום המלא</button>
+      <button class="btn btn-lilac" id="btnBrief">הצגת הסיכום לעריכה</button>
+    </div>
+  </div>
+
+  <div class="panel lilac" id="briefPanel" style="display:none">
+    <h3><span class="dot"></span>הסיכום המלא — לעריכה חופשית לפני ההעתקה</h3>
+    <div class="sec-note" style="font-size:14px;color:var(--ink-3);margin-bottom:10px">אפשר לערוך, להוסיף ולמחוק כל שורה. מה שמועתק הוא בדיוק הטקסט שמופיע כאן — קלוד יקרא אותו כמו שהוא.</div>
+    <textarea id="briefEdit" style="min-height:340px;font-size:14.5px;line-height:1.55;direction:rtl"></textarea>
+    <div class="btn-row" style="margin-top:12px">
+      <button class="btn btn-main" id="btnBriefCopy">העתקת הסיכום (כולל העריכות)</button>
+      <button class="btn btn-ghost" id="btnBriefRebuild">בנייה מחדש מהשדות</button>
     </div>
   </div>
 
@@ -260,7 +270,10 @@ function analyze(d){
 
   /* eating window */
   const first=tMin(d.f_firstmeal_t), sleep=tMin(d.f_sleep), wake=tMin(d.f_wake), last=tMin(d.f_lastmeal_t);
-  out.newStart = first!=null ? tFmt(first+120) : null;
+  /* גישה חדשה: ארוחת בוקר סמוכה להשכמה (עד שעה), ואז מרווח של כ-5 שעות לארוחה הבאה.
+     במקום לדחוף את תחילת האכילה מאוחר - מתחילים מוקדם ומרווחים. */
+  out.newStart = wake!=null ? tFmt(wake+60) : (first!=null ? d.f_firstmeal_t : null);
+  out.secondMeal = out.newStart!=null ? tFmt(tMin(out.newStart)+300) : null;
   out.newLast  = sleep!=null ? tFmt(sleep-240) : null;
   out.sleepDur = (sleep!=null&&wake!=null) ? ((wake-sleep+1440)%1440)/60 : null;
   out.lastGap  = (sleep!=null&&last!=null) ? ((sleep-last+1440)%1440)/60 : null;
@@ -276,12 +289,12 @@ function analyze(d){
   if(has(medical,['תריס','בלוטת']))
     out.flags.push('<b>בלוטת התריס</b> — ייתכן קצב ירידה איטי מהמחושב. לתאם ציפיות מראש.');
   if(notNone(ed))
-    out.flags.push('<b>יחסים מורכבים עם אוכל</b> — לא מיישמים דחיית ארוחת בוקר, לא סופרים קלוריות מול הלקוח, דגש על קשב לשובע והרגלים. לשקול שיתוף איש מקצוע בתחום.');
+    out.flags.push('<b>יחסים מורכבים עם אוכל</b> — לא סופרים קלוריות מול הלקוח, בלי חוקי זמן נוקשים סביב ארוחות, דגש על קשב לשובע והרגלים. ארוחת בוקר סמוכה להשכמה מתאימה כאן במיוחד. לשקול שיתוף איש מקצוע בתחום.');
   if(out.sleepDur!=null && out.sleepDur<7)
     out.flags.push('<b>שינה קצרה ('+r1(out.sleepDur)+' שעות)</b> — שינה קצרה מגבירה רעב ומקשה על ירידה. להגדיר שינה כאחד היעדים.');
   if(notNone(medical) && !has(medical,['סוכרת','סכרת','תריס','בלוטת']))
     out.flags.push('<b>רקע רפואי</b>: ״'+esc(medical)+'״ — לשיקולך.');
-  if(!out.flags.length) out.okflags.push('אין דגלים רפואיים או התנהגותיים מיוחדים. אפשר להריץ את התוכנית המלאה כולל דחיית בוקר.');
+  if(!out.flags.length) out.okflags.push('אין דגלים רפואיים או התנהגותיים מיוחדים. אפשר להריץ את התוכנית המלאה: ארוחת בוקר סמוכה להשכמה ומרווח של כ-5 שעות לארוחה הבאה.');
   out.edFlag = notNone(ed);
 
   /* diet substitutions */
@@ -376,8 +389,14 @@ function analyze(d){
     return true;
   };
   const pick=arr=>{ const ok=arr.filter(dishOk); return (ok.length?ok:arr).slice(0,3); };
+  /* נשנוש מתוכנן: 150-200 קק"ל שמורים בתוך התקציב (10% מהתקציב, עם רצפה ותקרה) */
+  out.snackKcal = Math.min(200, Math.max(150, Math.round(out.budget*0.10)));
+  out.snackWhat = (d.f_snack_what||'').trim();
+  out.snackFreq = d.f_snack_freq || null;   // rare / sometimes / daily
+  const remBudget = out.budget - out.snackKcal;
+  const bK = Math.round(remBudget*0.32), lK = Math.round(remBudget*0.40);
   out.menu={
-    split:{breakfast:Math.round(out.budget*0.30), lunch:Math.round(out.budget*0.38), dinner:Math.round(out.budget*0.24), sweet:out.budget-Math.round(out.budget*0.30)-Math.round(out.budget*0.38)-Math.round(out.budget*0.24)},
+    split:{breakfast:bK, lunch:lK, dinner:remBudget-bK-lK, sweet:out.snackKcal},
     options:{breakfast:pick(DISHES.breakfast), lunch:pick(DISHES.lunch), dinner:pick(DISHES.dinner)}
   };
   out.loves=(d.f_loves||'').trim();
@@ -443,8 +462,10 @@ function renderCoach(a){
 
   /* window */
   let winHtml =
-    kv2('אכילה ראשונה היום', (d.f_firstmeal_t||'—')+(d.f_firstmeal_w?' · '+esc(d.f_firstmeal_w):'')) +
-    kv2('← התחלה חדשה (＋2 שעות)', '<b style="color:var(--pistachio-deep)">'+(a.newStart||'—')+'</b>') +
+    kv2('השכמה', d.f_wake||'—') +
+    kv2('← ארוחת בוקר (עד שעה מההשכמה)', '<b style="color:var(--pistachio-deep)">'+(a.newStart||'—')+'</b>') +
+    kv2('← הארוחה הבאה (מרווח של כ-5 שעות)', '<b style="color:var(--pistachio-deep)">'+(a.secondMeal||'—')+'</b>') +
+    kv2('אכילה ראשונה בהרגל הנוכחי', (d.f_firstmeal_t||'—')+(d.f_firstmeal_w?' · '+esc(d.f_firstmeal_w):'')) +
     kv2('שעת שינה', d.f_sleep||'—') +
     kv2('← ארוחה אחרונה (שינה −4 שעות)', '<b style="color:var(--pistachio-deep)">'+(a.newLast||'—')+'</b>');
   if(a.lastGap!=null) winHtml += kv2('מרווח נוכחי בין אכילה אחרונה לשינה', r1(a.lastGap)+' שעות'+(a.lastGap<4?' — <b style="color:var(--danger)">קצר מהיעד</b>':' ✓'));
@@ -480,7 +501,7 @@ function renderCoach(a){
   pool.push('10 דקות הליכה אחרי '+a.walkAfter);
   if(a.newLast && !a.edFlag && a.lastGap!=null && a.lastGap<4) pool.push('אכילה אחרונה עד '+a.newLast);
   if(a.coffee.cups>0 && a.coffee.sugar>0) pool.push('קפה בלי סוכר');
-  if(a.triggers.some(x=>x.t.includes('הרגל')||x.t.includes('רגשית'))) pool.push('המתוק המתוכנן בלבד — בשעה שנקבעה');
+  if(a.snackFreq==='daily'||a.triggers.some(x=>x.t.includes('הרגל')||x.t.includes('רגשית'))) pool.splice(2,0,'בלי נשנוש לא מתוכנן — '+(a.snackWhat||'הנשנוש שסוכם')+' מותר');
   if(a.sleepDur!=null && a.sleepDur<7) pool.push('כיבוי אורות עד '+tFmt((tMin(d.f_wake)??420)-450));
   pool.push('2 ירקות בכל יציאה מהבית');
   pool.push('כל ארוחה נפתחת בירק');
@@ -495,7 +516,8 @@ function renderCoach(a){
   const m=a.menu;
   const mealBlock=(title,kcal,arr)=>'<div style="margin:10px 0"><b style="color:var(--lilac-deep)">'+title+' · כ-'+kcal+' קלוריות · '+Math.round(a.protein(t)/3)+' ג׳ חלבון</b><ul class="list" style="margin-top:4px">'+arr.map(x=>'<li>'+esc(x.n)+' <span style="color:var(--ink-3)">(~'+x.k+' קל׳, '+x.p+' ג׳)</span></li>').join('')+'</ul></div>';
   $('cMenu').innerHTML =
-    '<div class="kv"><span class="k">חלוקת התקציב היומי</span><span class="val">בוקר '+m.split.breakfast+' · צהריים '+m.split.lunch+' · ערב '+m.split.dinner+' · מתוק מתוכנן '+m.split.sweet+'</span></div>'+
+    '<div class="kv"><span class="k">חלוקת התקציב היומי</span><span class="val">בוקר '+m.split.breakfast+' · צהריים '+m.split.lunch+' · ערב '+m.split.dinner+' · נשנוש מתוכנן '+m.split.sweet+'</span></div>'+
+    (a.snackWhat?'<div class="rec"><b>הנשנוש שהלקוח אוהב (מהשאלון):</b> ״'+esc(a.snackWhat)+'״ — שמורים לו '+a.snackKcal+' קק״ל בתוך התקציב. בשיחה מאשרים יחד מנה מדויקת ושעה.</div>':'<div class="rec"><b>נשנוש מתוכנן:</b> שמורים '+a.snackKcal+' קק״ל בתוך התקציב לנשנוש שהלקוח רגיל אליו — לברר בשיחה מה הוא הכי אוהב, גם אם זה 3 קוביות שוקולד.</div>')+
     mealBlock('בוקר (ארוחת הפתיחה)',m.split.breakfast,m.options.breakfast)+
     mealBlock('צהריים',m.split.lunch,m.options.lunch)+
     mealBlock('ערב',m.split.dinner,m.options.dinner)+
@@ -513,13 +535,13 @@ function renderCoach(a){
   $('cDecisions').innerHTML = [
     dec('d_target','משקל יעד שלב א׳','הטווח המותר: '+r1((+d.f_weight)-a.tMax)+'–'+r1((+d.f_weight)-a.tMin)+' ק״ג', t, 'number'),
     dec('d_weeks','משך המסע (שבועות)','לפי קצב של '+a.weeklyKg+' ק״ג בשבוע', a.weeks(t)??'', 'number'),
-    dec('d_start','תחילת אכילה יומית', a.edFlag?'ללא דחייה (דגל)':'הוצע אוטומטית: שעתיים אחרי ההרגל הנוכחי', a.edFlag?(d.f_firstmeal_t||''):(a.newStart||''), 'time'),
+    dec('d_start','ארוחת בוקר','הוצע אוטומטית: עד שעה מההשכמה. הארוחה הבאה במרווח של כ-5 שעות ('+(a.secondMeal||'—')+')', a.newStart||'', 'time'),
     dec('d_last','ארוחה אחרונה', 'הוצע אוטומטית: 4 שעות לפני השינה', a.newLast||'', 'time'),
     dec('d_flex','היום הגמיש הקבוע','זוהה מהשאלון — יוגדר באפליקציה כיום גמיש אוטומטי (מיקוד חלבון, בלי שבירת רצף)', flexSug, 'text'),
     dec('d_sol','שני הפתרונות המהירים','הומלץ לפי ההגבלות: '+a.solutions.map(s=>a.solNames[s]).join(' + ')+'. אפשר להחליף לסלט וינגרט / שייק ירוק.', a.solutions.map(s=>a.solNames[s]).join(' + '), 'text'),
     dec('d_walk','ההליכה היומית (10 דקות)','אחרי הארוחה הגדולה. הצעה: '+a.walkAfter, 'אחרי '+a.walkAfter, 'text'),
     dec('d_strength','תנועה ואימון כוח','פעמיים בשבוע, 15–20 דקות, בלי ציוד. הועדף בשאלון: '+(a.moveText||'לא נבחר')+'.'+((d.f_extype||'').trim()?' מתאמן כבר: ״'+esc(d.f_extype)+'״':''), a.moveText||'', 'text'),
-    dec('d_sweet','המתוק המתוכנן','מנה אחת ביום, בשעה קבועה, בתוך התקציב. לפי הטריגר: '+(a.triggers[0]?a.triggers[0].t:'—'), '', 'text'),
+    dec('d_sweet','הנשנוש המתוכנן ('+a.snackKcal+' קק״ל שמורים בתקציב)','מנה אחת ביום, בשעה קבועה. לפי הטריגר: '+(a.triggers[0]?a.triggers[0].t:'—')+(a.snackFreq==='daily'?' · הלקוח מנשנש כל יום — זה עוגן חשוב':''), a.snackWhat?(a.snackWhat+' · עד '+a.snackKcal+' קק״ל'):'', 'text'),
     dec('d_ifthen','כלל האם-אז האישי','נוסח אוטומטית מהטריגר המרכזי. בשיחה מחדדים יחד את המצב המדויק ואת הפעולה, ככל שהניסוח ספציפי יותר, הוא עובד יותר', (a.triggers[0]&&a.triggers[0].rule)||'', 'text'),
     dec('d_goals','3 המטרות היומיות לאפליקציה','נבחרו אוטומטית מהתשובות. המאגר המלא: '+a.goalPool.join(' · '), goalsSug.join(' | '), 'text'),
     dec('d_plan','שני חלונות התכנון','כחצי שעה בשבת + כחצי שעה באמצע השבוע — לקבוע שעות', '', 'text'),
@@ -561,6 +583,7 @@ function renderCoach(a){
     ['אכילה ראשונה', d.f_firstmeal_t+(d.f_firstmeal_w?' · '+d.f_firstmeal_w:'')],
     ['אכילה אחרונה', d.f_lastmeal_t+(d.f_lastmeal_w?' · '+d.f_lastmeal_w:'')],
     ['מתוקים', d.f_sweets],
+    ['נשנוש קבוע', ({rare:'כמעט ולא',sometimes:'כמה פעמים בשבוע',daily:'כל יום'}[d.f_snack_freq]||'—')+(d.f_snack_what?' · '+d.f_snack_what:'')],
     ['מטוגנים', d.f_fried||'—'],
     ['קפה', d.f_coffee_n+' כוסות · '+(d.f_coffee_sugar||0)+' כפיות סוכר · '+milk],
     ['משקאות', d.f_drinks||'—'],
@@ -615,8 +638,7 @@ function renderShop(){
 }
 
 /* brief for Claude */
-$('btnBrief').addEventListener('click',()=>{
-  if(!A){ toast('קודם לנתח תשובות'); return; }
+function buildBrief(){
   const a=A,d=a.d, gv=id=>($(id)?.value||'').trim();
   const target=+gv('d_target')||a.suggestedTarget;
   const lines=[
@@ -633,12 +655,12 @@ $('btnBrief').addEventListener('click',()=>{
 '— החלטות שלב 2 (מהשיחה) —',
 'משקל יעד שלב א׳: '+target,
 'משך המסע: '+(gv('d_weeks')||a.weeks(target))+' שבועות (כולל מרווח ביטחון 25%) = '+((+gv('d_weeks')||a.weeks(target)||0)*7)+' ימים באפליקציה',
-'תחילת אכילה: '+gv('d_start')+' · ארוחה אחרונה: '+gv('d_last'),
+'ארוחת בוקר (עד שעה מההשכמה): '+gv('d_start')+' · הארוחה הבאה כ-5 שעות אחרי ('+(a.secondMeal||'—')+') · ארוחה אחרונה: '+gv('d_last'),
 'יום גמיש קבוע: '+(gv('d_flex')||'אין'),
 'פתרונות מהירים: '+gv('d_sol'),
 'הליכה יומית: '+gv('d_walk'),
 'אימון כוח: '+(gv('d_strength')||'לקבוע'),
-'מתוק מתוכנן: '+(gv('d_sweet')||'לקבוע'),
+'נשנוש מתוכנן ('+a.snackKcal+' קק״ל שמורים בתוך התקציב): '+(gv('d_sweet')||'לקבוע בשיחה'),
 'כלל אם-אז אישי: '+(gv('d_ifthen')||'לקבוע'),
 'כלל קפה: '+(a.coffeeRule||'אין צורך, שותה נקי'),
 'קושי בארוחות גדולות: '+(a.bigMeals?'כן — לכלול בכלי את טכניקות ״החצי השני מחכה״ ו״היד הלא דומיננטית״':'לא'),
@@ -649,7 +671,7 @@ $('btnBrief').addEventListener('click',()=>{
 '— תזונה מותאמת —',
 'נמנע/לא אוהב: '+(d.f_avoid||'—')+' · אוהב ויודע להכין: '+(a.loves||'—'),
 'בישול: '+(d.f_cook||'—')+' · זמן הכנה: '+(d.f_preptime||'—'),
-'חלוקת תקציב: בוקר '+a.menu.split.breakfast+' / צהריים '+a.menu.split.lunch+' / ערב '+a.menu.split.dinner+' / מתוק '+a.menu.split.sweet,
+'חלוקת תקציב: בוקר '+a.menu.split.breakfast+' / צהריים '+a.menu.split.lunch+' / ערב '+a.menu.split.dinner+' / נשנוש מתוכנן '+a.menu.split.sweet,
 'אופציות בוקר: '+a.menu.options.breakfast.map(x=>x.n).join(' | '),
 'אופציות צהריים: '+a.menu.options.lunch.map(x=>x.n).join(' | '),
 'אופציות ערב: '+a.menu.options.dinner.map(x=>x.n).join(' | '),
@@ -716,6 +738,8 @@ $('btnBrief').addEventListener('click',()=>{
 "    ifThenRule: '"+(gv('d_ifthen')||'').replace(/'/g,'׳')+"',",
 "    coffeeRule: "+(a.coffeeRule?"'"+a.coffeeRule.replace(/'/g,'׳')+"'":'null')+',',
 '    bigMealsTips: '+(a.bigMeals?'true':'false')+',',
+"    plannedSnack: "+(gv('d_sweet')?"'"+gv('d_sweet').replace(/'/g,'׳').split('·')[0].trim()+"'":'null')+',',
+'    plannedSnackKcal: '+a.snackKcal+',',
 "    movement: '"+(gv('d_strength')||a.moveText||'').replace(/'/g,'׳')+"',",
 '    startWaist: '+((+d.f_waist)>0?(+d.f_waist):'null')+',',
 "    badgeTheme: '"+a.badgeTheme+"',",
@@ -725,7 +749,25 @@ $('btnBrief').addEventListener('click',()=>{
 "    why: '"+(d.f_why||'').replace(/'/g,'׳').replace(/\n/g,' ')+"'",
 '};',
   ];
-  copyText(lines.join('\n'),'הסיכום המלא הועתק ✓ להדביק לקלוד');
+  return lines.join('\n');
+}
+$('btnBrief').addEventListener('click',()=>{
+  if(!A){ toast('קודם לנתח תשובות'); return; }
+  $('briefEdit').value = buildBrief();
+  $('briefPanel').style.display='block';
+  $('briefPanel').scrollIntoView({behavior:'smooth',block:'start'});
+  toast('הסיכום מוכן — אפשר לערוך ואז להעתיק');
+});
+$('btnBriefCopy').addEventListener('click',()=>{
+  const txt=$('briefEdit').value.trim();
+  if(!txt){ toast('הסיכום ריק'); return; }
+  copyText(txt,'הסיכום הועתק ✓ להדביק לקלוד');
+});
+$('btnBriefRebuild').addEventListener('click',()=>{
+  if(!A){ toast('קודם לנתח תשובות'); return; }
+  if(!confirm('לבנות מחדש מהשדות? עריכות ידניות בטקסט יימחקו.')) return;
+  $('briefEdit').value = buildBrief();
+  toast('נבנה מחדש מהשדות ✓');
 });
 
 /* coach buttons */

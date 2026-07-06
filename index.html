@@ -8711,7 +8711,7 @@
     <div class="top-bar">
         <div class="top-bar-label">רישום ארוחות</div>
         <div class="top-bar-title">מה אכלתי היום</div>
-        <div class="top-bar-sub">תיאור חופשי או הקלטה · Claude יזהה ערכים</div>
+        <div class="top-bar-sub">תיאור חופשי או הקלטה · נשמר מסודר ביומן</div>
     </div>
 
     <!-- Meal logger card -->
@@ -8761,13 +8761,13 @@
         </div>
 
         <div class="meal-logger-btns">
-            <button class="meal-analyze-btn" id="mealAnalyzeBtn" onclick="analyzeMeal()">
-                נתח עם Claude
+            <button class="meal-analyze-btn" id="mealAnalyzeBtn" onclick="structureMeal()">
+                סדר ושמור ביומן
             </button>
             <button class="meal-manual-btn" onclick="openManualMeal()">הזנה ידנית</button>
         </div>
 
-        <!-- Preview after Claude analysis -->
+        <!-- Preview after local structuring -->
         <div class="meal-preview" id="mealPreview">
             <div class="meal-preview-text" id="mealPreviewText"></div>
             <div class="meal-confidence" id="mealConfidence"></div>
@@ -8798,6 +8798,9 @@
             <div class="day-total-label">ארוחות</div>
         </div>
     </div>
+
+    <!-- Planned snack (reserved inside the daily budget) -->
+    <div id="plannedSnackNote" style="display:none; margin-top: var(--s-3); padding: 10px 14px; background: var(--lilac-wash); border: 1px solid var(--lilac-light); border-radius: 12px; font-size: 14px; color: var(--lilac-deep); text-align: center;"></div>
 
     <!-- Reality Log button (PRD #4) -->
     <button class="reality-log-btn" onclick="openRealityLog()" style="margin-top: var(--s-4);">
@@ -9049,24 +9052,30 @@
 
     <div class="section-title">
         <div class="section-title-mark"></div>
-        <div class="section-title-text">הגדרות AI</div>
+        <div class="section-title-text">הגדרות</div>
     </div>
 
     <div class="settings-card">
-        <div class="settings-row" style="display:block; border-bottom: 1px solid var(--border-hair);">
-            <div class="settings-row-label">מפתח Claude API</div>
-            <div class="settings-row-sub">נשמר בדפדפן בלבד · נדרש לרישום ארוחות חכם</div>
-            <input type="password" class="api-key-input" id="apiKeyInput" 
-                   placeholder="sk-ant-api03-..." autocomplete="off">
-            <div class="api-key-status" id="apiKeyStatus"></div>
-            <button class="btn-secondary" onclick="saveApiKey()" style="margin-top: 8px; width: 100%; padding: 8px;">שמור מפתח</button>
-        </div>
         <div class="settings-row">
             <div>
                 <div class="settings-row-label">Causal Mirror</div>
                 <div class="settings-row-sub">שיקוף שבועי סיבתי</div>
             </div>
             <button class="toggle-switch" id="toggleCausalMirror" onclick="toggleSetting('showCausalMirror')"></button>
+        </div>
+    </div>
+
+    <div class="section-title">
+        <div class="section-title-mark"></div>
+        <div class="section-title-text">ההרגלים היומיים שלי</div>
+    </div>
+
+    <div class="settings-card" style="padding: 6px var(--s-5) 12px;">
+        <div style="font-size:13px; color:#8a8780; padding-top:10px; line-height:1.5;">אלו ההרגלים שמופיעים כל יום במסך הראשי. שינוי חל מהיום והלאה, וההיסטוריה נשמרת.</div>
+        <div id="habitManagerList"></div>
+        <div style="display:flex; gap:8px; padding-top:12px;">
+            <button class="btn-secondary" onclick="addHabit()" style="flex:1; padding:10px;">+ הוספת הרגל</button>
+            <button class="btn-secondary" onclick="restoreDefaultHabits()" style="padding:10px 14px;">איפוס</button>
         </div>
     </div>
 
@@ -9324,7 +9333,7 @@
         <div class="modal-sticky-footer">
             <div class="modal-actions">
                 <button class="btn-modal-secondary" onclick="closeWorkoutModal()">סגור</button>
-                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" disabled style="padding: 12px;">שמור</button>
+                <button class="btn-primary" onclick="saveWorkout()" id="saveWorkoutBtn" style="padding: 12px; opacity: 0.6;">שמור</button>
             </div>
         </div>
     </div>
@@ -9400,6 +9409,8 @@ const CLIENT_CONFIG = {
     ifThenRule: '',          // כלל אם-אז אישי, למשל: 'אם אני מול הטלוויזיה ומרגיש חשק, אז...'
     coffeeRule: null,        // למשל: 'בלי סוכר בקפה, חצי מכמות החלב', או null אם שותה נקי
     bigMealsTips: false,     // האם לכלול את טכניקות העצירה בארוחות גדולות
+    plannedSnack: '2 תמרים ובננה',  // הנשנוש המתוכנן היומי - שמור בתוך התקציב
+    plannedSnackKcal: 150,          // תקציב הנשנוש בקק"ל (150-200 מומלץ)
     movement: '',            // התחייבות התנועה, למשל: '10 דקות תרגילי משקל גוף בבית · שני וחמישי'
     startWaist: null,        // היקף מותניים מהשאלון (ס"מ) - נקודת הפתיחה
     badgeTheme: '',          // כותרת התגים, למשל: 'הליכה' (ריק = 'תנועה')
@@ -9411,11 +9422,44 @@ const CLIENT_CONFIG = {
 const GOAL_WEIGHT = CLIENT_CONFIG.targetWeight;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-const HABITS = [
+const DEFAULT_HABITS = [
     { id: 'protein', icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\">\n    <circle cx=\"20\" cy=\"20\" r=\"17\" stroke=\"#A9D39E\" stroke-width=\"0.7\" stroke-dasharray=\"2 3\" opacity=\"0.5\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"14\" fill=\"#f0f7ed\" stroke=\"#A9D39E\" stroke-width=\"1\"/>\n    <ellipse cx=\"20\" cy=\"20\" rx=\"9\" ry=\"6\" fill=\"#CEA2FD\" opacity=\"0.25\"/>\n    <ellipse cx=\"20\" cy=\"20\" rx=\"9\" ry=\"6\" fill=\"none\" stroke=\"#9169c8\" stroke-width=\"1.2\"/>\n    <ellipse cx=\"17\" cy=\"19\" rx=\"1\" ry=\"0.8\" fill=\"#9169c8\" opacity=\"0.7\"/>\n    <ellipse cx=\"22\" cy=\"20.5\" rx=\"0.9\" ry=\"0.7\" fill=\"#9169c8\" opacity=\"0.5\"/>\n    <ellipse cx=\"19\" cy=\"22\" rx=\"0.8\" ry=\"0.6\" fill=\"#9169c8\" opacity=\"0.6\"/>\n    <path d=\"M 13 14 Q 11 12 12.5 11\" stroke=\"#6b9c5e\" stroke-width=\"0.8\" \n          stroke-linecap=\"round\" fill=\"none\"/>\n    <circle cx=\"12.5\" cy=\"10.5\" r=\"0.6\" fill=\"#A9D39E\"/>\n    <path d=\"M 27 26 Q 29 28 27.5 29\" stroke=\"#6b9c5e\" stroke-width=\"0.8\" \n          stroke-linecap=\"round\" fill=\"none\"/>\n    <circle cx=\"27.5\" cy=\"29.5\" r=\"0.6\" fill=\"#A9D39E\"/>\n</svg>", name: 'חלבון בכל ארוחה', desc: 'ביצים/קטניות/יוגורט/טופו' },
     { id: 'fullness', icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\">\n    <circle cx=\"20\" cy=\"20\" r=\"17\" stroke=\"#A9D39E\" stroke-width=\"0.7\" stroke-dasharray=\"2 3\" opacity=\"0.5\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"14\" fill=\"#f0f7ed\" stroke=\"#A9D39E\" stroke-width=\"1\"/>\n    <path d=\"M 12 22 Q 12 13 20 13 Q 28 13 28 22\" \n          fill=\"none\" stroke=\"#9169c8\" stroke-width=\"1.3\" stroke-linecap=\"round\"/>\n    <line x1=\"20\" y1=\"13\" x2=\"20\" y2=\"9\" stroke=\"#6b9c5e\" stroke-width=\"1.2\" stroke-linecap=\"round\"/>\n    <circle cx=\"20\" cy=\"22\" r=\"1.6\" fill=\"#9169c8\"/>\n    <line x1=\"20\" y1=\"22\" x2=\"24.5\" y2=\"17\" stroke=\"#9169c8\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n    <path d=\"M 22 9 Q 24 8 25 9.5 Q 23 10 22 9.5 Z\" fill=\"#CEA2FD\" opacity=\"0.7\"/>\n    <path d=\"M 12 22 L 28 22\" stroke=\"#A9D39E\" stroke-width=\"0.6\" stroke-dasharray=\"1 2\" opacity=\"0.6\"/>\n</svg>", name: 'עצרתי בזמן בארוחת ערב', desc: 'ב-18:00, שובע 7/10' },
-    { id: 'snacks', icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\">\n    <circle cx=\"20\" cy=\"20\" r=\"17\" stroke=\"#A9D39E\" stroke-width=\"0.7\" stroke-dasharray=\"2 3\" opacity=\"0.5\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"14\" fill=\"#f0f7ed\" stroke=\"#A9D39E\" stroke-width=\"1\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"8\" fill=\"none\" stroke=\"#9169c8\" stroke-width=\"1.4\"/>\n    <line x1=\"14.5\" y1=\"14.5\" x2=\"25.5\" y2=\"25.5\" stroke=\"#9169c8\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n    <circle cx=\"20\" cy=\"13\" r=\"1.5\" fill=\"#A9D39E\" opacity=\"0.6\"/>\n    <ellipse cx=\"22\" cy=\"11\" rx=\"1.2\" ry=\"2\" fill=\"#6b9c5e\" opacity=\"0.7\" transform=\"rotate(30 22 11)\"/>\n    <circle cx=\"14\" cy=\"20\" r=\"0.6\" fill=\"#CEA2FD\"/>\n    <circle cx=\"26\" cy=\"20\" r=\"0.6\" fill=\"#CEA2FD\"/>\n</svg>", name: 'בלי נשנוש לא מתוכנן', desc: '2 תמרים ובננה מותר' }
+    { id: 'snacks', icon: "<svg viewBox=\"0 0 40 40\" fill=\"none\">\n    <circle cx=\"20\" cy=\"20\" r=\"17\" stroke=\"#A9D39E\" stroke-width=\"0.7\" stroke-dasharray=\"2 3\" opacity=\"0.5\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"14\" fill=\"#f0f7ed\" stroke=\"#A9D39E\" stroke-width=\"1\"/>\n    <circle cx=\"20\" cy=\"20\" r=\"8\" fill=\"none\" stroke=\"#9169c8\" stroke-width=\"1.4\"/>\n    <line x1=\"14.5\" y1=\"14.5\" x2=\"25.5\" y2=\"25.5\" stroke=\"#9169c8\" stroke-width=\"1.4\" stroke-linecap=\"round\"/>\n    <circle cx=\"20\" cy=\"13\" r=\"1.5\" fill=\"#A9D39E\" opacity=\"0.6\"/>\n    <ellipse cx=\"22\" cy=\"11\" rx=\"1.2\" ry=\"2\" fill=\"#6b9c5e\" opacity=\"0.7\" transform=\"rotate(30 22 11)\"/>\n    <circle cx=\"14\" cy=\"20\" r=\"0.6\" fill=\"#CEA2FD\"/>\n    <circle cx=\"26\" cy=\"20\" r=\"0.6\" fill=\"#CEA2FD\"/>\n</svg>", name: 'בלי נשנוש לא מתוכנן', desc: (CLIENT_CONFIG.plannedSnack ? CLIENT_CONFIG.plannedSnack + ' מותר' : 'רק הנשנוש שסוכם מראש') }
 ];
+
+// HABITS is rebuilt from DEFAULT_HABITS + the user's habitConfig (add/edit/remove in the More screen).
+let HABITS = DEFAULT_HABITS.slice();
+const MAX_HABITS = 5;
+
+function sanitizeHabitText(t) {
+    return String(t || '').replace(/[<>&"']/g, '').trim().slice(0, 70);
+}
+function customHabitIcon(emoji) {
+    const e = sanitizeHabitText(emoji) || '✦';
+    return '<span style="font-size:24px;line-height:1;display:inline-block">' + e + '</span>';
+}
+function rebuildHabits() {
+    const cfg = (typeof state !== 'undefined' && state && state.habitConfig) ? state.habitConfig : {};
+    const hidden = cfg.hidden || [];
+    const edits = cfg.edits || {};
+    const custom = cfg.custom || [];
+    const base = DEFAULT_HABITS
+        .filter(h => !hidden.includes(h.id))
+        .map(h => {
+            const e = edits[h.id];
+            return e ? { ...h, name: e.name || h.name, desc: (e.desc !== undefined ? e.desc : h.desc) } : h;
+        });
+    const customs = custom.map(c => ({
+        id: c.id,
+        icon: customHabitIcon(c.emoji),
+        name: sanitizeHabitText(c.name),
+        desc: sanitizeHabitText(c.desc || '')
+    }));
+    HABITS = base.concat(customs);
+    // Never allow an empty habit list - the whole day view depends on it
+    if (!HABITS.length) HABITS = [DEFAULT_HABITS[0]];
+}
 
 const LUXURY_TARGET_SVG = "<svg viewBox=\"0 0 40 40\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><circle cx=\"20\" cy=\"20\" r=\"18\" stroke=\"#6b9c5e\" stroke-width=\"0.5\" stroke-dasharray=\"1 2.5\" opacity=\"0.55\"/><circle cx=\"20\" cy=\"20\" r=\"15\" fill=\"#fdfbf6\" stroke=\"#A9D39E\" stroke-width=\"1\"/><circle cx=\"20\" cy=\"20\" r=\"10.5\" fill=\"none\" stroke=\"#6b9c5e\" stroke-width=\"0.8\" opacity=\"0.85\"/><circle cx=\"20\" cy=\"20\" r=\"6.5\" fill=\"#ebdcfb\" fill-opacity=\"0.35\" stroke=\"#9169c8\" stroke-width=\"0.9\"/><circle cx=\"20\" cy=\"20\" r=\"2.6\" fill=\"#9169c8\"/><circle cx=\"20\" cy=\"20\" r=\"1.2\" fill=\"#CEA2FD\" opacity=\"0.9\"/><circle cx=\"19.3\" cy=\"19.3\" r=\"0.4\" fill=\"#fdfbf6\" opacity=\"0.8\"/><path d=\"M 29.5 10.5 Q 32.5 9 34 11 Q 32.5 12.5 29.8 11.5 Z\" fill=\"#A9D39E\" opacity=\"0.75\"/><path d=\"M 29.5 10.5 L 34 11\" stroke=\"#6b9c5e\" stroke-width=\"0.5\" opacity=\"0.6\"/><circle cx=\"34\" cy=\"11\" r=\"0.55\" fill=\"#6b9c5e\"/><path d=\"M 7 29.5 L 7.4 30.8 L 8.7 31.2 L 7.4 31.6 L 7 32.9 L 6.6 31.6 L 5.3 31.2 L 6.6 30.8 Z\" fill=\"#CEA2FD\" opacity=\"0.75\"/><circle cx=\"33.5\" cy=\"30\" r=\"0.7\" fill=\"#CEA2FD\" opacity=\"0.6\"/><line x1=\"20\" y1=\"3.5\" x2=\"20\" y2=\"5.5\" stroke=\"#6b9c5e\" stroke-width=\"0.7\" stroke-linecap=\"round\" opacity=\"0.5\"/><line x1=\"20\" y1=\"34.5\" x2=\"20\" y2=\"36.5\" stroke=\"#6b9c5e\" stroke-width=\"0.7\" stroke-linecap=\"round\" opacity=\"0.5\"/><line x1=\"3.5\" y1=\"20\" x2=\"5.5\" y2=\"20\" stroke=\"#6b9c5e\" stroke-width=\"0.7\" stroke-linecap=\"round\" opacity=\"0.5\"/><line x1=\"34.5\" y1=\"20\" x2=\"36.5\" y2=\"20\" stroke=\"#6b9c5e\" stroke-width=\"0.7\" stroke-linecap=\"round\" opacity=\"0.5\"/></svg>";
 
@@ -9870,8 +9914,7 @@ function renderLuxuryIcon(name, size = 40) {
 // ==================== STATE ====================
 let state = loadState();
 saveState(); // Persist any migration applied by loadState (e.g., new goal/settings fields)
-// Note: API key hydration from IndexedDB happens later in the script.
-// If IDB has the key but localStorage lost it, hydrateApiKeyFromIDB() will restore it.
+rebuildHabits(); // Apply the user's habit customizations (add/edit/remove) on top of the defaults
 let viewingDayNum = null;
 let weighingWeekNum = null;
 let selectedCommitment = null;
@@ -9902,9 +9945,9 @@ function loadState() {
         };
     }
     if (!s.waists) s.waists = {};   // מדידות היקף מותניים: { weekNum: cm }
+    if (!s.habitConfig) s.habitConfig = { hidden: [], edits: {}, custom: [] };   // ניהול הרגלים דינאמי
     if (!s.settings) {
         s.settings = {
-            claudeApiKey: '',
             enableDailyAnchor: true,
             showCausalMirror: true,
             lastAnchorShownDay: 0
@@ -10578,8 +10621,9 @@ function renderHabits() {
     }
     
     // Flex day: show only protein habit
-    const habitsToShow = type === 'flex' 
-        ? HABITS.filter(h => h.id === 'protein')
+    const proteinOnly = HABITS.filter(h => h.id === 'protein');
+    const habitsToShow = type === 'flex'
+        ? (proteinOnly.length ? proteinOnly : HABITS.slice(0, 1))
         : HABITS;
 
     container.innerHTML = habitsToShow.map(h => {
@@ -11168,8 +11212,17 @@ function renderMoreScreen() {
         const pool = CLIENT_CONFIG.habitPool || [];
         if (pool.length) {
             hpSection.style.display = '';
-            hpEl.innerHTML = pool.map(h => '<div style="padding:7px 0;border-bottom:1px dashed #e8e5df;font-size:14.5px">• ' + h + '</div>').join('') +
-                '<div style="font-size:12.5px;color:#8a8780;margin-top:10px;line-height:1.5">כשההרגלים הנוכחיים כבר מרגישים טבעיים, או כשמתחשק רענון, מכאן מוסיפים או מחליפים יחד עם רן.</div>';
+            const activeNames = HABITS.map(x => x.name);
+            hpEl.innerHTML = pool.map((h, i) => {
+                const already = activeNames.includes(sanitizeHabitText(h));
+                return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed #e8e5df;font-size:14.5px">' +
+                    '<span style="flex:1">• ' + h + '</span>' +
+                    (already
+                        ? '<span style="font-size:12.5px;color:#6b9c5e;font-weight:600">פעיל ✓</span>'
+                        : '<button onclick="addHabitFromPool(' + i + ')" style="border:none;background:#ebdcfb;color:#9169c8;border-radius:9px;padding:6px 13px;font-size:13px;font-family:inherit;font-weight:600">הוספה</button>') +
+                    '</div>';
+            }).join('') +
+                '<div style="font-size:12.5px;color:#8a8780;margin-top:10px;line-height:1.5">כשההרגלים הנוכחיים כבר מרגישים טבעיים, או כשמתחשק רענון, מוסיפים מכאן בלחיצה. אפשר גם לערוך ולהסיר למעלה, בקטע ״ההרגלים היומיים שלי״.</div>';
         } else hpSection.style.display = 'none';
     }
 
@@ -12142,8 +12195,10 @@ function openWorkoutModal() {
 function updateSaveBtn() {
     const btn = document.getElementById('saveWorkoutBtn');
     if (!btn) return;
-    // Require duration + type (mood optional)
-    btn.disabled = !(workoutDraft.duration && workoutDraft.type);
+    // The button is ALWAYS clickable - saveWorkout() explains what is missing.
+    // (A disabled button gives zero feedback, which felt like "nothing happens".)
+    btn.disabled = false;
+    btn.style.opacity = (workoutDraft.duration && workoutDraft.type) ? '1' : '0.6';
 }
 
 /* ============================================================
@@ -12908,8 +12963,16 @@ function closeWorkoutModal() {
 }
 
 function saveWorkout() {
-    if (!workoutDraft.duration || !workoutDraft.type) {
-        showToast('בחר משך וסוג אימון');
+    if (!workoutDraft.duration && !workoutDraft.type) {
+        showToast('בחר משך וסוג אימון כדי לשמור');
+        return;
+    }
+    if (!workoutDraft.duration) {
+        showToast('חסר משך האימון - בחר או הקלד דקות');
+        return;
+    }
+    if (!workoutDraft.type) {
+        showToast('חסר סוג האימון - בחר אחד מהכפתורים');
         return;
     }
     haptic();
@@ -12964,6 +13027,9 @@ function saveWorkout() {
         }
     }
     
+    // Safety: never write to day 0 / negative (e.g. journey not started yet)
+    if (!targetDay || targetDay < 1) targetDay = 1;
+
     if (!state.workouts[targetDay]) state.workouts[targetDay] = [];
     state.workouts[targetDay].push({ ...workoutDraft });
     
@@ -12980,34 +13046,140 @@ function saveWorkout() {
         return;
     }
     
-    // Variable celebration based on context
-    const weekNum = getCurrentWeekNum();
-    const weekTotal = getWeekMovementMinutes(weekNum);
-    const level = getMovementLevel(weekNum);
-    const weekWorkouts = getWeekWorkouts(weekNum).length;
-    
-    let msg;
-    if (weekTotal >= level.target && weekTotal - workoutDraft.duration < level.target) {
-        msg = `עמדת ביעד השבועי! ${weekTotal} דק׳ 🎯`;
-    } else if (weekWorkouts === level.sessions) {
-        msg = `${weekWorkouts} אימונים השבוע. יפה!`;
-    } else if (getTotalMovementMinutes() === workoutDraft.duration) {
-        msg = 'האימון הראשון! התחלה יפה 🌱';
-    } else {
-        const totalMins = getTotalMovementMinutes();
-        if (totalMins >= 1000 && totalMins - workoutDraft.duration < 1000) {
-            msg = '1000 דקות סה״כ! אלוף.';
-        } else if (totalMins >= 500 && totalMins - workoutDraft.duration < 500) {
-            msg = '500 דקות סה״כ! 🔥';
-        } else if (totalMins >= 100 && totalMins - workoutDraft.duration < 100) {
-            msg = '100 דקות סה״כ! מתחיל להתמחות.';
+    // Variable celebration based on context.
+    // Wrapped in try/catch: the workout is already saved and the modal closed,
+    // so a rendering hiccup here must never look like a failed save.
+    try {
+        const weekNum = getCurrentWeekNum();
+        const weekTotal = getWeekMovementMinutes(weekNum);
+        const level = getMovementLevel(weekNum);
+        const weekWorkouts = getWeekWorkouts(weekNum).length;
+
+        let msg;
+        if (weekTotal >= level.target && weekTotal - workoutDraft.duration < level.target) {
+            msg = `עמדת ביעד השבועי! ${weekTotal} דק׳ 🎯`;
+        } else if (weekWorkouts === level.sessions) {
+            msg = `${weekWorkouts} אימונים השבוע. יפה!`;
+        } else if (getTotalMovementMinutes() === workoutDraft.duration) {
+            msg = 'האימון הראשון! התחלה יפה 🌱';
         } else {
-            msg = `${workoutDraft.duration} דקות נרשמו · סה״כ השבוע ${weekTotal} דק׳`;
+            const totalMins = getTotalMovementMinutes();
+            if (totalMins >= 1000 && totalMins - workoutDraft.duration < 1000) {
+                msg = '1000 דקות סה״כ! אלוף.';
+            } else if (totalMins >= 500 && totalMins - workoutDraft.duration < 500) {
+                msg = '500 דקות סה״כ! 🔥';
+            } else if (totalMins >= 100 && totalMins - workoutDraft.duration < 100) {
+                msg = '100 דקות סה״כ! מתחיל להתמחות.';
+            } else {
+                msg = `${workoutDraft.duration} דקות נרשמו · סה״כ השבוע ${weekTotal} דק׳`;
+            }
         }
+
+        showToast(msg);
+        renderMovementSection();
+    } catch (e) {
+        console.warn('celebration render failed (workout already saved):', e);
+        showToast('✓ האימון נשמר');
     }
-    
-    showToast(msg);
-    renderMovementSection();
+}
+
+// ==================== HABIT MANAGER (add / edit / remove) ====================
+
+function refreshAfterHabitChange() {
+    rebuildHabits();
+    saveState();
+    if (typeof renderTodayScreen === 'function') { try { renderTodayScreen(); } catch (e) {} }
+    if (typeof renderHabitManager === 'function') renderHabitManager();
+}
+
+function addHabit(prefillName) {
+    haptic();
+    if (HABITS.length >= MAX_HABITS) {
+        showToast('עד ' + MAX_HABITS + ' הרגלים במקביל - מעט וטוב מנצח');
+        return;
+    }
+    const nameRaw = prompt('שם ההרגל החדש (קצר וברור):', prefillName || '');
+    if (nameRaw === null) return;
+    const name = sanitizeHabitText(nameRaw);
+    if (!name) { showToast('צריך שם להרגל'); return; }
+    const descRaw = prompt('שורת הסבר קצרה (לא חובה):', '');
+    if (descRaw === null) return;
+    const emojiRaw = prompt('אימוג׳י להרגל (לא חובה):', '');
+    if (!state.habitConfig) state.habitConfig = { hidden: [], edits: {}, custom: [] };
+    state.habitConfig.custom.push({
+        id: 'custom_' + Date.now(),
+        name: name,
+        desc: sanitizeHabitText(descRaw || ''),
+        emoji: sanitizeHabitText(emojiRaw || '')
+    });
+    refreshAfterHabitChange();
+    showToast('ההרגל "' + name + '" נוסף ✓ מהיום הוא חלק מהיום שלך');
+}
+
+function addHabitFromPool(poolIndex) {
+    const pool = CLIENT_CONFIG.habitPool || [];
+    const text = pool[poolIndex];
+    if (!text) return;
+    addHabit(text);
+    if (typeof renderMoreScreen === 'function') { try { renderMoreScreen(); } catch (e) {} }
+}
+
+function editHabit(id) {
+    haptic();
+    const h = HABITS.find(x => x.id === id);
+    if (!h) return;
+    const nameRaw = prompt('שם ההרגל:', h.name);
+    if (nameRaw === null) return;
+    const name = sanitizeHabitText(nameRaw);
+    if (!name) { showToast('צריך שם להרגל'); return; }
+    const descRaw = prompt('שורת הסבר:', h.desc || '');
+    if (descRaw === null) return;
+    const desc = sanitizeHabitText(descRaw);
+    if (!state.habitConfig) state.habitConfig = { hidden: [], edits: {}, custom: [] };
+    const custom = (state.habitConfig.custom || []).find(c => c.id === id);
+    if (custom) { custom.name = name; custom.desc = desc; }
+    else {
+        if (!state.habitConfig.edits) state.habitConfig.edits = {};
+        state.habitConfig.edits[id] = { name: name, desc: desc };
+    }
+    refreshAfterHabitChange();
+    showToast('ההרגל עודכן ✓');
+}
+
+function deleteHabit(id) {
+    haptic();
+    const h = HABITS.find(x => x.id === id);
+    if (!h) return;
+    if (HABITS.length <= 1) { showToast('חייב להישאר לפחות הרגל אחד'); return; }
+    if (!confirm('להסיר את ההרגל "' + h.name + '"?\nהסימונים מהימים הקודמים נשמרים בהיסטוריה.')) return;
+    if (!state.habitConfig) state.habitConfig = { hidden: [], edits: {}, custom: [] };
+    const idx = (state.habitConfig.custom || []).findIndex(c => c.id === id);
+    if (idx >= 0) state.habitConfig.custom.splice(idx, 1);
+    else if (!state.habitConfig.hidden.includes(id)) state.habitConfig.hidden.push(id);
+    refreshAfterHabitChange();
+    showToast('ההרגל הוסר');
+}
+
+function restoreDefaultHabits() {
+    haptic();
+    if (!confirm('להחזיר את ההרגלים המקוריים של התוכנית?\nהוספות ועריכות ידניות יימחקו (הסימונים היומיים נשמרים).')) return;
+    state.habitConfig = { hidden: [], edits: {}, custom: [] };
+    refreshAfterHabitChange();
+    showToast('ההרגלים המקוריים הוחזרו ✓');
+}
+
+function renderHabitManager() {
+    const el = document.getElementById('habitManagerList');
+    if (!el) return;
+    el.innerHTML = HABITS.map(h => `
+        <div style="display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px dashed #e8e5df;">
+            <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; font-size:15px; color:var(--ink-primary);">${h.name}</div>
+                ${h.desc ? `<div style="font-size:13px; color:#8a8780; margin-top:1px;">${h.desc}</div>` : ''}
+            </div>
+            <button onclick="editHabit('${h.id}')" style="border:none; background:#f0f7ed; color:#6b9c5e; border-radius:9px; padding:7px 13px; font-size:13.5px; font-family:inherit; font-weight:600;">עריכה</button>
+            <button onclick="deleteHabit('${h.id}')" style="border:none; background:#faeceb; color:#c0564f; border-radius:9px; padding:7px 13px; font-size:13.5px; font-family:inherit; font-weight:600;">הסרה</button>
+        </div>`).join('');
 }
 
 // ==================== RENDER MOVEMENT SECTION ====================
@@ -13876,7 +14048,7 @@ function setupAnchorAutoSave() {
 
 // ==================== MEAL LOGGER (Upgrade #2) ====================
 
-let pendingMealAnalysis = null; // Holds Claude's response while user reviews
+let pendingMealAnalysis = null; // Holds the structured meal while the user reviews
 let speechRecognition = null;
 let isRecording = false;
 let selectedMealWindow = 'now'; // 'now' = use real time, otherwise: morning/noon/afternoon/evening/night
@@ -14073,249 +14245,94 @@ function toggleMealRecording() {
     }
 }
 
-// ----- Claude API call for meal analysis -----
-const MEAL_SYSTEM_PROMPT = `You are a clinical nutrition expert helping Ran (PhD dietitian) track meals during weight loss.
-Given a meal description in Hebrew or English, return ONLY valid JSON with these exact keys:
-- calories_estimate (number, midpoint of your estimated range)
-- calories_range (array of two numbers [min, max])
-- protein_g (number)
-- carbs_g (number)
-- fat_g (number)
-- confidence (number between 0.0 and 1.0)
-- flags (array of strings from: adequate_protein, high_carb, high_fat, processed, balanced, light, heavy)
-- comment_he (string in Hebrew, max 80 chars, professional and factual tone, no preaching)
-- detected_window (string, one of: "morning", "noon", "afternoon", "evening", "night", or null if no temporal cue is present in the text)
-- detected_day_offset (integer between -6 and 0, or null if no day reference is present. 0=today, -1=yesterday, -2=day before yesterday, etc.)
-For detected_window: only set it if the user EXPLICITLY mentions a meal time in the text (e.g., "ארוחת בוקר", "lunch", "אכלתי לארוחת ערב", "הבוקר", "אתמול בערב"). If the text only describes food without time context, return null.
-For detected_day_offset: detect Hebrew/English day references in the text:
-  - "היום", "הבוקר", "עכשיו", "today", "this morning" -> 0
-  - "אתמול", "אמש", "yesterday", "last night" -> -1
-  - "שלשום", "day before yesterday" -> -2
-  - "לפני 3 ימים", "3 days ago" -> -3
-  - and so on, up to -6
-  - If no day reference, return null (treat as today by default).
-Do NOT include markdown, explanations, or any text outside the JSON object.`;
-
-async function callClaudeForMeal(description) {
-    // Try IndexedDB first (source of truth), fall back to state
-    let apiKey = '';
-    try {
-        apiKey = await idbGetApiKey();
-    } catch (e) {
-        console.warn('[IDB] Get failed during API call:', e);
-    }
-    if (!apiKey) {
-        apiKey = (state.settings && state.settings.claudeApiKey) || '';
-    }
-    if (!apiKey) {
-        throw new Error('NO_API_KEY');
-    }
-    
-    // Sync state if IDB had the key but state didn't
-    if (apiKey && (!state.settings.claudeApiKey || state.settings.claudeApiKey !== apiKey)) {
-        state.settings.claudeApiKey = apiKey;
-        saveState();
-    }
-    
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 400,
-            system: MEAL_SYSTEM_PROMPT,
-            messages: [{ role: 'user', content: description }]
-        })
-    });
-    
-    if (!response.ok) {
-        const err = await response.text();
-        console.error('Claude API error:', response.status, err);
-        throw new Error('API_ERROR_' + response.status);
-    }
-    
-    const data = await response.json();
-    const text = data.content && data.content[0] && data.content[0].text;
-    if (!text) throw new Error('EMPTY_RESPONSE');
-    
-    // Try to parse the JSON. Strip code fences if present.
-    const cleaned = text.replace(/```json|```/g, '').trim();
-    let parsed;
-    try {
-        parsed = JSON.parse(cleaned);
-    } catch (e) {
-        console.error('Failed to parse Claude response:', cleaned);
-        throw new Error('PARSE_ERROR');
-    }
-    
-    // Sanitize and validate the response - never trust LLM output
-    return sanitizeMealAnalysis(parsed);
+// ----- Local structuring of meal text (offline, no external AI) -----
+// Detects day references and meal-window words in the Hebrew text.
+function detectMealTiming(text) {
+    const t = ' ' + text + ' ';
+    let dayOffset = null;
+    if (/שלשום/.test(t)) dayOffset = -2;
+    else if (/אתמול|אמש/.test(t)) dayOffset = -1;
+    let win = null;
+    if (/ארוחת בוקר|הבוקר|בבוקר|\bבוקר\b/.test(t)) win = 'morning';
+    else if (/צהריי?ם|צוהריים/.test(t) && /אחה|אחר/.test(t)) win = 'afternoon';
+    else if (/צהריי?ם|צוהריים/.test(t)) win = 'noon';
+    else if (/אחה[״"']?צ/.test(t)) win = 'afternoon';
+    else if (/ארוחת ערב|בערב|הערב|\bערב\b/.test(t)) win = 'evening';
+    else if (/בלילה|הלילה|\bלילה\b/.test(t)) win = 'night';
+    return { dayOffset: dayOffset, win: win };
 }
 
-// Sanitize meal analysis from Claude API to prevent XSS and ensure type safety
-function sanitizeMealAnalysis(raw) {
-    // Coerce numeric fields. Math.max/min clamps unrealistic values.
-    const toNum = (v, min, max) => {
-        const n = Number(v);
-        if (!Number.isFinite(n)) return 0;
-        return Math.max(min, Math.min(max, Math.round(n)));
-    };
-    
-    const calories = toNum(raw.calories_estimate, 0, 5000);
-    const protein = toNum(raw.protein_g, 0, 300);
-    const carbs = toNum(raw.carbs_g, 0, 500);
-    const fat = toNum(raw.fat_g, 0, 300);
-    
-    // Validate range
-    let range = null;
-    if (Array.isArray(raw.calories_range) && raw.calories_range.length === 2) {
-        const lo = toNum(raw.calories_range[0], 0, 5000);
-        const hi = toNum(raw.calories_range[1], 0, 5000);
-        if (lo <= hi && hi > 0) range = [lo, hi];
-    }
-    
-    // Confidence in [0, 1]
-    let confidence = Number(raw.confidence);
-    if (!Number.isFinite(confidence)) confidence = 0.5;
-    confidence = Math.max(0, Math.min(1, confidence));
-    
-    // Flags must be array of strings, max 5 items, each max 30 chars
-    let flags = [];
-    if (Array.isArray(raw.flags)) {
-        flags = raw.flags
-            .filter(f => typeof f === 'string')
-            .slice(0, 5)
-            .map(f => f.substring(0, 30));
-    }
-    
-    // Comment - string, max 200 chars
-    let comment = '';
-    if (typeof raw.comment_he === 'string') {
-        comment = raw.comment_he.substring(0, 200);
-    }
-    
-    // detected_window must be one of the allowed keys
-    const validWindows = ['morning', 'noon', 'afternoon', 'evening', 'night'];
-    let detectedWindow = null;
-    if (typeof raw.detected_window === 'string') {
-        const dw = raw.detected_window.trim();
-        if (validWindows.includes(dw)) detectedWindow = dw;
-    }
-    
-    // detected_day_offset: integer between -6 and 0, or null
-    let detectedDayOffset = null;
-    if (typeof raw.detected_day_offset === 'number' && Number.isInteger(raw.detected_day_offset)) {
-        if (raw.detected_day_offset >= -6 && raw.detected_day_offset <= 0) {
-            detectedDayOffset = raw.detected_day_offset;
-        }
-    }
-    
-    return {
-        calories_estimate: calories,
-        calories_range: range,
-        protein_g: protein,
-        carbs_g: carbs,
-        fat_g: fat,
-        confidence,
-        flags,
-        comment_he: comment,
-        detected_window: detectedWindow,
-        detected_day_offset: detectedDayOffset
-    };
+// Cleans up free text / voice transcription into a tidy diary line:
+// newlines and commas become separators, filler words removed, spacing normalized.
+function tidyMealText(raw) {
+    let t = String(raw || '');
+    t = t.replace(/\r/g, '');
+    t = t.replace(/\s*\n+\s*/g, ' · ');          // line breaks -> separator
+    t = t.replace(/\s*[,;]\s*/g, ' · ');           // commas -> separator
+    t = t.replace(/(^|\s)(אה+|אמ+|אממ+)(?=\s|$)/g, ' '); // voice fillers
+    t = t.replace(/\s+/g, ' ').trim();
+    t = t.replace(/(\s*·\s*)+/g, ' · ');           // collapse repeated separators
+    t = t.replace(/^·\s*/, '').replace(/\s*·$/, '');
+    return t;
 }
 
-async function analyzeMeal() {
+// Structures the meal locally and opens the preview for confirmation.
+function structureMeal() {
     const input = document.getElementById('mealInput');
-    const text = input.value.trim();
-    if (!text) {
+    const rawText = input.value.trim();
+    if (!rawText) {
         input.focus();
+        showToast('כתוב או הקלט מה אכלת');
         return;
     }
-    
     haptic();
-    const btn = document.getElementById('mealAnalyzeBtn');
-    btn.disabled = true;
-    const originalLabel = btn.textContent;
-    btn.textContent = 'מנתח...';
-    
-    try {
-        const result = await callClaudeForMeal(text);
-        pendingMealAnalysis = { ...result, text };
-        showMealPreview(pendingMealAnalysis);
-    } catch (err) {
-        if (err.message === 'NO_API_KEY') {
-            alert('נדרש מפתח Claude API.\nהיכנס למסך "עוד" → הגדרות AI להזין מפתח.\n\nבינתיים, ניתן להשתמש בהזנה ידנית.');
-        } else if (err.message.startsWith('API_ERROR_401')) {
-            alert('מפתח API לא תקף. בדוק את ההגדרות במסך "עוד".');
-        } else if (err.message.startsWith('API_ERROR_429')) {
-            alert('מגבלת קצב. נסה שוב בעוד מספר שניות.');
-        } else {
-            alert('שגיאה בניתוח. נסה שוב או הזן ידנית.\n\n' + err.message);
-        }
-    } finally {
-        btn.disabled = false;
-        btn.textContent = originalLabel;
-    }
+    const timing = detectMealTiming(rawText);
+    pendingMealAnalysis = {
+        text: tidyMealText(rawText),
+        calories_estimate: 0,
+        calories_range: null,
+        protein_g: 0,
+        carbs_g: 0,
+        fat_g: 0,
+        confidence: 1.0,
+        flags: ['local'],
+        comment_he: '',
+        detected_window: timing.win,
+        detected_day_offset: timing.dayOffset
+    };
+    showMealPreview(pendingMealAnalysis);
 }
 
 function showMealPreview(analysis) {
     const preview = document.getElementById('mealPreview');
-    // text is user-provided (or could contain injected content from Claude) - use textContent
+    // text is user-provided - use textContent (never innerHTML)
     document.getElementById('mealPreviewText').textContent = `"${analysis.text}"`;
-    
-    const conf = analysis.confidence || 0.5;
-    const confLevel = conf >= 0.75 ? 'high' : conf >= 0.5 ? 'medium' : 'low';
-    const confLabel = confLevel === 'high' ? 'ביטחון גבוה' : confLevel === 'medium' ? 'ביטחון בינוני' : 'ביטחון נמוך';
+
+    // No AI analysis anymore - hide the confidence badge and the nutrition stats row.
     const confEl = document.getElementById('mealConfidence');
-    confEl.className = 'meal-confidence ' + confLevel;
-    confEl.textContent = confLabel;
-    
-    // All numeric values are sanitized in sanitizeMealAnalysis() - safe to interpolate
-    // But we still build DOM with explicit element creation to be extra safe.
+    confEl.className = 'meal-confidence';
+    confEl.textContent = '';
+    confEl.style.display = 'none';
     const stats = document.getElementById('mealPreviewStats');
-    stats.innerHTML = ''; // Clear safely
-    
-    const range = analysis.calories_range;
-    const rangeStr = (range && range.length === 2) ? ` (${range[0]}-${range[1]})` : '';
-    
-    const statItems = [
-        { val: analysis.calories_estimate || 0, label: 'קק״ל', suffix: rangeStr },
-        { val: analysis.protein_g || 0, label: 'חלבון', suffix: '' },
-        { val: analysis.carbs_g || 0, label: 'פחמ׳', suffix: '' },
-        { val: analysis.fat_g || 0, label: 'שומן', suffix: '' }
-    ];
-    statItems.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'meal-preview-stat';
-        const strong = document.createElement('strong');
-        strong.textContent = String(item.val);
-        div.appendChild(strong);
-        div.appendChild(document.createTextNode(' ' + item.label + item.suffix));
-        stats.appendChild(div);
-    });
-    
-    // Show comment + window detection info - using textContent (no HTML)
-    let commentText = analysis.comment_he || '';
-    if (selectedMealWindow === 'now' || selectedMealWindow === 'custom') {
+    stats.innerHTML = '';
+    stats.style.display = 'none';
+
+    // Show what was detected from the text (day / window), so the user can fix via the pills.
+    let commentText = '';
+    if (selectedMealWindow === 'now') {
         const labels = { morning: 'בוקר', noon: 'צהריים', afternoon: 'אחה״צ', evening: 'ערב', night: 'לילה' };
         const dayOff = analysis.detected_day_offset;
         const dwLabel = analysis.detected_window ? labels[analysis.detected_window] : null;
-        // Only show AI detection if user is on 'now' (custom takes priority)
-        if (selectedMealWindow === 'now' && (dayOff !== null && dayOff !== undefined && dayOff < 0 || dwLabel)) {
-            let detectionStr = 'Claude זיהה: ';
+        if ((typeof dayOff === 'number' && dayOff < 0) || dwLabel) {
+            let detectionStr = 'זוהה מהתיאור: ';
             if (dayOff === -1) detectionStr += 'אתמול';
             else if (dayOff === -2) detectionStr += 'שלשום';
             else if (typeof dayOff === 'number' && dayOff < -2) detectionStr += `לפני ${-dayOff} ימים`;
             if (dwLabel) {
-                if (dayOff !== null && dayOff !== undefined && dayOff < 0) detectionStr += ' ';
+                if (typeof dayOff === 'number' && dayOff < 0) detectionStr += ' · ';
                 detectionStr += dwLabel;
             }
-            commentText += (commentText ? ' · ' : '') + detectionStr;
+            commentText = detectionStr;
         }
     }
     document.getElementById('mealComment').textContent = commentText;
@@ -14432,20 +14449,14 @@ function confirmMeal() {
 function editMeal() {
     if (!pendingMealAnalysis) return;
     haptic();
-    const calRaw = prompt('קלוריות:', pendingMealAnalysis.calories_estimate);
-    if (calRaw === null) return;
-    const proteinRaw = prompt('חלבון (גר׳):', pendingMealAnalysis.protein_g);
-    if (proteinRaw === null) return;
-    
-    let cal = parseInt(calRaw, 10);
-    let protein = parseInt(proteinRaw, 10);
-    if (isNaN(cal) || cal < 0) cal = 0;
-    if (cal > 3000) cal = 3000;
-    if (isNaN(protein) || protein < 0) protein = 0;
-    if (protein > 300) protein = 300;
-    
-    pendingMealAnalysis.calories_estimate = cal;
-    pendingMealAnalysis.protein_g = protein;
+    const newText = prompt('עריכת התיאור:', pendingMealAnalysis.text);
+    if (newText === null) return;
+    const tidy = tidyMealText(newText);
+    if (!tidy) return;
+    pendingMealAnalysis.text = tidy;
+    const timing = detectMealTiming(newText);
+    pendingMealAnalysis.detected_window = timing.win;
+    pendingMealAnalysis.detected_day_offset = timing.dayOffset;
     showMealPreview(pendingMealAnalysis);
 }
 
@@ -14538,6 +14549,18 @@ function renderMealsScreen() {
     document.getElementById('dayCalTotal').textContent = totals.calories;
     document.getElementById('dayProteinTotal').textContent = totals.protein;
     document.getElementById('dayMealsCount').textContent = totals.mealsCount;
+
+    // Planned snack note (reserved inside the daily budget)
+    const snackNote = document.getElementById('plannedSnackNote');
+    if (snackNote) {
+        if (CLIENT_CONFIG.plannedSnack) {
+            const kcal = CLIENT_CONFIG.plannedSnackKcal ? ' · עד ' + CLIENT_CONFIG.plannedSnackKcal + ' קק״ל' : '';
+            snackNote.textContent = 'הנשנוש המתוכנן שלך: ' + CLIENT_CONFIG.plannedSnack + kcal + ' · שמור בתוך התקציב, בלי אשמה';
+            snackNote.style.display = 'block';
+        } else {
+            snackNote.style.display = 'none';
+        }
+    }
     
     // Meals list (combines meals + realityLogs grouped by window)
     const list = document.getElementById('loggedMealsList');
@@ -14583,7 +14606,7 @@ function renderMealsScreen() {
             <div class="meal-window-header">
                 <div class="meal-window-title">${w.label}</div>
                 <div class="meal-window-line"></div>
-                <div class="meal-window-summary">${winCount} ${winCount === 1 ? 'רישום' : 'רישומים'} · ${winCal} קק״ל</div>
+                <div class="meal-window-summary">${winCount} ${winCount === 1 ? 'רישום' : 'רישומים'}${winCal > 0 ? ' · ' + winCal + ' קק״ל' : ''}</div>
             </div>`;
         
         group.items.forEach(({ type, data, idx }) => {
@@ -14613,8 +14636,8 @@ function renderMealsScreen() {
                     </div>
                     <div class="logged-meal-stats">
                         <div>
-                            <div class="logged-meal-cal">${cal}</div>
-                            <div style="font-size: 13px;">${protein}g חלבון</div>
+                            ${cal > 0 ? `<div class="logged-meal-cal">${cal}</div>` : ''}
+                            ${protein > 0 ? `<div style="font-size: 13px;">${protein}g חלבון</div>` : ''}
                         </div>
                     </div>
                     <button class="logged-meal-del" onclick="deleteMeal(${idx})" title="מחק">✕</button>
@@ -14630,56 +14653,6 @@ function renderMealsScreen() {
 
 // ==================== SETTINGS (in More screen) ====================
 
-async function saveApiKey() {
-    haptic();
-    const input = document.getElementById('apiKeyInput');
-    const key = input.value.trim();
-    
-    // Update in-memory state immediately for UI responsiveness
-    if (!state.settings) state.settings = {};
-    state.settings.claudeApiKey = key;
-    updateApiKeyStatus();
-    
-    // Save to IndexedDB FIRST - this is the source of truth.
-    // IDB survives where localStorage can be evicted.
-    let idbOk = false;
-    try {
-        idbOk = await idbSetApiKey(key);
-        console.log('[IDB] API key saved to IndexedDB:', idbOk);
-    } catch (e) {
-        console.error('[IDB] Save failed:', e);
-    }
-    
-    // Also save to localStorage as a fast cache (best-effort)
-    saveState();
-    
-    // Re-request persistent storage when user actively saves a key
-    if (key) requestPersistentStorage();
-    
-    // If IDB save failed, warn the user
-    if (key && !idbOk) {
-        const status = document.getElementById('apiKeyStatus');
-        if (status) {
-            status.textContent = '⚠️ נשמר זמנית - ייתכן שהמפתח לא יישמר לטווח ארוך';
-            status.className = 'api-key-status';
-        }
-    }
-}
-
-function updateApiKeyStatus() {
-    const status = document.getElementById('apiKeyStatus');
-    const input = document.getElementById('apiKeyInput');
-    if (state.settings.claudeApiKey) {
-        const masked = state.settings.claudeApiKey.slice(0, 10) + '...' + state.settings.claudeApiKey.slice(-4);
-        status.textContent = '✓ מפתח נשמר: ' + masked;
-        status.className = 'api-key-status connected';
-        if (input && !input.value) input.value = state.settings.claudeApiKey;
-    } else {
-        status.textContent = 'אין מפתח. רישום ארוחות חכם לא זמין.';
-        status.className = 'api-key-status';
-    }
-}
-
 function toggleSetting(key) {
     haptic();
     state.settings[key] = !state.settings[key];
@@ -14694,24 +14667,14 @@ function updateSettingsToggles() {
     if (c) c.classList.toggle('on', !!state.settings.showCausalMirror);
 }
 
-// Hook into More screen render - also re-hydrate API key from IDB
-// to ensure it's always shown if it exists
+// Hook into More screen render - keep toggles and notification UI in sync
 const _originalRenderMore = renderMoreScreen;
 renderMoreScreen = function() {
     _originalRenderMore();
-    updateApiKeyStatus();
     updateSettingsToggles();
+    renderHabitManager();
     // Sync notif button + time input with current settings
     if (typeof updateNotifButtonUI === 'function') updateNotifButtonUI();
-    // Re-check IDB - if key exists there but not in state, restore it
-    idbGetApiKey().then((idbKey) => {
-        if (idbKey && (!state.settings.claudeApiKey || state.settings.claudeApiKey !== idbKey)) {
-            console.log('[IDB] Refreshed API key from IndexedDB on More screen');
-            state.settings.claudeApiKey = idbKey;
-            saveState();
-            updateApiKeyStatus();
-        }
-    }).catch(() => {});
 };
 
 /* ============================================================
@@ -15499,99 +15462,6 @@ async function requestPersistentStorage() {
     }
 }
 
-/* ============================================================
-   ===== IndexedDB - resilient API key storage =================
-   IndexedDB survives where localStorage gets evicted by browsers
-   like Opera Android. The key is the source of truth here.
-   ============================================================ */
-const IDB_NAME = 'ran_tracker_secure';
-const IDB_STORE = 'kv';
-const IDB_KEY = 'claudeApiKey';
-
-function idbOpen() {
-    return new Promise((resolve, reject) => {
-        if (!('indexedDB' in window)) return reject(new Error('IndexedDB not supported'));
-        const req = indexedDB.open(IDB_NAME, 1);
-        req.onupgradeneeded = () => {
-            const db = req.result;
-            if (!db.objectStoreNames.contains(IDB_STORE)) {
-                db.createObjectStore(IDB_STORE);
-            }
-        };
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-    });
-}
-
-async function idbSetApiKey(key) {
-    try {
-        const db = await idbOpen();
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(IDB_STORE, 'readwrite');
-            tx.objectStore(IDB_STORE).put(key, IDB_KEY);
-            tx.oncomplete = () => { db.close(); resolve(true); };
-            tx.onerror = () => { db.close(); reject(tx.error); };
-        });
-    } catch (e) {
-        console.warn('[IDB] Set failed:', e);
-        return false;
-    }
-}
-
-async function idbGetApiKey() {
-    try {
-        const db = await idbOpen();
-        return await new Promise((resolve, reject) => {
-            const tx = db.transaction(IDB_STORE, 'readonly');
-            const req = tx.objectStore(IDB_STORE).get(IDB_KEY);
-            req.onsuccess = () => { db.close(); resolve(req.result || ''); };
-            req.onerror = () => { db.close(); reject(req.error); };
-        });
-    } catch (e) {
-        console.warn('[IDB] Get failed:', e);
-        return '';
-    }
-}
-
-// Hydrate API key from IndexedDB on app startup. Runs after loadState().
-// If IDB has a key but state doesn't, we restore it. If state has a key
-// but IDB doesn't (legacy users), we migrate it into IDB.
-async function hydrateApiKeyFromIDB() {
-    try {
-        const idbKey = await idbGetApiKey();
-        const stateKey = (state.settings && state.settings.claudeApiKey) || '';
-        
-        if (idbKey && !stateKey) {
-            // IDB has key, state doesn't - restore it
-            console.log('[IDB] Restoring API key from IndexedDB');
-            state.settings.claudeApiKey = idbKey;
-            saveState();
-            updateApiKeyStatus();
-        } else if (stateKey && !idbKey) {
-            // state has key, IDB doesn't - migrate to IDB
-            console.log('[IDB] Migrating API key to IndexedDB');
-            await idbSetApiKey(stateKey);
-        } else if (idbKey && stateKey && idbKey !== stateKey) {
-            // Conflict - prefer IDB (it survived longer)
-            console.log('[IDB] Conflict - using IndexedDB version');
-            state.settings.claudeApiKey = idbKey;
-            saveState();
-            updateApiKeyStatus();
-        }
-    } catch (e) {
-        console.warn('[IDB] Hydration failed:', e);
-    }
-}
-
-// Run hydration on startup - both immediately and after DOM ready
-// to handle different timing scenarios
-hydrateApiKeyFromIDB();
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        // Re-run hydration after DOM is ready to update UI
-        setTimeout(hydrateApiKeyFromIDB, 100);
-    });
-}
 
 /* ============================================================
    ===== PRD ADDITIONS - Upgrade #5: PWA ======================
