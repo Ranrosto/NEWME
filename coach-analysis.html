@@ -288,7 +288,7 @@ function analyze(d){
   /* medical flags */
   const meds=(d.f_meds||''), medical=(d.f_medical||''), ed=(d.f_ed||'');
   const has=(txt,arr)=>arr.some(k=>txt.includes(k));
-  const notNone = t => t && !/^אין\.?$/.test(t.trim());
+  const notNone = t => t && !/^(אין|לא|אין לי|לא\.|אין\.)\.?$/.test(t.trim());
   if(has(meds,['אוזמפיק','וויגובי','ויגובי','מונג','סקסנדה','טרוליסיטי','GLP','גי אל פי']))
     out.flags.push('<b>זריקות GLP-1</b> — תיאבון מדוכא: להקפיד על יעד החלבון כעדיפות ראשונה, לוודא שהתקציב לא נמוך מדי, ולשקול קצב איטי יותר.');
   if(has(medical,['סוכרת','סכרת']))
@@ -411,7 +411,9 @@ function analyze(d){
   /* ---- movement engine: options + badges per client ---- */
   const MOVE_NAMES={walk:'הליכה',stairs:'מדרגות',body:'תרגילי משקל גוף',rope:'קפיצת חבל',dance:'ריקוד',bike:'אופניים',swim:'שחייה',stretch:'מתיחות ויוגה'};
   const multi=(d.f_move_multi||[]).map(k=>MOVE_NAMES[k]).filter(Boolean);
-  const mainMove=out.movePref||multi[0]||'הליכה';
+  /* לתגים, לסוגי האימון ולתוכנית משתמשים בשם קצר, לא במשפט השלם מהשאלון */
+  const MOVE_SHORT={walk:'הליכה', body:'תרגילי משקל גוף', stairs:'מדרגות'};
+  const mainMove=MOVE_SHORT[d.f_move_pref]||multi[0]||'הליכה';
   const moveSet=[mainMove].concat(multi.filter(m=>m!==mainMove)).slice(0,4);
   while(moveSet.length<4){ const fill=['הליכה','מתיחות ויוגה','תרגילי משקל גוף','מדרגות'].find(f=>!moveSet.includes(f)); moveSet.push(fill); }
   out.badgeTheme=mainMove;
@@ -740,7 +742,7 @@ function buildBrief(){
 '',
 '— תזונה מותאמת —',
 'נמנע/לא אוהב: '+(d.f_avoid||'—')+' · אוהב ויודע להכין: '+(a.loves||'—'),
-'בישול: '+(d.f_cook||'—')+' · זמן הכנה: '+(d.f_preptime||'—'),
+'בישול: '+({basic:'מינימלי',ok:'מתכונים פשוטים',love:'אוהב לבשל'}[d.f_cook]||'—')+' · זמן הכנה: '+({q10:'עד 10 דקות',q20:'עד 20 דקות',qfree:'יש זמן'}[d.f_preptime]||'—'),
 'חלוקת תקציב: בוקר '+split2.breakfast+' / צהריים '+split2.lunch+' / ערב '+split2.dinner+' / נשנוש מתוכנן '+split2.sweet,
 'אופציות בוקר: '+(menuOpts?menuOpts.breakfast:a.menu.options.breakfast.map(x=>x.n)).join(' | '),
 'אופציות צהריים: '+(menuOpts?menuOpts.lunch:a.menu.options.lunch.map(x=>x.n)).join(' | '),
@@ -757,7 +759,7 @@ function buildBrief(){
 ...recLines.map(t=>'• '+t),
 '',
 '— החלפות תזונתיות —',
-'הגבלות: '+((d.f_diet||[]).join(', ')||'אין')+(d.f_diet_other?' · '+d.f_diet_other:''),
+'הגבלות: '+(((d.f_diet||[]).map(x=>({veg:'צמחוני',vegan:'טבעוני',gluten:'ללא גלוטן',lactose:'ללא לקטוז',nuts:'אלרגיה לאגוזים',kosher:'שומר כשרות'}[x]||x)).join(', '))||'אין')+(d.f_diet_other?' · '+d.f_diet_other:''),
 'סלט: '+a.sub.salad+' · דייסה: '+a.sub.oats+' + '+a.sub.porridgeProtein+' · שקית ירקות: '+a.sub.bagNuts,
 (a.sub.kosherNote?'• '+a.sub.kosherNote:''),
 '',
@@ -819,8 +821,52 @@ function buildBrief(){
 "    why: '"+(d.f_why||'').replace(/'/g,'׳').replace(/\n/g,' ')+"'",
 '};',
 '',
-'— הוראה לקלוד —',
-'אם יש סתירה בין הטקסט העברי החופשי לבין בלוק הקוד, הטקסט העברי גובר (ייתכן שרן ערך אותו ידנית אחרי שהקוד נוצר).',
+'— נתונים מובנים (JSON) — המקור המדויק ביותר לערכים —',
+JSON.stringify({
+  client:{ name:name, age:+d.f_age||null, gender:d.f_sex||'m', heightCm:+d.f_height||null,
+    startWeight:weight2, targetWeight:target, startWaist:(+d.f_waist)>0?(+d.f_waist):null },
+  numbers:{ tdee:tdee2, calorieBudget:budget, deficit:deficit, proteinTargetGrams:protein,
+    weeklyPaceKg:weeklyKg2, journeyWeeks:(+gv('d_weeks')||a.weeks(target)||null),
+    journeyDays:((+gv('d_weeks')||a.weeks(target)||0)*7)||null },
+  eatingWindow:{ breakfast:gv('d_start')||null, secondMealApprox:secondMeal2||null, lastMeal:gv('d_last')||null },
+  plannedSnack:{ what:((gv('d_sweet')||'').split('·')[0].trim())||null, kcal:snackKcal },
+  budgetSplit:split2,
+  menuOptions:(menuOpts||{ breakfast:a.menu.options.breakfast.map(x=>x.n),
+    lunch:a.menu.options.lunch.map(x=>x.n), dinner:a.menu.options.dinner.map(x=>x.n) }),
+  dailyGoals:goalsChosen,
+  habitPool:poolRest,
+  movement:{ plan:movePlan2, badgeTheme:badgeTheme, workoutTypes:wt,
+    dailyWalk:gv('d_walk')||null, strength:gv('d_strength')||null },
+  rules:{ ifThen:gv('d_ifthen')||null, coffee:(coffeeRule||a.coffeeRule||null),
+    bigMealsTips:a.bigMeals, flexWeekday:(a.flexDayNum!=null?a.flexDayNum:null),
+    flexLabel:gv('d_flex')||null, secondaryMetric:gv('d_metric')||null,
+    planningWindows:gv('d_plan')||'שבת + אמצע שבוע' },
+  restrictions:(d.f_diet||[]),
+  notes:{ avoid:d.f_avoid||null, loves:a.loves||null, why:d.f_why||null,
+    reminderTime:d.f_reminder||'08:00', quickSolutions:gv('d_sol')||null },
+  flags:flagLines
+}, null, 1),
+'',
+'— הוראות בנייה למודל הבונה (לקרוא במלואן לפני כתיבת שורת קוד אחת) —',
+'1. אל תבנה אפליקציה חדשה ואל תשכתב אותה. רן מצרף קובץ תבנית index.html (כ-16,000 שורות, אפליקציית PWA שלמה ועובדת). כל המשימה: התאמת התבנית ללקוח הזה.',
+'2. השינויים המותרים, ואלה בלבד:',
+'   א. להחליף את בלוק const CLIENT_CONFIG בתבנית בבלוק שלמעלה כמו שהוא (אחרי יישום תיקונים מהטקסט העברי אם יש סתירה).',
+'   ב. להחליף את תוכן מערך const MEALS (הערה: המערך אינו מוצג בממשק הנוכחי, אבל חובה להחליפו כי הוא מכיל תפריט אישי של לקוח קודם). לבנות בדיוק 4 רשומות לפי המתכון הזה:',
+'      · רשומה 1: id=\'breakfast\', type=\'main\', time=eatingWindow.breakfast, name=\'ארוחת בוקר\', details.ingredients=menuOptions.breakfast',
+'      · רשומה 2: id=\'lunch\', type=\'main\', time=eatingWindow.secondMealApprox, name=\'צהריים\', details.ingredients=menuOptions.lunch',
+'      · רשומה 3: id=\'snack\', type=\'snack\', time=\'16:30\', name=\'הנשנוש המתוכנן\', details.ingredients=[plannedSnack.what + \' · עד \' + plannedSnack.kcal + \' קק״ל\']',
+'      · רשומה 4: id=\'dinner\', type=\'main\', time=eatingWindow.lastMeal, name=\'ארוחת ערב\', details.ingredients=menuOptions.dinner',
+'      · summary לכל רשומה: \'~X קק״ל · ~Y ג׳ חלבון\' לפי budgetSplit ו-proteinTargetGrams/3 · icon: להעתיק SVG קיים מרשומות התבנית (לא להמציא חדש) · details.tip: משפט הנחיה קצר',
+'   ג. לעדכן ב-const DEFAULT_HABITS את שלושת ההרגלים לפי dailyGoals, לפי המיפוי: name = הטקסט שלפני הסוגריים/המקף, desc = הטקסט שבסוגריים (אם אין - משפט תפעולי קצר). לא לשנות id, לא לגעת ב-icon. חריג חשוב: ההרגל השלישי (id=\'snacks\') - ה-desc שלו בתבנית הוא קוד דינאמי שמושך אוטומטית את plannedSnack מ-CLIENT_CONFIG, להשאיר אותו בדיוק כמו שהוא ולשנות רק name במידת הצורך.',
+'3. אסור לגעת בשום דבר אחר: לא בפונקציות, לא בעיצוב וב-CSS, לא ברישום ה-service worker, לא במפתחות localStorage, לא במבנה המסכים.',
+'4. בדיקות חובה לפני מסירה:',
+'   · הקובץ הוא HTML אחד שלם שנפתח ותקין (בלי קיצורים, בלי "...", בלי הערות placeholder).',
+'   · בלוק CLIENT_CONFIG תקין תחבירית (JavaScript חוקי).',
+'   · calorieBudget שווה בדיוק לסכום ארבעת חלקי budgetSplit.',
+'   · כל השעות בפורמט HH:MM.',
+'   · שם הלקוח הקודם מהתבנית לא מופיע בשום מקום בקובץ (חיפוש טקסטואלי).',
+'5. הפלט: קובץ index.html אחד שלם להורדה. לא קטעי קוד, לא הסברים באמצע הקובץ.',
+'6. סדר עדיפויות במקרה של סתירה: הטקסט העברי החופשי גובר על בלוק הקוד ועל ה-JSON (ייתכן שרן ערך אותו ידנית). אם עדיין לא ברור, לבחור את ברירת המחדל השמרנית ולציין את ההנחות בסוף התשובה, מחוץ לקובץ.',
   ];
   return lines.join('\n');
 }
