@@ -85,6 +85,12 @@ textarea{min-height:76px;resize:vertical}
 footer{text-align:center;padding:26px 0 10px;color:var(--ink-4);font-size:13px}
 footer a{color:var(--ink-4);text-decoration:none}
 
+/* ===== editable panels ===== */
+[contenteditable="true"]{outline:none;border-radius:10px;transition:box-shadow .15s}
+[contenteditable="true"]:hover{box-shadow:0 0 0 1.5px var(--lilac-light)}
+[contenteditable="true"]:focus{box-shadow:0 0 0 2px var(--lilac);background:#fffdf8}
+.edit-chip{font-size:11.5px;color:var(--lilac-deep);background:var(--lilac-wash);border-radius:99px;padding:2px 10px;font-weight:700;margin-right:auto}
+
 /* ===================== COACH ===================== */
 #coachView{display:none}
 .coach-badge{display:inline-block;background:var(--lilac-deep);color:#fff;font-size:12.5px;font-weight:700;border-radius:99px;padding:3px 12px;letter-spacing:.03em}
@@ -611,6 +617,19 @@ function renderCoach(a){
     ['תזכורת', d.f_reminder||'—'],
   ];
   $('cRaw').innerHTML=rows.map(r=>'<div class="raw"><b>'+esc(r[0])+':</b> '+esc(r[1])+'</div>').join('');
+
+  /* ===== הפאנלים המרכזיים ניתנים לעריכה ישירה, והסיכום קורא מהם ===== */
+  ['cFlags','cHabits','cRecs','cMenu'].forEach(id=>{
+    const el=$(id); if(!el) return;
+    el.setAttribute('contenteditable','true');
+    el.setAttribute('spellcheck','false');
+    const h3=el.closest('.panel')?.querySelector('h3');
+    if(h3 && !h3.querySelector('.edit-chip')){
+      const chip=document.createElement('span');
+      chip.className='edit-chip'; chip.textContent='✎ ניתן לעריכה';
+      h3.appendChild(chip);
+    }
+  });
 }
 
 /* shopping + equipment list */
@@ -665,6 +684,28 @@ function buildBrief(){
   const rem2 = budget - snackKcal;
   const bK2 = Math.round(rem2*0.32), lK2 = Math.round(rem2*0.40);
   const split2 = { breakfast:bK2, lunch:lK2, dinner:rem2-bK2-lK2, sweet:snackKcal };
+
+  /* ===== קציר מהפאנלים הניתנים לעריכה (העריכה על המסך גוברת על החישוב) ===== */
+  const panelLines = id => {
+    const el=$(id); if(!el) return null;
+    const lines=[...el.children].map(x=>(x.innerText||'').replace(/\s*\n+\s*/g,' · ').trim()).filter(Boolean);
+    return lines.length ? lines : null;
+  };
+  const flagLines = panelLines('cFlags') || a.flags.map(f=>f.replace(/<[^>]+>/g,''));
+  const recLines = panelLines('cRecs') || a.triggers.map(t=>t.t+' → '+t.tool);
+  const habitLines = (panelLines('cHabits')||a.goalPool.map((g,i)=>(i<3?'מומלץ '+(i+1)+': ':'מאגר: ')+g))
+      .map(x=>x.replace(/^מומלץ \d+:\s*/,'').replace(/^מאגר:\s*/,'').trim()).filter(Boolean);
+  const goalsChosen = gv('d_goals').split('|').map(x=>x.trim()).filter(Boolean);
+  const poolRest = habitLines.filter(h=>!goalsChosen.includes(h));
+  let menuOpts = null;
+  const menuEl = $('cMenu');
+  if(menuEl){
+    const uls=[...menuEl.querySelectorAll('ul')];
+    if(uls.length>=3){
+      const grab=u=>[...u.querySelectorAll('li')].map(li=>(li.innerText||'').replace(/\(~[^)]*\)\s*$/,'').trim()).filter(Boolean);
+      menuOpts={breakfast:grab(uls[0]),lunch:grab(uls[1]),dinner:grab(uls[2])};
+    }
+  }
   const lines=[
 'צור כלי מותאם ללקוח הזה — שאלון v2',
 '==============================',
@@ -696,19 +737,19 @@ function buildBrief(){
 'נמנע/לא אוהב: '+(d.f_avoid||'—')+' · אוהב ויודע להכין: '+(a.loves||'—'),
 'בישול: '+(d.f_cook||'—')+' · זמן הכנה: '+(d.f_preptime||'—'),
 'חלוקת תקציב: בוקר '+split2.breakfast+' / צהריים '+split2.lunch+' / ערב '+split2.dinner+' / נשנוש מתוכנן '+split2.sweet,
-'אופציות בוקר: '+a.menu.options.breakfast.map(x=>x.n).join(' | '),
-'אופציות צהריים: '+a.menu.options.lunch.map(x=>x.n).join(' | '),
-'אופציות ערב: '+a.menu.options.dinner.map(x=>x.n).join(' | '),
+'אופציות בוקר: '+(menuOpts?menuOpts.breakfast:a.menu.options.breakfast.map(x=>x.n)).join(' | '),
+'אופציות צהריים: '+(menuOpts?menuOpts.lunch:a.menu.options.lunch.map(x=>x.n)).join(' | '),
+'אופציות ערב: '+(menuOpts?menuOpts.dinner:a.menu.options.dinner.map(x=>x.n)).join(' | '),
 '3 מטרות יומיות: '+gv('d_goals'),
-'מאגר הרגלים נוספים (למסך עוד): '+a.goalPool.slice(3).join(' | '),
+'מאגר הרגלים נוספים (למסך עוד): '+poolRest.join(' | '),
 'חלונות תכנון שבועיים: '+(gv('d_plan')||'שבת + אמצע שבוע'),
 'מדד משני: '+gv('d_metric'),
 '',
 '— דגלים —',
-...(a.flags.length? a.flags.map(f=>'• '+f.replace(/<[^>]+>/g,'')) : ['אין']),
+...(flagLines.length? flagLines.map(f=>'• '+f) : ['אין']),
 '',
-'— טריגרים למתוקים —',
-...a.triggers.map(t=>'• '+t.t+' → '+t.tool),
+'— המלצות וטריגרים (כפי שמופיעים על מסך המלווה, כולל עריכות) —',
+...recLines.map(t=>'• '+t),
 '',
 '— החלפות תזונתיות —',
 'הגבלות: '+((d.f_diet||[]).join(', ')||'אין')+(d.f_diet_other?' · '+d.f_diet_other:''),
@@ -769,7 +810,7 @@ function buildBrief(){
 "    badgeTheme: '"+badgeTheme.replace(/'/g,'׳')+"',",
 "    workoutTypes: { warmup: '"+wt.warmup+"', endurance: '"+wt.endurance+"', hiit: '"+wt.hiit+"', skills: '"+wt.skills+"' },",
 "    gender: '"+(d.f_sex||'m')+"',",
-"    habitPool: ["+a.goalPool.slice(3).map(g=>"'"+g.replace(/'/g,'׳')+"'").join(', ')+"],",
+"    habitPool: ["+poolRest.map(g=>"'"+g.replace(/'/g,'׳')+"'").join(', ')+"],",
 "    why: '"+(d.f_why||'').replace(/'/g,'׳').replace(/\n/g,' ')+"'",
 '};',
 '',
@@ -804,7 +845,8 @@ $('btnBrief').addEventListener('click',()=>{
 $('briefEdit').addEventListener('input',()=>{ briefManuallyEdited = true; syncBriefStatus(); });
 /* כל קלט בשדות ההחלטה מרענן את הסיכום (כשאין עריכה ידנית) */
 document.addEventListener('input', e=>{
-  if(e.target && e.target.closest && e.target.closest('#cDecisions')) liveBriefSync();
+  if(!e.target || !e.target.closest) return;
+  if(e.target.closest('#cDecisions') || e.target.closest('[contenteditable="true"]')) liveBriefSync();
 });
 $('btnBriefCopy').addEventListener('click',()=>{
   const txt=$('briefEdit').value.trim();
