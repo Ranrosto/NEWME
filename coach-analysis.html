@@ -193,7 +193,8 @@ ul.list li{margin:4px 0}
 
   <div class="panel lilac" id="briefPanel" style="display:none">
     <h3><span class="dot"></span>הסיכום המלא — לעריכה חופשית לפני ההעתקה</h3>
-    <div class="sec-note" style="font-size:14px;color:var(--ink-3);margin-bottom:10px">אפשר לערוך, להוסיף ולמחוק כל שורה. מה שמועתק הוא בדיוק הטקסט שמופיע כאן — קלוד יקרא אותו כמו שהוא.</div>
+    <div class="sec-note" style="font-size:14px;color:var(--ink-3);margin-bottom:6px">אפשר לערוך, להוסיף ולמחוק כל שורה. מה שמועתק הוא בדיוק הטקסט שמופיע כאן — קלוד יקרא אותו כמו שהוא, והטקסט גובר על בלוק הקוד במקרה של סתירה.</div>
+    <div id="briefSyncStatus" style="font-size:13px;font-weight:600;margin-bottom:10px"></div>
     <textarea id="briefEdit" style="min-height:340px;font-size:14.5px;line-height:1.55;direction:rtl"></textarea>
     <div class="btn-row" style="margin-top:12px">
       <button class="btn btn-main" id="btnBriefCopy">העתקת הסיכום (כולל העריכות)</button>
@@ -533,7 +534,11 @@ function renderCoach(a){
   /* decisions */
   const flexSug = a.flexDay||'';
   $('cDecisions').innerHTML = [
+    dec('d_name','שם הלקוח (כפי שיופיע באפליקציה)','', a.name, 'text'),
     dec('d_target','משקל יעד שלב א׳','הטווח המותר: '+r1((+d.f_weight)-a.tMax)+'–'+r1((+d.f_weight)-a.tMin)+' ק״ג', t, 'number'),
+    dec('d_budget','תקציב קלורי יומי','חושב אוטומטית: '+a.budget+(a.floored?' (רצפת בטיחות)':'')+'. שינוי כאן מעדכן את חלוקת הארוחות ואת בלוק הקוד.', a.budget, 'number'),
+    dec('d_protein','יעד חלבון יומי (ג׳)','חושב אוטומטית: 1.2 × משקל היעד. מתעדכן חי כשמשנים את היעד.', a.protein(t), 'number'),
+    dec('d_snackkcal','תקציב הנשנוש (קק״ל)','ברירת מחדל 150–200 בתוך התקציב. שינוי כאן מעדכן את החלוקה.', a.snackKcal, 'number'),
     dec('d_weeks','משך המסע (שבועות)','לפי קצב של '+a.weeklyKg+' ק״ג בשבוע', a.weeks(t)??'', 'number'),
     dec('d_start','ארוחת בוקר','הוצע אוטומטית: עד שעה מההשכמה. הארוחה הבאה במרווח של כ-5 שעות ('+(a.secondMeal||'—')+')', a.newStart||'', 'time'),
     dec('d_last','ארוחה אחרונה', 'הוצע אוטומטית: 4 שעות לפני השינה', a.newLast||'', 'time'),
@@ -546,6 +551,9 @@ function renderCoach(a){
     dec('d_goals','3 המטרות היומיות לאפליקציה','נבחרו אוטומטית מהתשובות. המאגר המלא: '+a.goalPool.join(' · '), goalsSug.join(' | '), 'text'),
     dec('d_plan','שני חלונות התכנון','כחצי שעה בשבת + כחצי שעה באמצע השבוע — לקבוע שעות', '', 'text'),
     dec('d_metric','מדד התקדמות משני','שקילה: פעם בשבוע בלבד, אותו יום, בבוקר, אחרי שירותים, לפני אוכל. בנוסף: היקף מותניים אחת לשבועיים (דורש סרט מדידה) או ״בגד ייחוס״', 'היקף מותניים', 'text'),
+    dec('d_coffee','כלל הקפה','נגזר מהשאלון. אפשר לרכך או להחמיר.', a.coffeeRule||'', 'text'),
+    dec('d_badge','נושא התגים באפליקציה','לפי התנועה המועדפת של הלקוח', a.badgeTheme, 'text'),
+    dec('d_wtypes','4 סוגי האימון (מופרדים ב-·)','הכפתורים במסך רישום האימון', Object.values(a.workoutTypes).join(' · '), 'text'),
   ].join('');
   function dec(id,title,sub,val,type){
     return '<div class="d2"><div class="t">'+title+'</div><div class="s">'+sub+'</div>'+
@@ -566,6 +574,7 @@ function renderCoach(a){
     const inRange = loss>=a.tMin-0.01 && loss<=a.tMax+0.01;
     tl.innerHTML = 'ירידה: '+loss+' ק״ג · חלבון: <b>'+a.protein(nt)+' ג׳</b> (כ-'+Math.round(a.protein(nt)/3)+' בארוחה) · '+(wk!=null?('משך: <b>'+wk+' שבועות ('+days+' ימים)</b>'):'')+(inRange?'':' · <span style="color:var(--danger)">מחוץ לטווח 5–10%!</span>');
     if(wk!=null && $('d_weeks')) $('d_weeks').value=wk;
+    if($('d_protein')) $('d_protein').value=a.protein(nt);
   }
   $('d_target').addEventListener('input',liveTarget);
   liveTarget();
@@ -641,16 +650,31 @@ function renderShop(){
 function buildBrief(){
   const a=A,d=a.d, gv=id=>($(id)?.value||'').trim();
   const target=+gv('d_target')||a.suggestedTarget;
+  /* ערכים מהשדות — עם נפילה חכמה לחישוב האוטומטי */
+  const name = gv('d_name')||a.name;
+  const budget = +gv('d_budget')||a.budget;
+  const protein = +gv('d_protein')||a.protein(target);
+  const snackKcal = +gv('d_snackkcal')||a.snackKcal;
+  const deficit = Math.max(a.tdee-budget,0);
+  const weeklyKg2 = r1(deficit*7/7700);
+  const coffeeRule = gv('d_coffee')||null;
+  const badgeTheme = gv('d_badge')||a.badgeTheme;
+  const wtRaw = gv('d_wtypes').split(/[·,|]/).map(x=>x.trim()).filter(Boolean);
+  const wt = wtRaw.length===4 ? {warmup:wtRaw[0],endurance:wtRaw[1],hiit:wtRaw[2],skills:wtRaw[3]} : a.workoutTypes;
+  /* חלוקת תקציב מחושבת מחדש לפי השדות */
+  const rem2 = budget - snackKcal;
+  const bK2 = Math.round(rem2*0.32), lK2 = Math.round(rem2*0.40);
+  const split2 = { breakfast:bK2, lunch:lK2, dinner:rem2-bK2-lK2, sweet:snackKcal };
   const lines=[
 'צור כלי מותאם ללקוח הזה — שאלון v2',
 '==============================',
 '— פרטים —',
-'שם: '+d.f_name, 'גיל: '+d.f_age+' · מין: '+(d.f_sex==='f'?'נקבה':'זכר')+' · גובה: '+d.f_height+' · משקל: '+d.f_weight,
+'שם: '+name, 'גיל: '+d.f_age+' · מין: '+(d.f_sex==='f'?'נקבה':'זכר')+' · גובה: '+d.f_height+' · משקל: '+d.f_weight,
 '',
 '— חישובים —',
-'TDEE: '+a.tdee+' · תקציב יומי: '+a.budget+(a.floored?' (רצפה)':'')+' · גירעון: '+a.deficit,
-'חלבון יומי: '+a.protein(target)+' ג׳ (1.2 × משקל יעד) · כ-'+Math.round(a.protein(target)/3)+' ג׳ בכל אחת מ-3 ארוחות',
-'קצב שבועי: '+a.weeklyKg+' ק״ג',
+'TDEE: '+a.tdee+' · תקציב יומי: '+budget+(a.floored&&budget===a.budget?' (רצפה)':'')+' · גירעון: '+deficit,
+'חלבון יומי: '+protein+' ג׳ · כ-'+Math.round(protein/3)+' ג׳ בכל אחת מ-3 ארוחות',
+'קצב שבועי: '+weeklyKg2+' ק״ג',
 '',
 '— החלטות שלב 2 (מהשיחה) —',
 'משקל יעד שלב א׳: '+target,
@@ -660,18 +684,18 @@ function buildBrief(){
 'פתרונות מהירים: '+gv('d_sol'),
 'הליכה יומית: '+gv('d_walk'),
 'אימון כוח: '+(gv('d_strength')||'לקבוע'),
-'נשנוש מתוכנן ('+a.snackKcal+' קק״ל שמורים בתוך התקציב): '+(gv('d_sweet')||'לקבוע בשיחה'),
+'נשנוש מתוכנן ('+snackKcal+' קק״ל שמורים בתוך התקציב): '+(gv('d_sweet')||'לקבוע בשיחה'),
 'כלל אם-אז אישי: '+(gv('d_ifthen')||'לקבוע'),
-'כלל קפה: '+(a.coffeeRule||'אין צורך, שותה נקי'),
+'כלל קפה: '+(coffeeRule||a.coffeeRule||'אין צורך, שותה נקי'),
 'קושי בארוחות גדולות: '+(a.bigMeals?'כן — לכלול בכלי את טכניקות ״החצי השני מחכה״ ו״היד הלא דומיננטית״':'לא'),
 'תנועה נבחרת: '+(gv('d_strength')||a.moveText||'לקבוע'),
 'תוכנית תנועה: '+a.movePlan,
-'נושא תגים: '+a.badgeTheme+' · סוגי אימון: '+Object.values(a.workoutTypes).join(', '),
+'נושא תגים: '+badgeTheme+' · סוגי אימון: '+Object.values(wt).join(', '),
 '',
 '— תזונה מותאמת —',
 'נמנע/לא אוהב: '+(d.f_avoid||'—')+' · אוהב ויודע להכין: '+(a.loves||'—'),
 'בישול: '+(d.f_cook||'—')+' · זמן הכנה: '+(d.f_preptime||'—'),
-'חלוקת תקציב: בוקר '+a.menu.split.breakfast+' / צהריים '+a.menu.split.lunch+' / ערב '+a.menu.split.dinner+' / נשנוש מתוכנן '+a.menu.split.sweet,
+'חלוקת תקציב: בוקר '+split2.breakfast+' / צהריים '+split2.lunch+' / ערב '+split2.dinner+' / נשנוש מתוכנן '+split2.sweet,
 'אופציות בוקר: '+a.menu.options.breakfast.map(x=>x.n).join(' | '),
 'אופציות צהריים: '+a.menu.options.lunch.map(x=>x.n).join(' | '),
 'אופציות ערב: '+a.menu.options.dinner.map(x=>x.n).join(' | '),
@@ -705,7 +729,7 @@ function buildBrief(){
 '• סולם רעב 1-10: 3=רעב אמיתי וזמן לאכול, 7=נעים ומספיק וכאן עוצרים, 8+=עברנו. זו ההגדרה המעשית של עצירה ב-80%',
 '• חלוקת חלבון: היעד היומי מתחלק לכ-3 מנות שוות, לא הכל בערב',
 '• פרוטוקול פלטו: שבועיים יציבות = לא משנים כלום ובודקים היקף מותניים · שבוע שלישי = בדיקת חלבון ושינה · רק אז שוקלים התאמת תקציב',
-'• תוכנית סיום: בהגעה ליעד, שבועיים תחזוקה מכוונת בתקציב '+(a.budget+300)+' קלוריות עם כל ההרגלים, ואז החלטה משותפת על שלב ב׳ או תחזוקה קבועה',
+'• תוכנית סיום: בהגעה ליעד, שבועיים תחזוקה מכוונת בתקציב '+(budget+300)+' קלוריות עם כל ההרגלים, ואז החלטה משותפת על שלב ב׳ או תחזוקה קבועה',
 (a.triggers.some(x=>x.t.includes('רגשית'))?'• לכלול את טכניקת 5 השלבים להתמודדות עם דחפים (נשימות ← קבלה ← גלים ← תודעת קושי ← שיקוף)':''),
 '',
 '— תשובות גולמיות —',
@@ -725,38 +749,62 @@ function buildBrief(){
 '',
 '— CLIENT_CONFIG מוכן להדבקה בקוד האפליקציה —',
 'const CLIENT_CONFIG = {',
-"    name: '"+(d.f_name||'').replace(/'/g,'׳')+"',",
+"    name: '"+name.replace(/'/g,'׳')+"',",
 '    startWeight: '+(+d.f_weight||0)+',',
 '    targetWeight: '+target+',',
-'    calorieBudget: '+a.budget+',',
-'    proteinTarget: '+a.protein(target)+',',
+'    calorieBudget: '+budget+',',
+'    proteinTarget: '+protein+',',
 "    eatStart: "+(gv('d_start')?"'"+gv('d_start')+"'":'null')+',',
 "    eatLast: "+(gv('d_last')?"'"+gv('d_last')+"'":'null')+',',
 '    flexWeekday: '+(a.flexDayNum!=null?a.flexDayNum:'null')+',   // 0=ראשון..6=שבת',
 "    flexLabel: '"+(gv('d_flex')||'').replace(/'/g,'׳')+"',",
 '    waistTracking: '+((gv('d_metric')||'').includes('היקף')?'true':'false')+',',
 "    ifThenRule: '"+(gv('d_ifthen')||'').replace(/'/g,'׳')+"',",
-"    coffeeRule: "+(a.coffeeRule?"'"+a.coffeeRule.replace(/'/g,'׳')+"'":'null')+',',
+"    coffeeRule: "+((coffeeRule||a.coffeeRule)?"'"+(coffeeRule||a.coffeeRule).replace(/'/g,'׳')+"'":'null')+',',
 '    bigMealsTips: '+(a.bigMeals?'true':'false')+',',
 "    plannedSnack: "+(gv('d_sweet')?"'"+gv('d_sweet').replace(/'/g,'׳').split('·')[0].trim()+"'":'null')+',',
-'    plannedSnackKcal: '+a.snackKcal+',',
+'    plannedSnackKcal: '+snackKcal+',',
 "    movement: '"+(gv('d_strength')||a.moveText||'').replace(/'/g,'׳')+"',",
 '    startWaist: '+((+d.f_waist)>0?(+d.f_waist):'null')+',',
-"    badgeTheme: '"+a.badgeTheme+"',",
-"    workoutTypes: { warmup: '"+a.workoutTypes.warmup+"', endurance: '"+a.workoutTypes.endurance+"', hiit: '"+a.workoutTypes.hiit+"', skills: '"+a.workoutTypes.skills+"' },",
+"    badgeTheme: '"+badgeTheme.replace(/'/g,'׳')+"',",
+"    workoutTypes: { warmup: '"+wt.warmup+"', endurance: '"+wt.endurance+"', hiit: '"+wt.hiit+"', skills: '"+wt.skills+"' },",
 "    gender: '"+(d.f_sex||'m')+"',",
 "    habitPool: ["+a.goalPool.slice(3).map(g=>"'"+g.replace(/'/g,'׳')+"'").join(', ')+"],",
 "    why: '"+(d.f_why||'').replace(/'/g,'׳').replace(/\n/g,' ')+"'",
 '};',
+'',
+'— הוראה לקלוד —',
+'אם יש סתירה בין הטקסט העברי החופשי לבין בלוק הקוד, הטקסט העברי גובר (ייתכן שרן ערך אותו ידנית אחרי שהקוד נוצר).',
   ];
   return lines.join('\n');
 }
+let briefManuallyEdited = false;
+function syncBriefStatus(){
+  const el=$('briefSyncStatus'); if(!el) return;
+  el.textContent = briefManuallyEdited
+    ? '✎ עריכה ידנית פעילה — שינויים בשדות למעלה לא מתעדכנים כאן אוטומטית. ״בנייה מחדש מהשדות״ מסנכרן (ומוחק את העריכות הידניות).'
+    : '⟳ מסונכרן חי — כל שינוי בשדות ההחלטה מתעדכן כאן אוטומטית, כולל בלוק הקוד.';
+  el.style.color = briefManuallyEdited ? 'var(--danger)' : 'var(--pistachio-deep)';
+}
+function liveBriefSync(){
+  if(!A) return;
+  if($('briefPanel').style.display==='none') return;
+  if(briefManuallyEdited) return;
+  $('briefEdit').value = buildBrief();
+}
 $('btnBrief').addEventListener('click',()=>{
   if(!A){ toast('קודם לנתח תשובות'); return; }
+  briefManuallyEdited = false;
   $('briefEdit').value = buildBrief();
   $('briefPanel').style.display='block';
+  syncBriefStatus();
   $('briefPanel').scrollIntoView({behavior:'smooth',block:'start'});
-  toast('הסיכום מוכן — אפשר לערוך ואז להעתיק');
+  toast('הסיכום מוכן — מסונכרן חי עם השדות');
+});
+$('briefEdit').addEventListener('input',()=>{ briefManuallyEdited = true; syncBriefStatus(); });
+/* כל קלט בשדות ההחלטה מרענן את הסיכום (כשאין עריכה ידנית) */
+document.addEventListener('input', e=>{
+  if(e.target && e.target.closest && e.target.closest('#cDecisions')) liveBriefSync();
 });
 $('btnBriefCopy').addEventListener('click',()=>{
   const txt=$('briefEdit').value.trim();
@@ -765,9 +813,11 @@ $('btnBriefCopy').addEventListener('click',()=>{
 });
 $('btnBriefRebuild').addEventListener('click',()=>{
   if(!A){ toast('קודם לנתח תשובות'); return; }
-  if(!confirm('לבנות מחדש מהשדות? עריכות ידניות בטקסט יימחקו.')) return;
+  if(briefManuallyEdited && !confirm('לבנות מחדש מהשדות? העריכות הידניות בטקסט יימחקו.')) return;
+  briefManuallyEdited = false;
   $('briefEdit').value = buildBrief();
-  toast('נבנה מחדש מהשדות ✓');
+  syncBriefStatus();
+  toast('נבנה מחדש מהשדות ✓ הסנכרון החי חזר');
 });
 
 /* coach buttons */
